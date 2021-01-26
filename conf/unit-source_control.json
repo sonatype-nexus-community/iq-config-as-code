@@ -1,0 +1,10 @@
+{
+  "source_control": {
+    "username": "Dummy",
+    "token": "#~FAKE~SECRET~KEY~#",
+    "baseBranch": "master",
+    "enablePullRequests": true,
+    "enableStatusChecks": true,
+    "provider": "bitbucket"
+  }
+}

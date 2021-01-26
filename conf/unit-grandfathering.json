@@ -1,0 +1,6 @@
+{
+  "grandfathering": {
+    "enabled": true,
+    "allowOverride": true
+  }
+}

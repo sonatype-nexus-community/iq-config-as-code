@@ -1,0 +1,12 @@
+{
+  "proprietary_components": {
+    "id": null,
+    "ownerId": "ROOT_ORGANIZATION_ID",
+    "packages": [
+      "com.sonatype"
+    ],
+    "regexes": [
+      "com.sonatype.*"
+    ]
+  }
+}

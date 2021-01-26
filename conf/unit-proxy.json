@@ -1,0 +1,11 @@
+{
+  "proxy": {
+    "hostname": null,
+    "username": null,
+    "port": 8080,
+    "password": null,
+    "passwordIsIncluded": false,
+    "excludeHosts": [
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "license_threat_groups": [
+    {
+      "name": "Banned",
+      "threatLevel": 10
+    },
+    {
+      "name": "Commercial",
+      "threatLevel": 7
+    },
+    {
+      "name": "Copyleft",
+      "threatLevel": 9
+    },
+    {
+      "name": "Liberal",
+      "threatLevel": 0
+    },
+    {
+      "name": "Non Standard",
+      "threatLevel": 6
+    },
+    {
+      "name": "Sonatype Informational",
+      "threatLevel": 0
+    },
+    {
+      "name": "Sonatype Special Licenses",
+      "threatLevel": 5
+    },
+    {
+      "name": "Weak Copyleft",
+      "threatLevel": 2
+    },
+    {
+      "name": "Use These Your Fired",
+      "threatLevel": 10
+    }
+  ]
+}

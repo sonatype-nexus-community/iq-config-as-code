@@ -1,0 +1,25 @@
+{
+  "component_labels": [
+    {
+      "label": "Architecture-Blacklisted",
+      "description": "Components which have been blacklisted from use",
+      "color": "orange"
+    },
+    {
+      "label": "Architecture-Cleanup",
+      "description": "Components which are relics of a build and should not be included in the distribution",
+      "color": "orange"
+    },
+    {
+      "label": "Architecture-Deprecated",
+      "description": "Components we want to discourage from developer use",
+      "color": "orange"
+    },
+    {
+      "label": "External License",
+      "description": "Denotes a component that is subject to an external commercial license.",
+      "color": "dark-red",
+      "ownerType": "ORGANIZATION"
+    }
+  ]
+}

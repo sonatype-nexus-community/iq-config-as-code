@@ -1,0 +1,23 @@
+{
+  "email_server": {},
+  "ldap_connections": [],
+  "custom_roles": [],
+  "users": [],
+  "webhooks": [ ],
+  "proxy": { },
+  "automatic_applications": {},
+  "automatic_source_control": {},
+  "system_notice": {},
+  "source_control": {},
+  "application_categories": [],
+  "component_labels": [],
+  "grandfathering": {},
+  "license_threat_groups": [],
+  "continuous_monitoring_stage": {},
+  "access": [],
+  "data_purging": {},
+  "proprietary_components": {},
+  "success_metrics": {},
+  "success_metrics_reports": {},
+  "organisations": []
+}

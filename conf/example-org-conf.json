@@ -1,0 +1,155 @@
+{
+  "organisations": [
+    {
+      "grandfathering": {
+        "enabled": true,
+        "allowOverride": true
+      },
+      "continuous_monitoring_stage": "Operate",
+      "source_control": {
+        "username": null,
+        "token": null,
+        "baseBranch": null,
+        "enablePullRequests": null,
+        "enableStatusChecks": true
+      },
+      "access": [
+        {
+          "user_or_group_name": "developerteam1",
+          "role_type": "GROUP",
+          "role": "Developer"
+        },
+        {
+          "user_or_group_name": "leads1",
+          "role_type": "GROUP",
+          "role": "Owner"
+        }
+      ],
+      "data_purging": {
+        "applicationReports": {
+          "stages": {
+            "develop": {
+              "inheritPolicy": false,
+              "enablePurging": true,
+              "maxCount": null,
+              "maxAge": "30 days"
+            },
+            "build": {
+              "inheritPolicy": false,
+              "enablePurging": true,
+              "maxCount": null,
+              "maxAge": "30 days"
+            },
+            "stage-release": {
+              "inheritPolicy": false,
+              "enablePurging": true,
+              "maxCount": null,
+              "maxAge": "30 days"
+            },
+            "release": {
+              "inheritPolicy": false,
+              "enablePurging": true,
+              "maxCount": null,
+              "maxAge": "1 year"
+            },
+            "operate": {
+              "inheritPolicy": false,
+              "enablePurging": false,
+              "maxCount": null,
+              "maxAge": null
+            },
+            "continuous-monitoring": {
+              "inheritPolicy": false,
+              "enablePurging": true,
+              "maxCount": null,
+              "maxAge": "1 year"
+            }
+          }
+        },
+        "successMetrics": {
+          "inheritPolicy": false,
+          "enablePurging": true,
+          "maxAge": "1 year"
+        }
+      },
+      "proprietary_components": {
+        "id": null,
+        "packages": [
+          "com.sonatype.org"
+        ],
+        "regexes": [
+          "com.sonatype.org.*"
+        ]
+      },
+      "application_categories": [
+        {
+          "name": "Top-Secret",
+          "description": "Application is classified Top-Secret",
+          "color": "dark-red"
+        },
+        {
+          "name": "Secret",
+          "description": "Application is classified Secret",
+          "color": "light-red"
+        }
+      ],
+      "component_labels": [
+        {
+          "label": "Org-Architecture-Blacklisted",
+          "description": "Components which have been blacklisted from use",
+          "color": "light-green"
+        }
+      ],
+      "license_threat_groups": [
+        {
+          "name": "Client-Banned",
+          "threatLevel": 10
+        }
+      ],
+      "applications": [
+        {
+          "name": "Webgoat Legacy Bitbucket",
+          "grandfathering": {
+        "enabled": true,
+        "allowOverride": true
+      },
+          "continuous_monitoring_stage": "Build",
+          "access": [
+            {
+              "user_or_group_name": "user1",
+              "role_type": "USER",
+              "role": "Application Evaluator"
+            }
+          ],
+          "source_control": {
+            "username": null,
+            "token": null,
+            "baseBranch": null,
+            "enablePullRequests": null,
+            "enableStatusChecks": true,
+            "repositoryUrl": "https://bitbucket.org/CSMonkee/webgoat-legacy"
+          },
+          "proprietary_components": {
+            "id": null,
+            "packages": [
+              "com.sonatype.app"
+            ],
+            "regexes": [
+              "com.sonatype.app.*"
+            ]
+          },
+          "publicId": "webgoat-legacy-bitbucket",
+          "applicationTags": [
+            {
+              "name": "Distributed"
+            },
+            {
+              "name": "Secret"
+            }
+          ]
+        }
+      ],
+      "name": "Example-Org"
+    }
+  ]
+}

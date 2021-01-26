@@ -1,0 +1,110 @@
+{
+  "custom_roles": [
+    {
+      "name": "Build-Agent",
+      "description": "Build Agent",
+      "builtIn": false,
+      "permissionCategories": [
+        {
+          "displayName": "Administrator",
+          "permissions": [
+            {
+              "id": "VIEW_ROLES",
+              "displayName": "View",
+              "description": "All Roles",
+              "allowed": false
+            }
+          ]
+        },
+        {
+          "displayName": "IQ",
+          "permissions": [
+            {
+              "id": "MANAGE_PROPRIETARY",
+              "displayName": "Edit",
+              "description": "Proprietary Components",
+              "allowed": false
+            },
+            {
+              "id": "CLAIM_COMPONENT",
+              "displayName": "Claim",
+              "description": "Components",
+              "allowed": false
+            },
+            {
+              "id": "WRITE",
+              "displayName": "Edit",
+              "description": "IQ Elements",
+              "allowed": false
+            },
+            {
+              "id": "READ",
+              "displayName": "View",
+              "description": "IQ Elements",
+              "allowed": false
+            },
+            {
+              "id": "EDIT_ACCESS_CONTROL",
+              "displayName": "Edit",
+              "description": "Access Control",
+              "allowed": false
+            },
+            {
+              "id": "EVALUATE_APPLICATION",
+              "displayName": "Evaluate",
+              "description": "Applications",
+              "allowed": true
+            },
+            {
+              "id": "EVALUATE_COMPONENT",
+              "displayName": "Evaluate",
+              "description": "Individual Components",
+              "allowed": true
+            },
+            {
+              "id": "ADD_APPLICATION",
+              "displayName": "Add",
+              "description": "Applications",
+              "allowed": true
+            },
+            {
+              "id": "MANAGE_AUTOMATIC_APPLICATION_CREATION",
+              "displayName": "Manage",
+              "description": "Automatic Application Creation",
+              "allowed": false
+            },
+            {
+              "id": "MANAGE_AUTOMATIC_SCM_CONFIGURATION",
+              "displayName": "Manage",
+              "description": "Automatic Source Control Configuration",
+              "allowed": false
+            }
+          ]
+        },
+        {
+          "displayName": "Remediation",
+          "permissions": [
+            {
+              "id": "WAIVE_POLICY_VIOLATIONS",
+              "displayName": "Waive",
+              "description": "Policy Violations",
+              "allowed": false
+            },
+            {
+              "id": "CHANGE_LICENSES",
+              "displayName": "Change",
+              "description": "Licenses",
+              "allowed": false
+            },
+            {
+              "id": "CHANGE_SECURITY_VULNERABILITIES",
+              "displayName": "Change",
+              "description": "Security Vulnerabilities",
+              "allowed": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

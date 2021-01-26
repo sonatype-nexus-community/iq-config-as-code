@@ -1,0 +1,39 @@
+{
+  "ldap_connections": [
+    {
+      "name": "ldapmock_docker",
+      "connection": {
+        "authenticationMethod": "SIMPLE",
+        "connectionTimeout": 30,
+        "hostname": "IQ-LDAPSERVER",
+        "port": 389,
+        "protocol": "LDAP",
+        "referralIgnored": false,
+        "retryDelay": 30,
+        "saslRealm": null,
+        "searchBase": "dc=ldapmock,dc=local",
+        "systemPassword": "adminpass",
+        "systemUsername": "cn=admin,dc=ldapmock,dc=local"
+      },
+      "mappings": {
+        "userBaseDN": "ou=people",
+        "userSubtree": "false",
+        "userObjectClass": "inetOrgPerson",
+        "userFilter": "",
+        "userIDAttribute": "uid",
+        "userRealNameAttribute": "cn",
+        "userEmailAttribute": "mail",
+        "userPasswordAttribute": "",
+        "groupMappingType": "STATIC",
+        "groupBaseDN": "ou=groups",
+        "groupSubtree": "false",
+        "groupObjectClass": "posixGroup",
+        "groupIDAttribute": "cn",
+        "groupMemberAttribute": "memberUID",
+        "groupMemberFormat": "${username}",
+        "userMemberOfGroupAttribute": "null",
+        "dynamicGroupSearchEnabled": "true"
+      }
+    }
+  ]
+}

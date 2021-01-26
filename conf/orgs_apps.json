@@ -1,0 +1,111 @@
+{
+  "organisations": [
+    {
+      "source_control": {
+        "username": null,
+        "token": null,
+        "baseBranch": null,
+        "enablePullRequests": null,
+        "enableStatusChecks": true
+      },
+      "access": [
+        {
+          "user_or_group_name": "developerteam1",
+          "role_type": "GROUP",
+          "role": "Developer"
+        },
+        {
+          "user_or_group_name": "leads1",
+          "role_type": "GROUP",
+          "role": "Owner"
+        }
+      ],
+      "applications": [
+        {
+          "name": "Application 1",
+          "access": [],
+          "publicId": "app1",
+          "applicationTags": [
+            {
+              "name": "Other"
+            },
+            {
+              "name": "Distributed"
+            }
+          ]
+        },
+        {
+          "name": "Application 2",
+          "access": [
+            {
+              "user_or_group_name": "Lead Eng 1",
+              "role_type": "USER",
+              "role": "Owner"
+            }
+          ],
+          "publicId": "app2",
+          "applicationTags": [
+            {
+              "name": "Other"
+            }
+          ]
+        }
+      ],
+      "name": "Org1"
+    },
+    {
+      "source_control": {
+      },
+      "access": [],
+      "applications": [
+        {
+          "applicationTags": [
+            {
+              "name": "Other"
+            }
+          ],
+          "access": [
+            {
+              "user_or_group_name": "developerteam2",
+              "role_type": "GROUP",
+              "role": "Developer"
+            }
+          ],
+          "name": "Application 3",
+          "publicId": "app3"
+        }
+      ],
+      "name": "Org2"
+    },
+    {
+      "access": [],
+      "applications": [
+        {
+          "applicationTags": [
+            {
+              "name": "Other"
+            }
+          ],
+          "source_control": {
+            "username": null,
+            "token": null,
+            "baseBranch": null,
+            "enablePullRequests": null,
+            "enableStatusChecks": true,
+            "repositoryUrl": "https://bitbucket.org/CSMonkee/webgoat-legacy"
+          },
+          "access": [
+            {
+              "user_or_group_name": "developerteam2",
+              "role_type": "GROUP",
+              "role": "Developer"
+            }
+          ],
+          "name": "webgoat-legacy-bitbucket",
+          "publicId": "webgoat-legacy-bitbucket"
+        }
+      ],
+      "name": "Java"
+    }
+  ]
+}

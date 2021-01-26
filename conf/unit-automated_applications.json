@@ -1,0 +1,6 @@
+{
+  "automatic_applications": {
+    "enabled": true,
+    "parentOrganizationId": "Sandbox Organization"
+  }
+}

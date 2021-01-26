@@ -1,0 +1,7 @@
+{
+  "system_notice": {
+    "id": "system-notice",
+    "message": "IQ will be down for routine backup at 00:00. Service will resume prior to 01:00.",
+    "enabled": true
+  }
+}

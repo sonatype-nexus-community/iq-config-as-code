@@ -1,0 +1,19 @@
+{
+  "application_categories": [
+    { 
+      "name": "Distributed",
+      "description": "Applications that are provided for consumption outside the company.",
+      "color": "yellow"
+    },
+    {
+      "name": "Hosted",
+      "description": "Applications that are hosted such as services or software as a service.",
+      "color": "light-purple"
+    },
+    {
+      "name": "Internal",
+      "description": "Applications that are used only by your employees.",
+      "color": "dark-green"
+    }
+  ]
+}

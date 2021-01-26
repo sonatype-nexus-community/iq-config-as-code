@@ -1,0 +1,210 @@
+{
+  "email_server": {
+    "hostname": "IQ-EMAILSERVER",
+    "port": 1025,
+    "username": "admin",
+    "password": "adminpass",
+    "passwordIsIncluded": true,
+    "systemEmail": "nexus@iqserver",
+    "sslEnabled": false,
+    "startTlsEnabled": false
+  },
+  "ldap_connections": [
+    {
+      "name": "ldapmock_docker",
+      "connection": {
+        "authenticationMethod": "SIMPLE",
+        "connectionTimeout": 30,
+        "hostname": "IQ-LDAPSERVER",
+        "port": 389,
+        "protocol": "LDAP",
+        "referralIgnored": false,
+        "retryDelay": 30,
+        "saslRealm": null,
+        "searchBase": "dc=ldapmock,dc=local",
+        "systemPassword": "adminpass",
+        "systemUsername": "cn=admin,dc=ldapmock,dc=local"
+      },
+      "mappings": {
+        "userBaseDN": "ou=people",
+        "userSubtree": "false",
+        "userObjectClass": "inetOrgPerson",
+        "userFilter": "",
+        "userIDAttribute": "uid",
+        "userRealNameAttribute": "cn",
+        "userEmailAttribute": "mail",
+        "userPasswordAttribute": "",
+        "groupMappingType": "STATIC",
+        "groupBaseDN": "ou=groups",
+        "groupSubtree": "false",
+        "groupObjectClass": "posixGroup",
+        "groupIDAttribute": "cn",
+        "groupMemberAttribute": "memberUID",
+        "groupMemberFormat": "${username}",
+        "userMemberOfGroupAttribute": "null",
+        "dynamicGroupSearchEnabled": "true"
+      }
+    }
+  ],
+  "custom_roles": [
+    {
+      "name": "Build-Agent",
+      "description": "Build Agent",
+      "builtIn": false,
+      "permissionCategories": [
+        {
+          "displayName": "Administrator",
+          "permissions": [
+            {
+              "id": "VIEW_ROLES",
+              "displayName": "View",
+              "description": "All Roles",
+              "allowed": false
+            }
+          ]
+        },
+        {
+          "displayName": "IQ",
+          "permissions": [
+            {
+              "id": "MANAGE_PROPRIETARY",
+              "displayName": "Edit",
+              "description": "Proprietary Components",
+              "allowed": false
+            },
+            {
+              "id": "CLAIM_COMPONENT",
+              "displayName": "Claim",
+              "description": "Components",
+              "allowed": false
+            },
+            {
+              "id": "WRITE",
+              "displayName": "Edit",
+              "description": "IQ Elements",
+              "allowed": false
+            },
+            {
+              "id": "READ",
+              "displayName": "View",
+              "description": "IQ Elements",
+              "allowed": false
+            },
+            {
+              "id": "EDIT_ACCESS_CONTROL",
+              "displayName": "Edit",
+              "description": "Access Control",
+              "allowed": false
+            },
+            {
+              "id": "EVALUATE_APPLICATION",
+              "displayName": "Evaluate",
+              "description": "Applications",
+              "allowed": true
+            },
+            {
+              "id": "EVALUATE_COMPONENT",
+              "displayName": "Evaluate",
+              "description": "Individual Components",
+              "allowed": true
+            },
+            {
+              "id": "ADD_APPLICATION",
+              "displayName": "Add",
+              "description": "Applications",
+              "allowed": true
+            },
+            {
+              "id": "MANAGE_AUTOMATIC_APPLICATION_CREATION",
+              "displayName": "Manage",
+              "description": "Automatic Application Creation",
+              "allowed": false
+            },
+            {
+              "id": "MANAGE_AUTOMATIC_SCM_CONFIGURATION",
+              "displayName": "Manage",
+              "description": "Automatic Source Control Configuration",
+              "allowed": false
+            }
+          ]
+        },
+        {
+          "displayName": "Remediation",
+          "permissions": [
+            {
+              "id": "WAIVE_POLICY_VIOLATIONS",
+              "displayName": "Waive",
+              "description": "Policy Violations",
+              "allowed": false
+            },
+            {
+              "id": "CHANGE_LICENSES",
+              "displayName": "Change",
+              "description": "Licenses",
+              "allowed": false
+            },
+            {
+              "id": "CHANGE_SECURITY_VULNERABILITIES",
+              "displayName": "Change",
+              "description": "Security Vulnerabilities",
+              "allowed": false
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "user1",
+      "password": "user1",
+      "firstName": "User",
+      "lastName": "One",
+      "email": "userone@company.com"
+    }
+  ],
+  "webhooks": [
+    {
+      "id": null,
+      "url": "http://myWebHook",
+      "secretKey": "#~FAKE~SECRET~KEY~#",
+      "description": "Dummy Webhook Endpoint",
+      "eventTypes": [
+        "Violation Alert",
+        "Policy Management",
+        "Application Evaluation",
+        "License Override Management",
+        "Security Vulnerability Override Management"
+      ]
+    }
+  ],
+  "proxy": {
+    "hostname": null,
+    "username": null,
+    "port": 8080,
+    "password": null,
+    "passwordIsIncluded": false,
+    "excludeHosts": [
+    ]
+  },
+  "automatic_applications": {
+    "enabled": true,
+    "parentOrganizationId": "Sandbox Organization"
+  },
+  "automatic_source_control": {
+    "enabled": true
+  },
+  "system_notice": {
+    "id": "system-notice",
+    "message": "IQ will be down for routine backup at 00:00. Service will resume prior to 01:00.",
+    "enabled": true
+  },
+  "source_control": {
+    "username": "Dummy",
+    "token": "#~FAKE~SECRET~KEY~#",
+    "baseBranch": "master",
+    "enablePullRequests": true,
+    "enableStatusChecks": true,
+    "provider": "bitbucket"
+  }
+}

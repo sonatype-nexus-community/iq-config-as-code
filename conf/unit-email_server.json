@@ -1,0 +1,12 @@
+{
+  "email_server": {
+    "hostname": "IQ-EMAILSERVER",
+    "port": 1025,
+    "username": "admin",
+    "password": "adminpass",
+    "passwordIsIncluded": true,
+    "systemEmail": "nexus@iqserver",
+    "sslEnabled": false,
+    "startTlsEnabled": false
+  }
+}

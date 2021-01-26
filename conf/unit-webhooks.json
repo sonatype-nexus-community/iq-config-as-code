@@ -1,0 +1,17 @@
+{
+  "webhooks": [
+    {
+      "id": null,
+      "url": "http://myWebHook",
+      "secretKey": "#~FAKE~SECRET~KEY~#",
+      "description": "Dummy Webhook Endpoint",
+      "eventTypes": [
+        "Violation Alert",
+        "Policy Management",
+        "Application Evaluation",
+        "License Override Management",
+        "Security Vulnerability Override Management"
+      ]
+    }
+  ]
+}
