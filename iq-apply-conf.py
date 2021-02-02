@@ -1,11 +1,20 @@
 #!/usr/bin/env python3
 
-#########################################################################################################
-# This script is designed to meet config-as-code requirements of Sonatype customers. It is a community
-# based project and is therefore not part of the 'official' Sonatype product portfolio. This script uses
-# private APIs. These are subject to change without prior notification from Sonatype. Please be aware
-# before you proceed to utilise this script.
-#########################################################################################################
+#
+# Copyright 2019-Present Sonatype Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 
 import argparse
 import json
@@ -569,8 +578,8 @@ def application_categories(data, org='ROOT_ORGANIZATION_ID'):
         resp = post_url(url, app_cat)
         if resp is not None:
             categories.append(resp)
-            print('Applied Application Category configuration:')
-            print_debug(app_cat)
+        print('Applied Application Category configuration:')
+        print_debug(app_cat)
 
 
 def component_labels(data, org='ROOT_ORGANIZATION_ID'):

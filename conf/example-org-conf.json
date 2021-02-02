@@ -110,9 +110,9 @@
         {
           "name": "Webgoat Legacy Bitbucket",
           "grandfathering": {
-        "enabled": true,
-        "allowOverride": true
-      },
+            "enabled": true,
+            "allowOverride": true
+          },
           "continuous_monitoring_stage": "Build",
           "access": [
             {
@@ -145,6 +145,9 @@
             },
             {
               "name": "Secret"
+            },
+            {
+              "name": "Other"
             }
           ]
         }
