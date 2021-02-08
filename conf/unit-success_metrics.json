@@ -1,3 +1,5 @@
 {
-  "success_metrics": {"enabled":true}
+  "success_metrics": {
+    "enabled":true
+  }
 }

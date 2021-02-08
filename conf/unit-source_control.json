@@ -1,10 +1,12 @@
 {
   "source_control": {
+    "ownerId": "ROOT_ORGANIZATION_ID",
+    "repositoryUrl": null,
     "username": "Dummy",
     "token": "#~FAKE~SECRET~KEY~#",
+    "provider": "bitbucket",
     "baseBranch": "master",
     "enablePullRequests": true,
-    "enableStatusChecks": true,
-    "provider": "bitbucket"
+    "enableStatusChecks": true
   }
 }

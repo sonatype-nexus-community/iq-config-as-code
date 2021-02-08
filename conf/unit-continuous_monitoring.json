@@ -1,3 +1,6 @@
 {
-  "continuous_monitoring_stage": "Release"
+  "continuous_monitoring_stage": {
+    "ownerId": "ROOT_ORGANIZATION_ID",
+    "stageTypeId": "release"
+  }
 }

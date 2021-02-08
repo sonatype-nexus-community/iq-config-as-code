@@ -1,6 +1,8 @@
 {
   "grandfathering": {
     "enabled": true,
-    "allowOverride": true
+    "inheritedFromOrganizationName": null,
+    "allowOverride": true,
+    "allowChange": true
   }
 }

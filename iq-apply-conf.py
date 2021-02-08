@@ -504,8 +504,9 @@ def add_success_metrics_reports(data):
     if data is None or len(data) == 0:
         return
     url = f'{iq_url}/rest/successMetrics/report'
-    # This API applies the config regardless of whether the proxy is already configured.
-    post_url(url, data)
+    for sm in data:
+        post_url(url, sm)
+
     print('Added Success Metrics Reporting configuration:')
     print_debug(data)
 
@@ -544,19 +545,17 @@ def custom_roles(data):
 def continuous_monitoring(cm_data, org=None, app=None):
     if cm_data is None or len(cm_data) == 0:
         return
-    data = {
-        "stageTypeId": cm_data.lower()
-    }
+    cm_data['stageTypeId'] = cm_data['stageTypeId'].lower()
 
     url = f'{iq_url}/rest/policyMonitoring/{org_or_app(org, app)}'
 
-    if cm_data.lower() == 'do not monitor':
+    if cm_data['stageTypeId'].lower() == 'do not monitor':
         delete_url(url, None)
     else:
-        put_url(url, data)
+        put_url(url, cm_data)
 
     print('Applied Continuous Monitoring configuration:')
-    print_debug(data)
+    print_debug(cm_data)
 
 
 def data_purging(data, org='ROOT_ORGANIZATION_ID'):

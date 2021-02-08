@@ -1,7 +1,9 @@
 {
-  "success_metrics_reports": {
-    "name": "All applications",
-    "scope": {},
-    "includeLatestData": false
-  }
+  "success_metrics_reports": [
+    {
+      "name": "All applications",
+      "scope": {},
+      "includeLatestData": false
+    }
+  ]
 }

@@ -1,40 +1,64 @@
 {
   "license_threat_groups": [
     {
+      "ownerId": "ROOT_ORGANIZATION_ID",
       "name": "Banned",
+      "nameLowercaseNoWhitespace": "banned",
       "threatLevel": 10
     },
     {
+      "ownerId": "ROOT_ORGANIZATION_ID",
       "name": "Commercial",
+      "nameLowercaseNoWhitespace": "commercial",
       "threatLevel": 7
     },
     {
+      "ownerId": "ROOT_ORGANIZATION_ID",
       "name": "Copyleft",
+      "nameLowercaseNoWhitespace": "copyleft",
       "threatLevel": 9
     },
     {
+      "ownerId": "ROOT_ORGANIZATION_ID",
       "name": "Liberal",
+      "nameLowercaseNoWhitespace": "liberal",
       "threatLevel": 0
     },
     {
+      "ownerId": "ROOT_ORGANIZATION_ID",
       "name": "Non Standard",
+      "nameLowercaseNoWhitespace": "nonstandard",
       "threatLevel": 6
     },
     {
+      "ownerId": "ROOT_ORGANIZATION_ID",
       "name": "Sonatype Informational",
+      "nameLowercaseNoWhitespace": "sonatypeinformational",
       "threatLevel": 0
     },
     {
+      "ownerId": "ROOT_ORGANIZATION_ID",
       "name": "Sonatype Special Licenses",
+      "nameLowercaseNoWhitespace": "sonatypespeciallicenses",
       "threatLevel": 5
     },
     {
-      "name": "Weak Copyleft",
-      "threatLevel": 2
+      "ownerId": "ROOT_ORGANIZATION_ID",
+      "name": "Use These Your Fired",
+      "nameLowercaseNoWhitespace": "usetheseyourfired",
+      "threatLevel": 10
     },
     {
-      "name": "Use These Your Fired",
+      "ownerId": "ROOT_ORGANIZATION_ID",
+      "name": "Vetting",
+      "nameLowercaseNoWhitespace": "vetting",
       "threatLevel": 10
+    },
+    {
+      "ownerId": "ROOT_ORGANIZATION_ID",
+      "name": "Weak Copyleft",
+      "nameLowercaseNoWhitespace": "weakcopyleft",
+      "threatLevel": 2
     }
   ]
 }

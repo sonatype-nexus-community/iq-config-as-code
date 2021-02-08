@@ -3,22 +3,29 @@
     {
       "label": "Architecture-Blacklisted",
       "description": "Components which have been blacklisted from use",
-      "color": "orange"
+      "color": "orange",
+      "ownerId": "ROOT_ORGANIZATION_ID",
+      "ownerType": "ORGANIZATION"
     },
     {
       "label": "Architecture-Cleanup",
       "description": "Components which are relics of a build and should not be included in the distribution",
-      "color": "orange"
+      "color": "orange",
+      "ownerId": "ROOT_ORGANIZATION_ID",
+      "ownerType": "ORGANIZATION"
     },
     {
       "label": "Architecture-Deprecated",
       "description": "Components we want to discourage from developer use",
-      "color": "orange"
+      "color": "orange",
+      "ownerId": "ROOT_ORGANIZATION_ID",
+      "ownerType": "ORGANIZATION"
     },
     {
       "label": "External License",
       "description": "Denotes a component that is subject to an external commercial license.",
       "color": "dark-red",
+      "ownerId": "ROOT_ORGANIZATION_ID",
       "ownerType": "ORGANIZATION"
     }
   ]
