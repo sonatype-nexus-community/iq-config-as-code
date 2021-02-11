@@ -25,6 +25,7 @@ iq_session = requests.Session
 iq_url, iq_auth, debug = "", "", False
 categories, organizations, applications, ldap_connections = [], [], [], []
 roleType = ['USER', 'GROUP']
+roles = {}
 
 
 def get_arguments():
@@ -58,6 +59,8 @@ def main():
     set_categories()
     set_organizations()
     set_applications()
+    set_roles()
+
 
     with open(file_name) as json_file:
         config = json.load(json_file)
@@ -130,15 +133,15 @@ def process_orgs():
 def org_configuration(org):
     orgconf = {}
     # Parses and applies all of the child Org configuration
-    orgconf['grandfathering'] = persist_grandfathering(org['id'])
-    orgconf['continuous_monitoring_stage'] = persist_continuous_monitoring(org['id'])
-    orgconf['source_control'] = persist_source_control(org['id'])
-    orgconf['data_purging'] = persist_data_purging(org['id'])
-    orgconf['proprietary_components'] = persist_proprietary_components(org['id'])
-    orgconf['application_categories'] = persist_application_categories(org['id'])
-    orgconf['component_labels'] = persist_component_labels(org['id'])
-    orgconf['license_threat_groups'] = persist_license_threat_groups(org['id'])
-    orgconf['access'] = persist_access(org['id'])
+    orgconf['grandfathering'] = persist_grandfathering(org=org['id'])
+    orgconf['continuous_monitoring_stage'] = persist_continuous_monitoring(org=org['id'])
+    orgconf['source_control'] = persist_source_control(org=org['id'])
+    orgconf['data_purging'] = persist_data_purging(org=org['id'])
+    orgconf['proprietary_components'] = persist_proprietary_components(org=org['id'])
+    orgconf['application_categories'] = persist_application_categories(org=org['id'])
+    orgconf['component_labels'] = persist_component_labels(org=org['id'])
+    orgconf['license_threat_groups'] = persist_license_threat_groups(org=org['id'])
+    orgconf['access'] = persist_access(org=org['id'])
     orgconf['name'] = org['name']
     persist_data(orgconf, f'scrape/{get_organization_name(org["id"])}-config.json')
     return orgconf
@@ -156,7 +159,7 @@ def app_configuration(app):
     app_conf['source_control'] = persist_source_control(app=app['id'])
     app_conf['publicId'] = app['publicId']
     app_conf['applicationTags'] = check_categories(app['applicationTags'])
-    app_conf['access'] = persist_access(app['id'])
+    app_conf['access'] = persist_access(app=app['id'])
     # persist_data(app_conf, f'scrape/{app["name"]}-config.json')
     return app_conf
 
@@ -375,31 +378,24 @@ def apply_role(url, role_id, user_or_group_name, role_type):
 
 
 def persist_access(org='ROOT_ORGANIZATION_ID', app=None):
-    url = f'{iq_url}/api/v2/{orgs_or_apps(org, app)}/roleMembers'
-    roles = find_available_roles()
+    if app is not None:
+        url = f'{iq_url}/api/v2/roleMemberships/application/{app}'
+    else:
+        url = f'{iq_url}/api/v2/roleMemberships/organization/{org}'
 
-    # for role in roles:
-    #     url = f'{iq_url}/rest/membershipMapping/organization/{org}/role/{role["id"]}'
+    accessors = []
+    members = get_url(url)
+    if members is not None:
+        for member in members['memberMappings']:
+            role = member['roleId']
+            for mem in member['members']:
+                accessor = {}
+                accessor['role'] = roles[role]
+                accessor['user_or_group_name'] = mem['userOrGroupName']
+                accessor['role_type'] = mem['type']
+                accessors.append(accessor)
 
-
-    # for acc in access:
-    #     # Apply the roles to the application
-    #     role = acc['role']
-    #     role_id = check_roles(role, iq_roles)
-    #     user_or_group_name = acc['user_or_group_name']
-    #     role_type = acc['role_type']
-    #
-    #     # Now apply the roles for the new applications
-    #     # if (check_user(user_or_group_name, users, role_type) is not None) and \
-    #     if (check_user_or_group(role_type) is not None) and (role_id is not None):
-    #         # Validation completed, apply the roles!
-    #         # No return payload with a 204 PUT response!
-    #         apply_role(url, role_id['tagId'], user_or_group_name, role_type)
-    #         print(f"to '{role}' for '{role_type}:{user_or_group_name}' to '{entity['name']}'")
-    #     else:
-    #         print(f"Unable to apply '{role}' for '{role_type}:{user_or_group_name}' to '{entity['name']}'")
-
-    return []
+    return accessors
 
 
 
@@ -652,12 +648,12 @@ def parse_ldap_connection(conn):
     return data
 
 
-def find_available_roles():
+def set_roles():
+    global roles
     url = f'{iq_url}/api/v2/applications/roles'
-    resp = get_url(url)
-    if resp is not None:
-        return resp['roles']
-    return ''
+    data = get_url(url)
+    for role in data['roles']:
+        roles[role['id']] = role['name']
 
 
 def name_available(name):
