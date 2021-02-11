@@ -73,51 +73,57 @@ def main():
 
     # Iterate over the Organisations
     if organizations is not None:
+
+        orgs = []
+
         # loops through config data
         for org in organizations:
 
             # Apply Organisation configuration
-            org_configuration(org)
+            org_conf = {}
+            org_conf = org_configuration(org)
 
-#            for app in org['applications']:
-#                if not app['publicId']:
-#                    print(f'No publicId {app}')
-#
-#                # Apply Application configuration
-#                if check_application(app) is None and name_available(app['name']):
-#                    # Apply Application configuration
-#                    app['organizationName'] = org['name']
-#                    app_configuration(app)
-#                else:
-#                    print(f"'{app['name']}' already exists in '{org['name']}'")
+            org_apps = []
+            for app in applications:
+                if app['organizationId'] == org['id']:
+                    org_apps.append(app_configuration(app))
+            org_conf['applications'] = org_apps
+            orgs.append(org_conf)
+
+        persist_data(orgs, 'scrape/orgs-apps-conf.json')
 
 
 def nexus_administration():
+
+    systemConf = {}
     # Parses and applies all the 'administrative' configuration for Nexus IQ
-    persist_users()
-    persist_roles()
-    persist_ldap_instances()
-    persist_email_server_connection()
-    persist_proxy()
-    persist_webhooks()
-    persist_system_notice()
-    persist_success_metrics()
-    persist_auto_applications()
-    persist_automatic_scc()
-    persist_success_metrics_reports()
+    systemConf['users'] = persist_users()
+    systemConf['custom_roles'] = persist_roles()
+    systemConf['ldap_connections'] = persist_ldap_instances()
+    systemConf['email_server'] = persist_email_server_connection()
+    systemConf['proxy'] = persist_proxy()
+    systemConf['webhooks'] = persist_webhooks()
+    systemConf['system_notice'] = persist_system_notice()
+    systemConf['success_metrics'] = persist_success_metrics()
+    systemConf['automatic_applications'] = persist_auto_applications()
+    systemConf['source_control'] = persist_automatic_scc()
+    systemConf['success_metrics_reports'] = persist_success_metrics_reports()
+    persist_data(systemConf, 'scrape/system-conf.json')
 
 
 def root_configuration():
+    rootOrgConf = {}
     # Parses and applies all of the ROOT Org configuration
-    persist_application_categories()
-    persist_application_grandfathering()
-    persist_continuous_monitoring()
-    persist_proprietary_components()
-    persist_component_labels()
-    persist_license_threat_groups()
-    persist_data_purging()
-    persist_source_control()
-    apply_access()
+    rootOrgConf['application_categories'] = persist_application_categories()
+    rootOrgConf['grandfathering'] = persist_grandfathering()
+    rootOrgConf['continuous_monitoring'] = persist_continuous_monitoring()
+    rootOrgConf['proprietary_components'] = persist_proprietary_components()
+    rootOrgConf['component_labels'] = persist_component_labels()
+    rootOrgConf['license_threat_groups'] = persist_license_threat_groups()
+    rootOrgConf['data_purging'] = persist_data_purging()
+    rootOrgConf['source_control'] = persist_source_control()
+    #rootOrgConf['access'] = apply_access()
+    persist_data(rootOrgConf, 'scrape/root-org-conf.json')
 
 def process_orgs():
     url = f'{iq_url}/api/v2/organizations'
@@ -128,34 +134,42 @@ def process_orgs():
     return None
 
 def org_configuration(org):
+    orgconf = {}
     # Parses and applies all of the child Org configuration
-    persist_application_categories(org['id'])
-    persist_component_labels(org['id'])
-    persist_license_threat_groups(org['id'])
-    persist_application_grandfathering(org['id'])
-    persist_continuous_monitoring(org['id'])
-    persist_data_purging(org['id'])
+    orgconf['grandfathering'] = persist_grandfathering(org['id'])
+    orgconf['continuous_monitoring_stage'] = persist_continuous_monitoring(org['id'])
+    orgconf['source_control'] = persist_source_control(org['id'])
     #apply_access(org, org.get('access'), org=org['eid'])
+    orgconf['data_purging'] = persist_data_purging(org['id'])
     data = org.get('proprietary_components')
+    orgpc = []
     if data is not None and len(data) > 0:
         data['ownerId'] = org['id']
-        persist_proprietary_components(data, org=org['eid'])
-    persist_source_control(org['id'])
+        orgpc.append(persist_proprietary_components(data, org=org['eid']))
+    orgconf['proprietary_components'] = orgpc
+    orgconf['application_categories'] = persist_application_categories(org['id'])
+    orgconf['component_labels'] = persist_component_labels(org['id'])
+    orgconf['license_threat_groups'] = persist_license_threat_groups(org['id'])
+    orgconf['name'] = org['name']
+    persist_data(orgconf, f'scrape/{get_organization_name(org["id"])}-config.json')
+    return orgconf
 
 
 def app_configuration(app):
-    # Parses and applies all of the application configuration
-    new_app = add_application(app)
-    persist_application_grandfathering(app.get('grandfathering'), app=app['publicId'])
-    persist_continuous_monitoring(app.get('continuous_monitoring_stage'), app=app['publicId'])
-    eid = new_app['id']
-    apply_access(new_app, app.get('access'), app=eid)
-    data = app.get('proprietary_components')
-    if data is not None and len(data) > 0:
-        data['ownerId'] = eid
-        persist_proprietary_components(data, app=new_app['publicId'])
-    persist_source_control(app.get('source_control'), app=eid)
 
+    app_conf = {}
+    # Parses and applies all of the application configuration
+    app_conf['name'] = app['name']
+    app_conf['grandfathering'] = persist_grandfathering(app=app['publicId'])
+    app_conf['continuous_monitoring_stage'] = persist_continuous_monitoring(app=app['publicId'])
+    app_conf['proprietary_components'] = persist_proprietary_components(app=app['publicId'])
+    app_conf['component_labels'] = persist_component_labels(app=app['publicId'])
+    app_conf['source_control'] = persist_source_control(app=app['id'])
+    app_conf['publicId'] = app['publicId']
+    app_conf['applicationTags'] = check_categories(app['applicationTags'])
+    # app_conf['access'] = apply_access(new_app, app.get('access'), app=eid)
+    # persist_data(app_conf, f'scrape/{app["name"]}-config.json')
+    return app_conf
 
 def print_debug(c):
     # testing json output to console
@@ -291,20 +305,29 @@ def check_categories(app_tags):
     return ret
 
 
-def check_category(name):
+def check_category(ac):
     ret = ''
-    if len(name) == 0:
+    if len(ac) == 0:
         return None
     for c in categories:
-        if name['name'] == c['name']:
-            ret = c['id']
+        if ac['tagId'] == c['id']:
+            ret = c['name']
             break
-    if len(ret) == 0:
-        ret = add_category(name['name'])
     if len(ret) > 0:
-        return {'tagId': ret}
+        return {'name': ret}
     return None
 
+def category_exists(ac):
+    ret = ''
+    if len(ac) == 0:
+        return None
+    for c in categories:
+        if ac['id'] == c['id']:
+            ret = c['name']
+            break
+    if len(ret) > 0:
+        return {'name': ret}
+    return None
 
 def check_roles(name, roles):
     ret = ''
@@ -330,33 +353,6 @@ def check_user_or_group(user_or_group):
     return None
 
 
-def add_application(app):
-    data = {
-        "publicId": app['publicId'],
-        "name": app['name'],
-        "organizationId": get_organization_id(app['organizationName']),
-        "applicationTags": check_categories(app['applicationTags'])
-    }
-    response = post_url(f'{iq_url}/api/v2/applications', data)
-    print('Added application:')
-    print_debug(data)
-
-    if response is not None:
-        print(f"added {app['publicId']} to {app['organizationName']}: {response['id']}")
-        applications.append(response)
-
-    return response
-
-
-def add_organization(org_name):
-    data = {"name": org_name}
-    url = f'{iq_url}/api/v2/organizations'
-    resp = post_url(url, data)
-    if resp is not None:
-        organizations.append(resp)
-        return resp['id']
-    return ''
-
 
 def add_ldap_connection(ldap_conn_name):
     data = {"name": ldap_conn_name}
@@ -365,21 +361,6 @@ def add_ldap_connection(ldap_conn_name):
     if resp is not None:
         ldap_connections.append(resp)
         print(f"Created LDAP connection: {ldap_conn_name}")
-        return resp['id']
-    return ''
-
-
-def add_category(name):
-    global categories
-
-    url = f'{iq_url}/api/v2/applicationCategories/organization/ROOT_ORGANIZATION_ID'
-    data = {"name": name,
-            "color": "dark-blue",
-            "description": name
-            }
-    resp = post_url(url, data)
-    if resp is not None:
-        categories.append(resp)
         return resp['id']
     return ''
 
@@ -426,34 +407,39 @@ def apply_access(org='ROOT_ORGANIZATION_ID', app=None):
 
 def persist_auto_applications():
     url = f'{iq_url}/rest/config/automaticApplications'
-    auto_apps = get_url(url)
+    data = get_url(url)
     for org in organizations:
-        if org['id'] == auto_apps['parentOrganizationId']:
-            auto_apps['parentOrganizationId'] = org['name']
+        if org['id'] == data['parentOrganizationId']:
+            data['parentOrganizationId'] = org['name']
             break
-    data = {'automatic_applications': auto_apps}
-    persist_data(data, 'scrape/system-auto_applications.json')
+    # persist_data(data, 'scrape/system-auto_applications.json')
     print_debug(data)
+    return data
 
 
-def persist_application_grandfathering(org='ROOT_ORGANIZATION_ID', app=None):
+def persist_grandfathering(org='ROOT_ORGANIZATION_ID', app=None):
+
     url = f'{iq_url}/rest/policyViolationGrandfathering/{org_or_app(org, app)}'
-    data = {'grandfathering': get_url(url)}
-    persist_data(data, f'scrape/{get_organization_name(org)}-grandfathering.json')
+
+    data = get_url(url)
+    # if app is not None:
+    #     persist_data(data, f'scrape/{app["name"]}-grandfathering.json')
+    # elif org is not None:
+    #     persist_data(data, f'scrape/{get_organization_name(org)}-grandfathering.json')
     print_debug(data)
     return data
 
 
 def persist_webhooks():
     url = f'{iq_url}/rest/config/webhook'
-    data = {'webhooks': []}
+    data = []
     webhooks = get_url(url)
     if not (webhooks is None):
         for webhook in webhooks:
             webhook['id'] = None
-            data['webhooks'].append(webhook)
+            data.append(webhook)
 
-    persist_data(data, 'scrape/system-webhooks.json')
+    # persist_data(data, 'scrape/system-webhooks.json')
     print_debug(data)
     return data
 
@@ -461,9 +447,8 @@ def persist_webhooks():
 def persist_proxy():
     # This API applies the config regardless of whether the proxy is already configured.
     url = f'{iq_url}/api/v2/config/httpProxyServer'
-    proxy = get_url(url)
-    data = {'proxy': proxy}
-    persist_data(data, 'scrape/system-proxy.json')
+    data = get_url(url)
+    # persist_data(data, 'scrape/system-proxy.json')
     print_debug(data)
     return data
 
@@ -471,11 +456,14 @@ def persist_proxy():
 def persist_source_control(org='ROOT_ORGANIZATION_ID', app=None):
     url = f'{iq_url}/api/v2/sourceControl/{org_or_app(org, app)}'
     # This API applies the config regardless of whether the proxy is already configured.
-    sc = get_url(url)
-    if sc is not None:
-        sc.pop('id')
-    data = {'source_control': sc}
-    persist_data(data, f'scrape/{get_organization_name(org)}-source_control.json')
+    data = get_url(url)
+    if data is not None:
+        data.pop('id')
+        data.pop('ownerId')
+    # if app is not None:
+    #     persist_data(data, f'scrape/{app["name"]}-source_control.json')
+    # elif org is not None:
+    #     persist_data(data, f'scrape/{get_organization_name(org)}-source_control.json')
     print_debug(data)
     return data
 
@@ -483,23 +471,22 @@ def persist_source_control(org='ROOT_ORGANIZATION_ID', app=None):
 def persist_success_metrics():
     url = f'{iq_url}/rest/successMetrics'
     # This API applies the config regardless of whether the proxy is already configured.
-    metrics = get_url(url)
-    data = {'success_metrics': metrics}
-    persist_data(data, 'scrape/system-success_metrics.json')
+    data = get_url(url)
+    # persist_data(data, 'scrape/system-success_metrics.json')
     print_debug(data)
+    return data
 
 
 def persist_success_metrics_reports():
     url = f'{iq_url}/rest/successMetrics/report'
     # This API applies the config regardless of whether the proxy is already configured.
-    success_metrics = get_url(url)
-    for sm in success_metrics:
+    data = get_url(url)
+    for sm in data:
         sm.pop('id')
         sm.pop('scope')
         sm['scope'] = {}
 
-    data = {'success_metrics_reports': success_metrics}
-    persist_data(data, 'scrape/system-success_metrics_reports.json')
+    # persist_data(data, 'scrape/system-success_metrics_reports.json')
     print_debug(data)
     return data
 
@@ -507,8 +494,8 @@ def persist_success_metrics_reports():
 def persist_automatic_scc():
     url = f'{iq_url}/rest/config/automaticScmConfiguration'
     # This API applies the config regardless of whether the proxy is already configured.
-    data = {'automatic_source_control': get_url(url)}
-    persist_data(data, 'scrape/system-automatic_scc.json')
+    data = get_url(url)
+    # persist_data(data, 'scrape/system-automatic_scc.json')
     print_debug(data)
     return data
 
@@ -519,92 +506,100 @@ def persist_proprietary_components(org='ROOT_ORGANIZATION_ID', app=None):
     pcs = get_url(url)
     pcs = pcs['proprietaryConfigByOwners']
     for pc in pcs:
-        data = {'proprietary_components': pc['proprietaryConfig']}
-        data['proprietary_components']['id'] = None
-        persist_data(data, f'scrape/{get_organization_name(org)}-proprietary_component.json')
+        data = pc['proprietaryConfig']
+        data['id'] = None
+        # if app is not None:
+        #     persist_data(data, f'scrape/{app["name"]}-proprietary_component.json')
+        # elif org is not None:
+        #     persist_data(data, f'scrape/{get_organization_name(org)}-proprietary_component.json')
         print_debug(data)
     return data
 
 def persist_roles():
     url = f'{iq_url}/rest/security/roles'
-    roles = get_url(url)
-    for element in roles:
+    data = get_url(url)
+    for element in data:
         element.pop('id', None)
-    data = {'custom_roles': roles}
-    persist_data(data, 'scrape/system_roles.json')
+    # persist_data(data, 'scrape/system_roles.json')
     print_debug(data)
     return data
 
 
 def persist_continuous_monitoring(org='ROOT_ORGANIZATION_ID', app=None):
     url = f'{iq_url}/rest/policyMonitoring/{org_or_app(org, app)}'
-    cms = get_url(url)
-    if cms is not None:
-        cms.pop('id')
-    data = {'continuous_monitoring_stage': cms}
-    persist_data(data, f'scrape/{get_organization_name(org)}-continuous_monitoring.json')
+    data = get_url(url)
+    if data is not None:
+        data.pop('id')
+        data.pop('ownerId')
+    # if app is not None:
+    #     persist_data(data, f'scrape/{app["name"]}-continuous_monitoring.json')
+    # elif org is not None:
+    #     persist_data(data, f'scrape/{get_organization_name(org)}-continuous_monitoring.json')
     print_debug(data)
     return data
 
 
 def persist_data_purging(org='ROOT_ORGANIZATION_ID'):
     url = f'{iq_url}/api/v2/dataRetentionPolicies/organizations/{org}'
-    data = {'data_purging': get_url(url)}
-    persist_data(data, f'scrape/{get_organization_name(org)}-data_purging.json')
+    data = get_url(url)
+    # persist_data(data, f'scrape/{get_organization_name(org)}-data_purging.json')
     print_debug(data)
     return data
 
 
 def persist_application_categories(org='ROOT_ORGANIZATION_ID'):
     url = f'{iq_url}/api/v2/applicationCategories/organization/{org}'
-    acs = get_url(url)
-    if acs is not None:
-        for ac in acs:
+    data = get_url(url)
+    if data is not None:
+        for ac in data:
+            if category_exists(ac) is None:
+                categories.append(ac.copy())
             ac.pop('id')
             ac.pop('organizationId')
 
-    data = {'application_categories': acs}
     print_debug(data)
-    persist_data(data, f'scrape/{get_organization_name(org)}-application_categories.json')
+    # persist_data(data, f'scrape/{get_organization_name(org)}-application_categories.json')
     return data
 
 
-def persist_component_labels(org='ROOT_ORGANIZATION_ID'):
-    url = f'{iq_url}/api/v2/labels/organization/{org}'
-    labels = get_url(url)
-    if labels is not None:
-        for label in labels:
+
+def persist_component_labels(org='ROOT_ORGANIZATION_ID', app=None):
+    url = f'{iq_url}/api/v2/labels/{org_or_app(org, app)}'
+    data = get_url(url)
+    if data is not None:
+        for label in data:
             label.pop('id')
-    data = {'component_labels': labels}
+            label.pop('ownerId')
     print_debug(data)
-    persist_data(data, f'scrape/{get_organization_name(org)}-component_labels.json')
+    # persist_data(data, f'scrape/{get_organization_name(org)}-component_labels.json')
     return data
 
 
 def persist_license_threat_groups(org='ROOT_ORGANIZATION_ID'):
     url = f'{iq_url}/rest/licenseThreatGroup/organization/{org}'
-    ltgs = get_url(url)
-    if ltgs is not None:
-        for ltg in ltgs:
+    data = get_url(url)
+    if data is not None:
+        for ltg in data:
             ltg.pop('id')
-    data = {'license_threat_groups': ltgs}
+            ltg.pop('ownerId')
+            ltg.pop('nameLowercaseNoWhitespace')
     print_debug(data)
-    persist_data(data, f'scrape/{get_organization_name(org)}-license_threat_groups.json')
+    # persist_data(data, f'scrape/{get_organization_name(org)}-license_threat_groups.json')
     return data
 
 
 def persist_ldap_instances():
     try:
         url = f'{iq_url}/rest/config/ldap'
-        data = {'ldap_connections': []}
+        data = []
         # Connection is created above, so it is expected in the list of connections
         conns = get_url(url)
         if not (conns is None):
             for conn in conns:
-                data['ldap_connections'].append(parse_ldap_connection(conn))
+                data.append(parse_ldap_connection(conn))
 
         print_debug(data)
-        persist_data(data, 'scrape/system-ldap_connections.json')
+        # persist_data(data, 'scrape/system-ldap_connections.json')
         return data
 
     except KeyError as err:
@@ -613,30 +608,27 @@ def persist_ldap_instances():
 
 def persist_email_server_connection():
     url = f'{iq_url}/api/v2/config/mail'
-    email = get_url(url)
-    data = {'email_server': email}
-    persist_data(data, 'scrape/system_email.json')
+    data = get_url(url)
+    # persist_data(data, 'scrape/system_email.json')
     print_debug(data)
     return data
 
 
 def persist_users():
     url = f'{iq_url}/rest/user'
-    users = get_url(url)
-    for element in users:
+    data = get_url(url)
+    for element in data:
         element.pop('id', None)
         element.pop('usernameLowercase', None)
-    data = {'users': users}
-    persist_data(data, "scrape/system_users.json")
+    # persist_data(data, "scrape/system_users.json")
     print_debug(data)
     return data
 
 
 def persist_system_notice():
     url = f'{iq_url}/rest/config/systemNotice'
-    notice = get_url(url)
-    data = {'system_notice': notice}
-    persist_data(data, 'scrape/system-system_notice.json')
+    data = get_url(url)
+    # persist_data(data, 'scrape/system-system_notice.json')
     print_debug(data)
     return data
 
