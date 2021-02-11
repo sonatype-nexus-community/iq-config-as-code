@@ -69,27 +69,19 @@ def main():
     root_configuration()
 
     # Iterate over the Organisations
-    # process_orgs()
-
-    # Iterate over the Organisations
     if organizations is not None:
-
         orgs = []
-
         # loops through config data
         for org in organizations:
-
             # Apply Organisation configuration
             org_conf = {}
             org_conf = org_configuration(org)
-
             org_apps = []
             for app in applications:
                 if app['organizationId'] == org['id']:
                     org_apps.append(app_configuration(app))
             org_conf['applications'] = org_apps
             orgs.append(org_conf)
-
         persist_data(orgs, 'scrape/orgs-apps-conf.json')
 
 
@@ -122,7 +114,7 @@ def root_configuration():
     rootOrgConf['license_threat_groups'] = persist_license_threat_groups()
     rootOrgConf['data_purging'] = persist_data_purging()
     rootOrgConf['source_control'] = persist_source_control()
-    #rootOrgConf['access'] = apply_access()
+    rootOrgConf['access'] = persist_access()
     persist_data(rootOrgConf, 'scrape/root-org-conf.json')
 
 def process_orgs():
@@ -139,17 +131,12 @@ def org_configuration(org):
     orgconf['grandfathering'] = persist_grandfathering(org['id'])
     orgconf['continuous_monitoring_stage'] = persist_continuous_monitoring(org['id'])
     orgconf['source_control'] = persist_source_control(org['id'])
-    #apply_access(org, org.get('access'), org=org['eid'])
     orgconf['data_purging'] = persist_data_purging(org['id'])
-    data = org.get('proprietary_components')
-    orgpc = []
-    if data is not None and len(data) > 0:
-        data['ownerId'] = org['id']
-        orgpc.append(persist_proprietary_components(data, org=org['eid']))
-    orgconf['proprietary_components'] = orgpc
+    orgconf['proprietary_components'] = persist_proprietary_components(org['id'])
     orgconf['application_categories'] = persist_application_categories(org['id'])
     orgconf['component_labels'] = persist_component_labels(org['id'])
     orgconf['license_threat_groups'] = persist_license_threat_groups(org['id'])
+    orgconf['access'] = persist_access(org['id'])
     orgconf['name'] = org['name']
     persist_data(orgconf, f'scrape/{get_organization_name(org["id"])}-config.json')
     return orgconf
@@ -167,7 +154,7 @@ def app_configuration(app):
     app_conf['source_control'] = persist_source_control(app=app['id'])
     app_conf['publicId'] = app['publicId']
     app_conf['applicationTags'] = check_categories(app['applicationTags'])
-    # app_conf['access'] = apply_access(new_app, app.get('access'), app=eid)
+    app_conf['access'] = persist_access(app['id'])
     # persist_data(app_conf, f'scrape/{app["name"]}-config.json')
     return app_conf
 
@@ -385,24 +372,33 @@ def apply_role(url, role_id, user_or_group_name, role_type):
     print_debug(data)
 
 
-def apply_access(org='ROOT_ORGANIZATION_ID', app=None):
+def persist_access(org='ROOT_ORGANIZATION_ID', app=None):
     url = f'{iq_url}/api/v2/{orgs_or_apps(org, app)}/roleMembers'
     roles = find_available_roles()
-    for role in roles:
-        x = 1
-        # Apply the roles to the application
 
-        # Now apply the roles for the new applications
-        # if (check_user(user_or_group_name, users, role_type) is not None) and \
-#        if (check_user_or_group(role_type) is not None) and (role_id is not None):
-#            # Validation completed, apply the roles!
-#            # No return payload with a 204 PUT response!
-#            apply_role(url, role_id['tagId'], user_or_group_name, role_type)
-#            print(f"to '{role}' for '{role_type}:{user_or_group_name}' to '{entity['name']}'")
-#        else:
-#            print(f"Unable to apply '{role}' for '{role_type}:{user_or_group_name}' to '{entity['name']}'")
+    # for role in roles:
+    #     url = f'{iq_url}/rest/membershipMapping/organization/{org}/role/{role["id"]}'
 
-    return None
+
+    # for acc in access:
+    #     # Apply the roles to the application
+    #     role = acc['role']
+    #     role_id = check_roles(role, iq_roles)
+    #     user_or_group_name = acc['user_or_group_name']
+    #     role_type = acc['role_type']
+    #
+    #     # Now apply the roles for the new applications
+    #     # if (check_user(user_or_group_name, users, role_type) is not None) and \
+    #     if (check_user_or_group(role_type) is not None) and (role_id is not None):
+    #         # Validation completed, apply the roles!
+    #         # No return payload with a 204 PUT response!
+    #         apply_role(url, role_id['tagId'], user_or_group_name, role_type)
+    #         print(f"to '{role}' for '{role_type}:{user_or_group_name}' to '{entity['name']}'")
+    #     else:
+    #         print(f"Unable to apply '{role}' for '{role_type}:{user_or_group_name}' to '{entity['name']}'")
+
+    return []
+
 
 
 def persist_auto_applications():
@@ -505,15 +501,18 @@ def persist_proprietary_components(org='ROOT_ORGANIZATION_ID', app=None):
     # This API applies the config regardless of whether the proxy is already configured.
     pcs = get_url(url)
     pcs = pcs['proprietaryConfigByOwners']
+    pcs2 = []
     for pc in pcs:
         data = pc['proprietaryConfig']
         data['id'] = None
+        data.pop('ownerId')
+        pcs2.append(data)
         # if app is not None:
         #     persist_data(data, f'scrape/{app["name"]}-proprietary_component.json')
         # elif org is not None:
         #     persist_data(data, f'scrape/{get_organization_name(org)}-proprietary_component.json')
         print_debug(data)
-    return data
+    return pcs2
 
 def persist_roles():
     url = f'{iq_url}/rest/security/roles'
