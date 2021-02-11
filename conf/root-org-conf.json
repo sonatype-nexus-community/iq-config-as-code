@@ -86,7 +86,9 @@
       "threatLevel": 10
     }
   ],
-  "continuous_monitoring_stage": "Release",
+  "continuous_monitoring_stage": {
+        "stageTypeId": "release"
+      },
   "access": [],
   "data_purging": {
     "applicationReports": {

@@ -68,7 +68,7 @@ def main():
     root_configuration(config)
 
     # Iterate over the Organisations
-    organisations = config.get('organisations')
+    organisations = config.get('organizations')
     if organisations is not None:
         # loops through config data
         for org in organisations:
@@ -77,9 +77,11 @@ def main():
             eid = check_organization(org['name'])
             if eid is None:
                 org['eid'] = add_organization(org['name'])
+            else:
+                org['eid'] = eid
 
-                # Apply Organisation configuration
-                org_configuration(org)
+            # Apply Organisation configuration
+            org_configuration(org)
 
             for app in org['applications']:
                 if not app['publicId']:
@@ -135,8 +137,9 @@ def org_configuration(org):
     apply_access(org, org.get('access'), org=org['eid'])
     data = org.get('proprietary_components')
     if data is not None and len(data) > 0:
-        data['ownerId'] = org['eid']
-        add_proprietary_components(data, org=org['eid'])
+        for ppc in data:
+            ppc['ownerId'] = org['eid']
+            add_proprietary_components(ppc, org=org['eid'])
     add_source_control(org.get('source_control'), org=org['eid'])
 
 
@@ -149,8 +152,9 @@ def app_configuration(app):
     apply_access(new_app, app.get('access'), app=eid)
     data = app.get('proprietary_components')
     if data is not None and len(data) > 0:
-        data['ownerId'] = eid
-        add_proprietary_components(data, app=new_app['publicId'])
+        for ppc in data:
+            ppc['ownerId'] = eid
+            add_proprietary_components(ppc, app=new_app['publicId'])
     add_source_control(app.get('source_control'), app=eid)
 
 

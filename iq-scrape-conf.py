@@ -67,6 +67,7 @@ def main():
 
     # ROOT level configuration
     root_configuration()
+    data = {}
 
     # Iterate over the Organisations
     if organizations is not None:
@@ -82,7 +83,8 @@ def main():
                     org_apps.append(app_configuration(app))
             org_conf['applications'] = org_apps
             orgs.append(org_conf)
-        persist_data(orgs, 'scrape/orgs-apps-conf.json')
+        data['organizations'] = orgs
+        persist_data(data, 'scrape/orgs-apps-conf.json')
 
 
 def nexus_administration():

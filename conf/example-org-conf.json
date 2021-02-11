@@ -1,11 +1,13 @@
 {
-  "organisations": [
+  "organizations": [
     {
       "grandfathering": {
         "enabled": true,
         "allowOverride": true
       },
-      "continuous_monitoring_stage": "Operate",
+      "continuous_monitoring_stage": {
+        "stageTypeId": "operate"
+      },
       "source_control": {
         "username": null,
         "token": null,
@@ -72,15 +74,17 @@
           "maxAge": "1 year"
         }
       },
-      "proprietary_components": {
-        "id": null,
-        "packages": [
-          "com.sonatype.org"
-        ],
-        "regexes": [
-          "com.sonatype.org.*"
-        ]
-      },
+      "proprietary_components": [
+        {
+          "id": null,
+          "packages": [
+            "com.sonatype.org"
+          ],
+          "regexes": [
+            "com.sonatype.org.*"
+          ]
+        }
+      ],
       "application_categories": [
         {
           "name": "Top-Secret",
@@ -113,7 +117,9 @@
             "enabled": true,
             "allowOverride": true
           },
-          "continuous_monitoring_stage": "Build",
+          "continuous_monitoring_stage": {
+            "stageTypeId": "build"
+          },
           "access": [
             {
               "user_or_group_name": "user1",
@@ -129,15 +135,17 @@
             "enableStatusChecks": true,
             "repositoryUrl": "https://bitbucket.org/CSMonkee/webgoat-legacy"
           },
-          "proprietary_components": {
-            "id": null,
-            "packages": [
-              "com.sonatype.app"
-            ],
-            "regexes": [
-              "com.sonatype.app.*"
-            ]
-          },
+          "proprietary_components": [
+            {
+              "id": null,
+              "packages": [
+                "com.sonatype.app"
+              ],
+              "regexes": [
+                "com.sonatype.app.*"
+              ]
+            }
+          ],
           "publicId": "webgoat-legacy-bitbucket",
           "applicationTags": [
             {
