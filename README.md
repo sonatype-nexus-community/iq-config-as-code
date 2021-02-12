@@ -60,6 +60,11 @@ Options:
   -a, --auth          Authentication. <user-id>:<password> 
   -d, --debug         Debug mode.
 
+Limitations/Scope:
+  These scripts use some private APIs that may change without prior notice. 
+  The 'roles' API does not return the role permissionCategories via the GET call. Therefore this data cannot be scraped and persisted. Custom Role permissions must be re-applied.
+  All password/token values are not returned when scraping config to JSON files. You will need to search the scrape/<config.json> file and replace the FAKE#~FAKE~SECRET~KEY~# entries.
+
 Changelog
 =========
 29th January 2021 - First release
