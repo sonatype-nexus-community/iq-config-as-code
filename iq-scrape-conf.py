@@ -380,8 +380,10 @@ def apply_role(url, role_id, user_or_group_name, role_type):
 def persist_access(org='ROOT_ORGANIZATION_ID', app=None):
     if app is not None:
         url = f'{iq_url}/api/v2/roleMemberships/application/{app}'
+        eid = app
     else:
         url = f'{iq_url}/api/v2/roleMemberships/organization/{org}'
+        eid = org
 
     accessors = []
     members = get_url(url)
@@ -389,11 +391,12 @@ def persist_access(org='ROOT_ORGANIZATION_ID', app=None):
         for member in members['memberMappings']:
             role = member['roleId']
             for mem in member['members']:
-                accessor = {}
-                accessor['role'] = roles[role]
-                accessor['user_or_group_name'] = mem['userOrGroupName']
-                accessor['role_type'] = mem['type']
-                accessors.append(accessor)
+                if mem['ownerId'] == eid:
+                    accessor = {}
+                    accessor['role'] = roles[role]
+                    accessor['user_or_group_name'] = mem['userOrGroupName']
+                    accessor['role_type'] = mem['type']
+                    accessors.append(accessor)
 
     return accessors
 
