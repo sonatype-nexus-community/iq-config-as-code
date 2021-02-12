@@ -34,7 +34,7 @@ def get_arguments():
      data, thus supporting the config-as-code requirement of Sonatype customers')
     parser.add_argument('-u', '--url', help='', default="http://localhost:8070", required=False)
     parser.add_argument('-a', '--auth', help='', default="admin:admin123", required=False)
-    parser.add_argument('-f', '--file_name', default="conf/configuration.json", required=True)
+    parser.add_argument('-f', '--file_name', default=False, required=True)
     parser.add_argument('-d', '--debug', default=False, required=False)
 
     args = vars(parser.parse_args())
@@ -68,8 +68,6 @@ def main():
     # Admin level configuration and integrations
     nexus_administration()
 
-    # ROOT level configuration
-    root_configuration()
     data = {}
 
     # Iterate over the Organisations
@@ -85,9 +83,14 @@ def main():
                 if app['organizationId'] == org['id']:
                     org_apps.append(app_configuration(app))
             org_conf['applications'] = org_apps
+            od = {}
+            od['organizations'] = []
+            od['organizations'].append(org_conf)
             orgs.append(org_conf)
+            persist_data(od, f'scrape/{get_organization_name(org["id"])}-config.json')
+
         data['organizations'] = orgs
-        persist_data(data, 'scrape/orgs-apps-conf.json')
+        persist_data(data, 'scrape/All-Organizations-Conf.json')
 
 
 def nexus_administration():
@@ -100,35 +103,13 @@ def nexus_administration():
     systemConf['email_server'] = persist_email_server_connection()
     systemConf['proxy'] = persist_proxy()
     systemConf['webhooks'] = persist_webhooks()
-    systemConf['system_notice'] = persist_system_notice()
+    # systemConf['system_notice'] = persist_system_notice()
     systemConf['success_metrics'] = persist_success_metrics()
     systemConf['automatic_applications'] = persist_auto_applications()
-    systemConf['source_control'] = persist_automatic_scc()
+    systemConf['automatic_source_control'] = persist_automatic_source_control()
     systemConf['success_metrics_reports'] = persist_success_metrics_reports()
-    persist_data(systemConf, 'scrape/system-conf.json')
+    persist_data(systemConf, 'scrape/System-Config.json')
 
-
-def root_configuration():
-    rootOrgConf = {}
-    # Parses and applies all of the ROOT Org configuration
-    rootOrgConf['application_categories'] = persist_application_categories()
-    rootOrgConf['grandfathering'] = persist_grandfathering()
-    rootOrgConf['continuous_monitoring'] = persist_continuous_monitoring()
-    rootOrgConf['proprietary_components'] = persist_proprietary_components()
-    rootOrgConf['component_labels'] = persist_component_labels()
-    rootOrgConf['license_threat_groups'] = persist_license_threat_groups()
-    rootOrgConf['data_purging'] = persist_data_purging()
-    rootOrgConf['source_control'] = persist_source_control()
-    rootOrgConf['access'] = persist_access()
-    persist_data(rootOrgConf, 'scrape/root-org-conf.json')
-
-def process_orgs():
-    url = f'{iq_url}/api/v2/organizations'
-    orgs = get_url(url)
-    for org in orgs['organizations']:
-        x = 1
-
-    return None
 
 def org_configuration(org):
     orgconf = {}
@@ -143,7 +124,6 @@ def org_configuration(org):
     orgconf['license_threat_groups'] = persist_license_threat_groups(org=org['id'])
     orgconf['access'] = persist_access(org=org['id'])
     orgconf['name'] = org['name']
-    persist_data(orgconf, f'scrape/{get_organization_name(org["id"])}-config.json')
     return orgconf
 
 
@@ -154,7 +134,7 @@ def app_configuration(app):
     app_conf['name'] = app['name']
     app_conf['grandfathering'] = persist_grandfathering(app=app['publicId'])
     app_conf['continuous_monitoring_stage'] = persist_continuous_monitoring(app=app['publicId'])
-    app_conf['proprietary_components'] = persist_proprietary_components(app=app['publicId'])
+    app_conf['proprietary_components'] = persist_proprietary_components(app=app)
     app_conf['component_labels'] = persist_component_labels(app=app['publicId'])
     app_conf['source_control'] = persist_source_control(app=app['id'])
     app_conf['publicId'] = app['publicId']
@@ -488,7 +468,7 @@ def persist_success_metrics_reports():
     return data
 
 
-def persist_automatic_scc():
+def persist_automatic_source_control():
     url = f'{iq_url}/rest/config/automaticScmConfiguration'
     # This API applies the config regardless of whether the proxy is already configured.
     data = get_url(url)
@@ -498,20 +478,28 @@ def persist_automatic_scc():
 
 
 def persist_proprietary_components(org='ROOT_ORGANIZATION_ID', app=None):
-    url = f'{iq_url}/rest/proprietary/{org_or_app(org, app)}'
     # This API applies the config regardless of whether the proxy is already configured.
+
+    if app is not None:
+        url = f'{iq_url}/rest/proprietary/application/{app["publicId"]}'
+        eid = app['id']
+    else:
+        url = f'{iq_url}/rest/proprietary/organization/{org}'
+        eid = org
+
     pcs = get_url(url)
     pcs = pcs['proprietaryConfigByOwners']
     pcs2 = []
     for pc in pcs:
         data = pc['proprietaryConfig']
-        data['id'] = None
-        data.pop('ownerId')
-        pcs2.append(data)
-        # if app is not None:
-        #     persist_data(data, f'scrape/{app["name"]}-proprietary_component.json')
-        # elif org is not None:
-        #     persist_data(data, f'scrape/{get_organization_name(org)}-proprietary_component.json')
+        if data['ownerId'] == eid:
+            data['id'] = None
+            data.pop('ownerId')
+            pcs2.append(data)
+            # if app is not None:
+            #     persist_data(data, f'scrape/{app["name"]}-proprietary_component.json')
+            # elif org is not None:
+            #     persist_data(data, f'scrape/{get_organization_name(org)}-proprietary_component.json')
         print_debug(data)
     return pcs2
 
@@ -625,12 +613,13 @@ def persist_users():
     return data
 
 
-def persist_system_notice():
-    url = f'{iq_url}/rest/config/systemNotice'
-    data = get_url(url)
-    # persist_data(data, 'scrape/system-system_notice.json')
-    print_debug(data)
-    return data
+# GET not supported for this API
+# def persist_system_notice():
+#     url = f'{iq_url}/rest/config/systemNotice'
+#     data = get_url(url)
+#     # persist_data(data, 'scrape/system-system_notice.json')
+#     print_debug(data)
+#     return data
 
 
 def parse_ldap_connection(conn):
