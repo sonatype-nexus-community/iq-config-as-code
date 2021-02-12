@@ -34,7 +34,6 @@ def get_arguments():
      data, thus supporting the config-as-code requirement of Sonatype customers')
     parser.add_argument('-u', '--url', help='', default="http://localhost:8070", required=False)
     parser.add_argument('-a', '--auth', help='', default="admin:admin123", required=False)
-    parser.add_argument('-f', '--file_name', default=False, required=True)
     parser.add_argument('-d', '--debug', default=False, required=False)
 
     args = vars(parser.parse_args())
@@ -53,17 +52,12 @@ def get_arguments():
 def main():
     # grab defaults or args passed into script.
     args = get_arguments()
-    file_name = args["file_name"]
 
     # store current applications, categories, and organizations
     set_categories()
     set_organizations()
     set_applications()
     set_roles()
-
-
-    with open(file_name) as json_file:
-        config = json.load(json_file)
 
     # Admin level configuration and integrations
     nexus_administration()

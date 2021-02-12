@@ -50,13 +50,11 @@ Usage: iq-scrape-config [ARGS]...
   Example usage:
 
     # Run python script though docker container with all packages installed on it!
-    docker run --rm -i -v $PWD:/tmp broadinstitute/python-requests iq-scrape-conf.py -f ./conf/<conf-file>.json -u "http://<iq-hostname>:<iq-port>"
+    docker run --rm -i -v $PWD:/tmp broadinstitute/python-requests iq-scrape-conf.py -u "http://<iq-hostname>:<iq-port>"
 
     # Run the script natively on your host
-    python3 iq-scrape-conf.py -f conf/<conf-file>.json
+    python3 iq-scrape-conf.py
 
-Mandatory:
-  -f, --file_name     Configuration file. <conf/config.json>
 Options:
   -u, --url           Nexus IQ Server URL
   -a, --auth          Authentication. <user-id>:<password> 
