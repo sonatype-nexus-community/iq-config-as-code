@@ -1,0 +1,173 @@
+{
+  "organizations": [
+    {
+      "grandfathering": {
+        "enabled": true,
+        "inheritedFromOrganizationName": null,
+        "allowOverride": true,
+        "allowChange": true
+      },
+      "continuous_monitoring_stage": {
+        "stageTypeId": "operate"
+      },
+      "source_control": {
+        "repositoryUrl": null,
+        "username": null,
+        "token": null,
+        "provider": null,
+        "baseBranch": null,
+        "enablePullRequests": null,
+        "enableStatusChecks": true
+      },
+      "data_purging": {
+        "applicationReports": {
+          "stages": {
+            "develop": {
+              "inheritPolicy": false,
+              "enablePurging": true,
+              "maxAge": "1 month"
+            },
+            "build": {
+              "inheritPolicy": false,
+              "enablePurging": true,
+              "maxAge": "1 month"
+            },
+            "stage-release": {
+              "inheritPolicy": false,
+              "enablePurging": true,
+              "maxAge": "1 month"
+            },
+            "release": {
+              "inheritPolicy": false,
+              "enablePurging": true,
+              "maxAge": "1 year"
+            },
+            "operate": {
+              "inheritPolicy": false,
+              "enablePurging": false
+            },
+            "continuous-monitoring": {
+              "inheritPolicy": false,
+              "enablePurging": true,
+              "maxAge": "1 year"
+            }
+          }
+        },
+        "successMetrics": {
+          "inheritPolicy": false,
+          "enablePurging": true,
+          "maxAge": "1 year"
+        }
+      },
+      "proprietary_components": [
+        {
+          "id": null,
+          "packages": [
+            "com.sonatype.example"
+          ],
+          "regexes": [
+            "com.sonatype.example.*"
+          ]
+        }
+      ],
+      "application_categories": [
+        {
+          "name": "Secret",
+          "description": "Application is classified Secret",
+          "color": "light-red"
+        },
+        {
+          "name": "Top-Secret",
+          "description": "Application is classified Top-Secret",
+          "color": "dark-red"
+        }
+      ],
+      "component_labels": [
+        {
+          "label": "Org-Architecture-Blacklisted",
+          "description": "Components which have been blacklisted from use",
+          "color": "light-green",
+          "ownerType": "ORGANIZATION"
+        }
+      ],
+      "license_threat_groups": [
+        {
+          "name": "Client-Banned",
+          "threatLevel": 10
+        }
+      ],
+      "access": [
+        {
+          "role": "Developer",
+          "user_or_group_name": "developerteam1",
+          "role_type": "GROUP"
+        },
+        {
+          "role": "Owner",
+          "user_or_group_name": "leads1",
+          "role_type": "GROUP"
+        }
+      ],
+      "name": "Example-Org",
+      "applications": [
+        {
+          "name": "Webgoat Legacy Bitbucket",
+          "grandfathering": {
+            "enabled": true,
+            "inheritedFromOrganizationName": null,
+            "allowOverride": false,
+            "allowChange": true
+          },
+          "continuous_monitoring_stage": {
+            "stageTypeId": "build"
+          },
+          "proprietary_components": [
+            {
+              "id": null,
+              "packages": [
+                "com.sonatype.app"
+              ],
+              "regexes": [
+                "com.sonatype.app.*"
+              ]
+            }
+          ],
+          "component_labels": null,
+          "source_control": {
+            "repositoryUrl": "https://bitbucket.org/CSMonkee/webgoat-legacy",
+            "username": null,
+            "token": null,
+            "provider": null,
+            "baseBranch": null,
+            "enablePullRequests": null,
+            "enableStatusChecks": true
+          },
+          "publicId": "webgoat-legacy-bitbucket",
+          "applicationTags": [
+            {
+              "name": "Distributed"
+            },
+            {
+              "name": "Other"
+            },
+            {
+              "name": "Secret"
+            }
+          ],
+          "access": [
+            {
+              "role": "Build-Agent",
+              "user_or_group_name": "BuildAgent",
+              "role_type": "USER"
+            },
+            {
+              "role": "Owner",
+              "user_or_group_name": "admin",
+              "role_type": "USER"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
