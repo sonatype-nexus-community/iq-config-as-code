@@ -62,6 +62,7 @@ Options:
   -d, --debug         Debug mode.
 
 Limitations/Scope:
+
   These scripts use some private APIs that may change without prior notice. 
   
   The 'roles' API does not return the role permissionCategories via the GET call. Therefore this data cannot be scraped and persisted. Custom Role permissions must be re-applied.
