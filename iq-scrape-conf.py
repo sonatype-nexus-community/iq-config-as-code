@@ -30,7 +30,7 @@ roles = {}
 
 def get_arguments():
     global iq_url, iq_session, iq_auth, debug
-    parser = argparse.ArgumentParser(description='This script enables you to configure IQ Server from JSON\
+    parser = argparse.ArgumentParser(description='This script enables you to persist the configuration of IQ Server to JSON\
      data, thus supporting the config-as-code requirement of Sonatype customers')
     parser.add_argument('-u', '--url', help='', default="http://localhost:8070", required=False)
     parser.add_argument('-a', '--auth', help='', default="admin:admin123", required=False)
