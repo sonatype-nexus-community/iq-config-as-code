@@ -18,7 +18,6 @@
 
 import argparse
 import json
-
 import requests
 
 iq_session = requests.Session

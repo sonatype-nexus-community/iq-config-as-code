@@ -305,10 +305,7 @@ def check_roles(name, roles):
         return None
     for role in roles:
         if name in role['name']:
-            ret = role['id']
-            break
-    if len(ret) > 0:
-        return {'tagId': ret}
+            return role['id']
     print(f"Role {name} is not available within Nexus IQ")
     return None
 
@@ -378,20 +375,25 @@ def add_category(name):
 
 
 # Apply roles to the endpoint identified within the URL
-def apply_role(url, role_id, user_or_group_name, role_type):
-    data = {
-        "memberMappings": [
-            {
-                "roleId": role_id,
-                "members": [
-                    {
-                        "type": role_type,
-                        "userOrGroupName": user_or_group_name
-                    }
-                ]
-            }
-        ]
-    }
+def apply_role(url, role, role_id, access):
+
+    data = {}
+    data['memberMappings'] = []
+
+    for user in access:
+        if user['role'] == role:
+            if len(data['memberMappings']) == 0:
+                map = {}
+                data['memberMappings'].append(map)
+                map['roleId'] = role_id
+                map['members'] = []
+
+            mapping = data['memberMappings'][0]
+            member = {}
+            mapping['members'].append(member)
+            member['type'] = user['role_type']
+            member['userOrGroupName'] = user['user_or_group_name']
+
     put_url(url, data)
     print("Applied RBAC data:")
     print_debug(data)
@@ -404,6 +406,7 @@ def apply_access(entity, access, org=None, app=None):
     iq_roles = None
     if len(access) > 0:
         iq_roles = find_available_roles()
+
     for acc in access:
         # Apply the roles to the application
         role = acc['role']
@@ -416,7 +419,7 @@ def apply_access(entity, access, org=None, app=None):
         if (check_user_or_group(role_type) is not None) and (role_id is not None):
             # Validation completed, apply the roles!
             # No return payload with a 204 PUT response!
-            apply_role(url, role_id['tagId'], user_or_group_name, role_type)
+            apply_role(url, role, role_id, access)
             print(f"to '{role}' for '{role_type}:{user_or_group_name}' to '{entity['name']}'")
         else:
             print(f"Unable to apply '{role}' for '{role_type}:{user_or_group_name}' to '{entity['name']}'")
