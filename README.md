@@ -32,9 +32,10 @@ need to be modified. Please discuss this with your Sonatype CSE.
 
 
 Usage
-$ python3 iq-scrape-conf.py --help
 
-$ python3 iq-apply-conf.py --help
+    $ python3 iq-scrape-conf.py --help
+
+    $ python3 iq-apply-conf.py --help
 
 Usage: iq-apply-config [ARGS]...
 
