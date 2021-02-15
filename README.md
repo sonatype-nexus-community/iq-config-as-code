@@ -45,9 +45,7 @@ Usage: iq-apply-config [ARGS]...
 
     # Run the script natively on your host
     python3 iq-apply-conf.py -f conf/<conf-file>.json
-    
     python3 iq-apply-conf.py -f scrape/System-Config.json
-    
     python3 iq-apply-conf.py -f scrape/All-Organizations-Config.json
 
 
@@ -63,8 +61,11 @@ Usage: iq-scrape-config [ARGS]...
 
 Options:
   -u, --url           Nexus IQ Server URL
+  
   -a, --auth          Authentication. <user-id>:<password> 
+    
   -d, --debug         Debug mode.
+  
   -f, --file_name     <config-file>.json    # iq-apply_config.py only
 
 Limitations/Scope:
