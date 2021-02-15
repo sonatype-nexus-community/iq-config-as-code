@@ -71,14 +71,14 @@ Options:
 
 Limitations/Scope:
 
-  These scripts use some private APIs that may change without prior notice. 
-  
-  The 'roles' API does not return the role permissionCategories via the GET call. Therefore this data cannot be scraped and persisted. Custom Role permissions must be re-applied.
-  
-  All password/token values are not returned when scraping config to JSON files. You will need to search the scrape/<config.json> file and replace the #~FAKE~SECRET~KEY~# entries.
-  
-  The email server account password is null when scraped. A boolean flag to denote password present defaults to 'false'. Be sure to address this when editing this
-  data, ahead of applying it to another environment.
+      These scripts use some private APIs that may change without prior notice. 
+
+      The 'roles' API does not return the role permissionCategories via the GET call. Therefore this data cannot be scraped and persisted. Custom Role permissions must be re-applied.
+
+      All password/token values are not returned when scraping config to JSON files. You will need to search the scrape/<config.json> file and replace the #~FAKE~SECRET~KEY~# entries.
+
+      The email server account password is null when scraped. A boolean flag to denote password present defaults to 'false'. Be sure to address this when editing this
+      data, ahead of applying it to another environment.
   
 
 Changelog
