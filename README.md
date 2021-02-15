@@ -60,13 +60,14 @@ Usage: iq-scrape-config [ARGS]...
     python3 iq-scrape-conf.py
 
 Options:
-  -u, --url           Nexus IQ Server URL
-  
-  -a, --auth          Authentication. <user-id>:<password> 
-    
-  -d, --debug         Debug mode.
-  
-  -f, --file_name     <config-file>.json    # iq-apply_config.py only
+
+      -u, --url           Nexus IQ Server URL
+
+      -a, --auth          Authentication. <user-id>:<password> 
+
+      -d, --debug         Debug mode.
+
+      -f, --file_name     <config-file>.json    # iq-apply_config.py only
 
 Limitations/Scope:
 
