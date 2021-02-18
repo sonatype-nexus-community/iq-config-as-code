@@ -138,7 +138,7 @@ def app_configuration(app):
 
 def print_debug(c):
     # testing json output to console
-    if debug:
+    if debug and c is not None:
         print(json.dumps(c, indent=4))
 
 
@@ -451,13 +451,14 @@ def persist_success_metrics_reports():
     url = f'{iq_url}/rest/successMetrics/report'
     # This API applies the config regardless of whether the proxy is already configured.
     data = get_url(url)
-    for sm in data:
-        sm.pop('id')
-        sm.pop('scope')
-        sm['scope'] = {}
+    if data is not None:
+        for sm in data:
+            sm.pop('id')
+            sm.pop('scope')
+            sm['scope'] = {}
 
-    # persist_data(data, 'scrape/system-success_metrics_reports.json')
-    print_debug(data)
+        # persist_data(data, 'scrape/system-success_metrics_reports.json')
+        print_debug(data)
     return data
 
 
