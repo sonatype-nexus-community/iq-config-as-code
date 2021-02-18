@@ -26,15 +26,16 @@ Configuration is applied in 2 layers:
     1. System
     2. Organization
 
-The conf directory contains files for individual configuration items in addition to the system-conf.json, root-org-conf.json
-and example-org.json that correspond with the aforementioned layers. Default data contained within the config files will 
+The conf directory contains files for individual configuration items in addition to the system-conf.json and 
+example-org.json that correspond with the aforementioned layers. Default data contained within the config files will 
 need to be modified. Please discuss this with your Sonatype CSE.
 
 
 Usage
-$ python3 iq-scrape-conf.py --help
 
-$ python3 iq-apply-conf.py --help
+    $ python3 iq-scrape-conf.py --help
+
+    $ python3 iq-apply-conf.py --help
 
 Usage: iq-apply-config [ARGS]...
 
@@ -45,6 +46,9 @@ Usage: iq-apply-config [ARGS]...
 
     # Run the script natively on your host
     python3 iq-apply-conf.py -f conf/<conf-file>.json
+    python3 iq-apply-conf.py -f scrape/System-Config.json
+    python3 iq-apply-conf.py -f scrape/All-Organizations-Config.json
+
 
 Usage: iq-scrape-config [ARGS]...
 
@@ -57,17 +61,32 @@ Usage: iq-scrape-config [ARGS]...
     python3 iq-scrape-conf.py
 
 Options:
-  -u, --url           Nexus IQ Server URL
-  -a, --auth          Authentication. <user-id>:<password> 
-  -d, --debug         Debug mode.
+
+      -u, --url           Nexus IQ Server URL
+
+      -a, --auth          Authentication. <user-id>:<password> 
+
+      -d, --debug         Debug mode.
+
+      -f, --file_name     <config-file>.json    # iq-apply_config.py only
 
 Limitations/Scope:
 
-  These scripts use some private APIs that may change without prior notice. 
+      These scripts use some private APIs that may change without prior notice. 
+      
+      SAML configuration is not supported.
+      
+      Policies are nogt supported. See: https://support.sonatype.com/hc/en-us/articles/360008133574
+
+      The 'roles' API does not return the role permissionCategories via the GET call. Therefore this data cannot be scraped and persisted. 
+      Custom Role permissions must be re-applied.
+
+      All password/token values are not returned when scraping config to JSON files. You will need to search the scrape/<config.json> 
+      file and replace the #~FAKE~SECRET~KEY~# entries.
+
+      The email server account password is null when scraped. A boolean flag to denote password present defaults to 'false'. Be sure to 
+      address this when editing this data, ahead of applying it to another environment.
   
-  The 'roles' API does not return the role permissionCategories via the GET call. Therefore this data cannot be scraped and persisted. Custom Role permissions must be re-applied.
-  
-  All password/token values are not returned when scraping config to JSON files. You will need to search the scrape/<config.json> file and replace the #~FAKE~SECRET~KEY~# entries.
 
 Changelog
 =========
