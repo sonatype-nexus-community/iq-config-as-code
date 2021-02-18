@@ -23,7 +23,9 @@ from where it can be re-applied. This capability supports Sonatype customers asp
 environment in support of business continuity and service resiliency. 
 
 Configuration is applied in 2 layers:
+
     1. System
+
     2. Organization
 
 The conf directory contains files for individual configuration items in addition to the system-conf.json and 
@@ -55,7 +57,7 @@ Usage: iq-scrape-config [ARGS]...
   Example usage:
 
     # Run python script though docker container with all packages installed on it!
-    docker run --rm -i -v $PWD:/tmp broadinstitute/python-requests iq-scrape-conf.py -u "http://<iq-hostname>:<iq-port>"
+    docker run -w /tmp --rm -i -v $PWD:/tmp broadinstitute/python-requests iq-scrape-conf.py -u "http://<iq-hostname>:<iq-port>"
 
     # Run the script natively on your host
     python3 iq-scrape-conf.py
