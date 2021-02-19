@@ -44,7 +44,7 @@ Usage: iq-apply-config [ARGS]...
   Example usage:
 
     # Run python script though docker container with all packages installed on it!
-    docker run --rm -i -v $PWD:/tmp broadinstitute/python-requests iq-apply-conf.py -f ./conf/<conf-file>.json -u "http://<iq-hostname>:<iq-port>"
+    docker run -w /tmp --rm -i -v $PWD:/tmp broadinstitute/python-requests /tmp/iq-apply-conf.py -f /tmp/conf/<conf-file>.json -u http://<iq-hostname>:<iq-port> -a <user>:<password>
 
     # Run the script natively on your host
     python3 iq-apply-conf.py -f conf/<conf-file>.json
