@@ -19,25 +19,31 @@
 import argparse
 import json
 import requests
+import os
 
 iq_session = requests.Session
-iq_url, iq_auth, debug = "", "", False
+iq_url, iq_auth, output_dir, debug = "", "", "", False
 categories, organizations, applications, ldap_connections = [], [], [], []
 roleType = ['USER', 'GROUP']
 roles = {}
 
 
 def get_arguments():
-    global iq_url, iq_session, iq_auth, debug
+    global iq_url, iq_session, iq_auth, output_dir, debug
     parser = argparse.ArgumentParser(description='This script enables you to persist the configuration of IQ Server to JSON\
      data, thus supporting the config-as-code requirement of Sonatype customers')
     parser.add_argument('-u', '--url', help='', default="http://localhost:8070", required=False)
     parser.add_argument('-a', '--auth', help='', default="admin:admin123", required=False)
+    parser.add_argument('-o', '--output', default="./scrape", required=False)
     parser.add_argument('-d', '--debug', default=False, required=False)
 
     args = vars(parser.parse_args())
     iq_url = args["url"]
     credentials = args["auth"].split(":")
+    output_dir = args["output"]
+    if output_dir[-1] != '/':
+        output_dir += '/'
+
     debug = args["debug"]
     iq_session = requests.Session()
     iq_session.cookies.set('CLM-CSRF-TOKEN', 'api')
@@ -51,6 +57,15 @@ def get_arguments():
 def main():
     # grab defaults or args passed into script.
     args = get_arguments()
+
+    # Create the 'output' directory
+    try:
+        os.makedirs(output_dir, 0o755);
+    except FileExistsError:
+        if os.access(output_dir, os.W_OK) is False:
+            print(f"Directory {output_dir} is not writeable!")
+            return
+
 
     # store current applications, categories, and organizations
     set_categories()
@@ -80,10 +95,10 @@ def main():
             od['organizations'] = []
             od['organizations'].append(org_conf)
             orgs.append(org_conf)
-            persist_data(od, f'scrape/{get_organization_name(org["id"])}-config.json')
+            persist_data(od, f'{output_dir}{get_organization_name(org["id"])}-config.json')
 
         data['organizations'] = orgs
-        persist_data(data, 'scrape/All-Organizations-Conf.json')
+        persist_data(data, f'{output_dir}All-Organizations-Conf.json')
 
 
 def nexus_administration():
@@ -101,7 +116,7 @@ def nexus_administration():
     systemConf['automatic_applications'] = persist_auto_applications()
     systemConf['automatic_source_control'] = persist_automatic_source_control()
     systemConf['success_metrics_reports'] = persist_success_metrics_reports()
-    persist_data(systemConf, 'scrape/System-Config.json')
+    persist_data(systemConf, f'{output_dir}System-Config.json')
 
 
 def org_configuration(org):
@@ -133,7 +148,7 @@ def app_configuration(app):
     app_conf['publicId'] = app['publicId']
     app_conf['applicationTags'] = check_categories(app['applicationTags'])
     app_conf['access'] = persist_access(app=app['id'])
-    # persist_data(app_conf, f'scrape/{app["name"]}-config.json')
+    # persist_data(app_conf, f'{output_dir}{app["name"]}-config.json')
     return app_conf
 
 def print_debug(c):
@@ -382,7 +397,7 @@ def persist_auto_applications():
         if org['id'] == data['parentOrganizationId']:
             data['parentOrganizationId'] = org['name']
             break
-    # persist_data(data, 'scrape/system-auto_applications.json')
+    # persist_data(data, '{output_dir}system-auto_applications.json')
     print_debug(data)
     return data
 
@@ -393,9 +408,9 @@ def persist_grandfathering(org='ROOT_ORGANIZATION_ID', app=None):
 
     data = get_url(url)
     # if app is not None:
-    #     persist_data(data, f'scrape/{app["name"]}-grandfathering.json')
+    #     persist_data(data, f'{output_dir}{app["name"]}-grandfathering.json')
     # elif org is not None:
-    #     persist_data(data, f'scrape/{get_organization_name(org)}-grandfathering.json')
+    #     persist_data(data, f'{output_dir}{get_organization_name(org)}-grandfathering.json')
     print_debug(data)
     return data
 
@@ -409,7 +424,7 @@ def persist_webhooks():
             webhook['id'] = None
             data.append(webhook)
 
-    # persist_data(data, 'scrape/system-webhooks.json')
+    # persist_data(data, '{output_dir}system-webhooks.json')
     print_debug(data)
     return data
 
@@ -418,7 +433,7 @@ def persist_proxy():
     # This API applies the config regardless of whether the proxy is already configured.
     url = f'{iq_url}/api/v2/config/httpProxyServer'
     data = get_url(url)
-    # persist_data(data, 'scrape/system-proxy.json')
+    # persist_data(data, '{output_dir}system-proxy.json')
     print_debug(data)
     return data
 
@@ -431,9 +446,9 @@ def persist_source_control(org='ROOT_ORGANIZATION_ID', app=None):
         data.pop('id')
         data.pop('ownerId')
     # if app is not None:
-    #     persist_data(data, f'scrape/{app["name"]}-source_control.json')
+    #     persist_data(data, f'{output_dir}{app["name"]}-source_control.json')
     # elif org is not None:
-    #     persist_data(data, f'scrape/{get_organization_name(org)}-source_control.json')
+    #     persist_data(data, f'{output_dir}{get_organization_name(org)}-source_control.json')
     print_debug(data)
     return data
 
@@ -442,7 +457,7 @@ def persist_success_metrics():
     url = f'{iq_url}/rest/successMetrics'
     # This API applies the config regardless of whether the proxy is already configured.
     data = get_url(url)
-    # persist_data(data, 'scrape/system-success_metrics.json')
+    # persist_data(data, '{output_dir}system-success_metrics.json')
     print_debug(data)
     return data
 
@@ -457,7 +472,7 @@ def persist_success_metrics_reports():
             sm.pop('scope')
             sm['scope'] = {}
 
-        # persist_data(data, 'scrape/system-success_metrics_reports.json')
+        # persist_data(data, '{output_dir}system-success_metrics_reports.json')
         print_debug(data)
     return data
 
@@ -466,7 +481,7 @@ def persist_automatic_source_control():
     url = f'{iq_url}/rest/config/automaticScmConfiguration'
     # This API applies the config regardless of whether the proxy is already configured.
     data = get_url(url)
-    # persist_data(data, 'scrape/system-automatic_scc.json')
+    # persist_data(data, '{output_dir}system-automatic_scc.json')
     print_debug(data)
     return data
 
@@ -491,9 +506,9 @@ def persist_proprietary_components(org='ROOT_ORGANIZATION_ID', app=None):
             data.pop('ownerId')
             pcs2.append(data)
             # if app is not None:
-            #     persist_data(data, f'scrape/{app["name"]}-proprietary_component.json')
+            #     persist_data(data, f'{output_dir}{app["name"]}-proprietary_component.json')
             # elif org is not None:
-            #     persist_data(data, f'scrape/{get_organization_name(org)}-proprietary_component.json')
+            #     persist_data(data, f'{output_dir}{get_organization_name(org)}-proprietary_component.json')
         print_debug(data)
     return pcs2
 
@@ -502,7 +517,7 @@ def persist_roles():
     data = get_url(url)
     for element in data:
         element.pop('id', None)
-    # persist_data(data, 'scrape/system_roles.json')
+    # persist_data(data, '{output_dir}system_roles.json')
     print_debug(data)
     return data
 
@@ -514,9 +529,9 @@ def persist_continuous_monitoring(org='ROOT_ORGANIZATION_ID', app=None):
         data.pop('id')
         data.pop('ownerId')
     # if app is not None:
-    #     persist_data(data, f'scrape/{app["name"]}-continuous_monitoring.json')
+    #     persist_data(data, f'{output_dir}{app["name"]}-continuous_monitoring.json')
     # elif org is not None:
-    #     persist_data(data, f'scrape/{get_organization_name(org)}-continuous_monitoring.json')
+    #     persist_data(data, f'{output_dir}{get_organization_name(org)}-continuous_monitoring.json')
     print_debug(data)
     return data
 
@@ -524,7 +539,7 @@ def persist_continuous_monitoring(org='ROOT_ORGANIZATION_ID', app=None):
 def persist_data_purging(org='ROOT_ORGANIZATION_ID'):
     url = f'{iq_url}/api/v2/dataRetentionPolicies/organizations/{org}'
     data = get_url(url)
-    # persist_data(data, f'scrape/{get_organization_name(org)}-data_purging.json')
+    # persist_data(data, f'{output_dir}{get_organization_name(org)}-data_purging.json')
     print_debug(data)
     return data
 
@@ -540,7 +555,7 @@ def persist_application_categories(org='ROOT_ORGANIZATION_ID'):
             ac.pop('organizationId')
 
     print_debug(data)
-    # persist_data(data, f'scrape/{get_organization_name(org)}-application_categories.json')
+    # persist_data(data, f'{output_dir}{get_organization_name(org)}-application_categories.json')
     return data
 
 
@@ -553,7 +568,7 @@ def persist_component_labels(org='ROOT_ORGANIZATION_ID', app=None):
             label.pop('id')
             label.pop('ownerId')
     print_debug(data)
-    # persist_data(data, f'scrape/{get_organization_name(org)}-component_labels.json')
+    # persist_data(data, f'{output_dir}{get_organization_name(org)}-component_labels.json')
     return data
 
 
@@ -566,7 +581,7 @@ def persist_license_threat_groups(org='ROOT_ORGANIZATION_ID'):
             ltg.pop('ownerId')
             ltg.pop('nameLowercaseNoWhitespace')
     print_debug(data)
-    # persist_data(data, f'scrape/{get_organization_name(org)}-license_threat_groups.json')
+    # persist_data(data, f'{output_dir}{get_organization_name(org)}-license_threat_groups.json')
     return data
 
 
@@ -581,7 +596,7 @@ def persist_ldap_instances():
                 data.append(parse_ldap_connection(conn))
 
         print_debug(data)
-        # persist_data(data, 'scrape/system-ldap_connections.json')
+        # persist_data(data, '{output_dir}system-ldap_connections.json')
         return data
 
     except KeyError as err:
@@ -591,7 +606,7 @@ def persist_ldap_instances():
 def persist_email_server_connection():
     url = f'{iq_url}/api/v2/config/mail'
     data = get_url(url)
-    # persist_data(data, 'scrape/system_email.json')
+    # persist_data(data, '{output_dir}system_email.json')
     print_debug(data)
     return data
 
@@ -602,7 +617,7 @@ def persist_users():
     for element in data:
         element.pop('id', None)
         element.pop('usernameLowercase', None)
-    # persist_data(data, "scrape/system_users.json")
+    # persist_data(data, "{output_dir}system_users.json")
     print_debug(data)
     return data
 
@@ -611,7 +626,7 @@ def persist_users():
 # def persist_system_notice():
 #     url = f'{iq_url}/rest/config/systemNotice'
 #     data = get_url(url)
-#     # persist_data(data, 'scrape/system-system_notice.json')
+#     # persist_data(data, '{output_dir}system-system_notice.json')
 #     print_debug(data)
 #     return data
 
