@@ -47,9 +47,9 @@ Usage: iq-apply-config [ARGS]...
     docker run -w /tmp --rm -i -v $PWD:/tmp broadinstitute/python-requests /tmp/iq-apply-conf.py -f /tmp/conf/<conf-file>.json -u http://<iq-hostname>:<iq-port> -a <user>:<password>
 
     # Run the script natively on your host
-    python3 iq-apply-conf.py -f conf/<conf-file>.json
-    python3 iq-apply-conf.py -f scrape/System-Config.json
-    python3 iq-apply-conf.py -f scrape/All-Organizations-Config.json
+    python3 iq-apply-conf.py -f conf/<conf-file>.json -a <user>:<password> -u <protocol>://<hostname>:<port>
+    python3 iq-apply-conf.py -f scrape/System-Config.json  -a <user>:<password> -u <protocol>://<hostname>:<port>
+    python3 iq-apply-conf.py -f scrape/All-Organizations-Config.json  -a <user>:<password> -u <protocol>://<hostname>:<port>
 
 
 Usage: iq-scrape-config [ARGS]...
@@ -60,17 +60,19 @@ Usage: iq-scrape-config [ARGS]...
     docker run -w /tmp --rm -i -v $PWD:/tmp broadinstitute/python-requests iq-scrape-conf.py -u "http://<iq-hostname>:<iq-port>"
 
     # Run the script natively on your host
-    python3 iq-scrape-conf.py
+    python3 iq-scrape-conf.py  -a <user>:<password> -u <protocol>://<hostname>:<port> -o /tmp
 
 Options:
 
-      -u, --url           Nexus IQ Server URL
+      -u, --url           Nexus IQ Server URL   # defaults to http://localhost:8070
 
-      -a, --auth          Authentication. <user-id>:<password> 
+      -a, --auth          Authentication. <user-id>:<password>      # defaults to admin:admin123
 
-      -d, --debug         Debug mode.
+      -d, --debug         Debug mode.           # defaults to False
 
-      -f, --file_name     <config-file>.json    # iq-apply_config.py only
+      -f, --file_name     <config-file>.json    # iq-apply_conf.py only
+      
+      -o, --output        <output-path>         # iq-scrape-conf.py only - defaults to ./scrape
 
 Limitations/Scope:
 
@@ -95,6 +97,8 @@ Changelog
 29th January 2021 - First release
 
 12th February 2021 - Scrape existing IQ config to disk.
+
+26th February 2021 - Scrape to user specified output directory
 
 LICENSE
 =========
