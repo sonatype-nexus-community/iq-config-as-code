@@ -601,8 +601,8 @@ def component_labels(data, org='ROOT_ORGANIZATION_ID'):
 def license_threat_groups(data, org='ROOT_ORGANIZATION_ID'):
     if data is None or len(data) == 0:
         return
-    url = f'{iq_url}/rest/licenseThreatGroup/organization/{org}'
     for ltg in data:
+        url = f'{iq_url}/rest/licenseThreatGroup/organization/{org}'
         licenses = ltg.pop('licenses')
         ltgResp = post_url(url, ltg)
         if (ltgResp is not None):
