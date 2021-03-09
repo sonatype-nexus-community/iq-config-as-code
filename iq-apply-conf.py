@@ -603,8 +603,13 @@ def license_threat_groups(data, org='ROOT_ORGANIZATION_ID'):
         return
     url = f'{iq_url}/rest/licenseThreatGroup/organization/{org}'
     for ltg in data:
-        if not (post_url(url, ltg) is None):
+        licenses = ltg.pop('licenses')
+        ltgResp = post_url(url, ltg)
+        if (ltgResp is not None):
+            url = f'{iq_url}/rest/licenseThreatGroupLicense/organization/{org}/{ltgResp.pop("id")}'
+            put_url(url, licenses)
             print('Applied License Threat Group configuration:')
+            ltg['licenses'] = licenses
             print_debug(ltg)
 
 

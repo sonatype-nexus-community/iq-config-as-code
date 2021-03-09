@@ -577,9 +577,16 @@ def persist_license_threat_groups(org='ROOT_ORGANIZATION_ID'):
     data = get_url(url)
     if data is not None:
         for ltg in data:
-            ltg.pop('id')
             ltg.pop('ownerId')
             ltg.pop('nameLowercaseNoWhitespace')
+            url = f'{iq_url}/rest/licenseThreatGroupLicense/organization/{org}/{ltg.pop("id")}'
+            licenses = get_url(url)
+            ltg_licenses = []
+            if licenses != None:
+                for license in licenses:
+                    ltg_licenses.append(license.pop('licenseId'))
+            ltg['licenses'] = ltg_licenses
+
     print_debug(data)
     # persist_data(data, f'{output_dir}{get_organization_name(org)}-license_threat_groups.json')
     return data

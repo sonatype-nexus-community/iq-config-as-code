@@ -93,7 +93,8 @@
       "license_threat_groups": [
         {
           "name": "Client-Banned",
-          "threatLevel": 10
+          "threatLevel": 10,
+          "licenses": []
         }
       ],
       "access": [
@@ -148,10 +149,10 @@
               "name": "Distributed"
             },
             {
-              "name": "Other"
+              "name": "Secret"
             },
             {
-              "name": "Secret"
+              "name": "Other"
             }
           ],
           "access": [
