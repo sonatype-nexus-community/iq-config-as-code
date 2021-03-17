@@ -33,6 +33,12 @@ example-org.json that correspond with the aforementioned layers. Default data co
 need to be modified. Please discuss this with your Sonatype CSE.
 
 
+Please Note:
+
+If you are using a Proxy Server(A server that acts a gateway between the client and the internet) - please be aware that this project only supports the use of a HTTP Proxy and if it is defined within the system properties. 
+This script will not work if a HTTPS Proxy is being used or if your Broswer is utilizing a .pac file
+ 
+
 Usage
 
     $ python3 iq-scrape-conf.py --help
