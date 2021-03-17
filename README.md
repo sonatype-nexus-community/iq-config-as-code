@@ -35,7 +35,7 @@ need to be modified. Please discuss this with your Sonatype CSE.
 
 Please Note:
 
-If you are using a Proxy Server(A server that acts a gateway between the client and the internet) - please be aware that this project only supports the use of a HTTP Proxy and if it is defined within the system properties. 
+If you are using a Proxy Server (A server that acts a gateway between the client and the internet) - please be aware that this project only supports the use of a HTTP Proxy and if it is defined within the system properties. 
 This script will not work if a HTTPS Proxy is being used or if your Broswer is utilizing a .pac file
  
 
@@ -54,7 +54,7 @@ Usage: iq-apply-config [ARGS]...
 
     # Run the script natively on your host
     python3 iq-apply-conf.py -f conf/<conf-file>.json -a <user>:<password> -u <protocol>://<hostname>:<port>
-    python3 iq-apply-conf.py -f scrape/System-Config.json  -a <user>:<password> -u <protocol>://<hostname>:<port>
+    python3 iq-apply-conf.py -f scrape/System-Config.json  -a <user>:<password> -u <protocol>://<hostname>:<port> -s True
     python3 iq-apply-conf.py -f scrape/All-Organizations-Config.json  -a <user>:<password> -u <protocol>://<hostname>:<port>
 
 
@@ -70,15 +70,17 @@ Usage: iq-scrape-config [ARGS]...
 
 Options:
 
-      -u, --url           Nexus IQ Server URL   # defaults to http://localhost:8070
+      -u, --url           Nexus IQ Server URL                                               # defaults to http://localhost:8070
 
-      -a, --auth          Authentication. <user-id>:<password>      # defaults to admin:admin123
+      -a, --auth          Authentication. <user-id>:<password>                              # defaults to admin:admin123
 
-      -d, --debug         Debug mode.           # defaults to False
-
-      -f, --file_name     <config-file>.json    # iq-apply_conf.py only
+      -d, --debug         Debug mode.                                                       # defaults to False
       
-      -o, --output        <output-path>         # iq-scrape-conf.py only - defaults to ./scrape
+      -s, --self_signed   Override validation when a self-signed certificate is installed.  # defaults to False
+
+      -f, --file_name     <config-file>.json                                                # iq-apply_conf.py only
+      
+      -o, --output        <output-path>                                                     # iq-scrape-conf.py only - defaults to ./scrape
 
 Limitations/Scope:
 
@@ -105,6 +107,8 @@ Changelog
 12th February 2021 - Scrape existing IQ config to disk.
 
 26th February 2021 - Scrape to user specified output directory
+
+17th March 2021 - Override self-signed certificate verification
 
 LICENSE
 =========
