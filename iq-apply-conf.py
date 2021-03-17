@@ -19,26 +19,30 @@
 import argparse
 import json
 import requests
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 iq_session = requests.Session
 iq_url, iq_auth, debug = "", "", False
 categories, organizations, applications, ldap_connections = [], [], [], []
 roleType = ['USER', 'GROUP']
-
+self_signed = False
 
 def get_arguments():
-    global iq_url, iq_session, iq_auth, debug
+    global iq_url, iq_session, iq_auth, debug, self_signed
     parser = argparse.ArgumentParser(description='This script enables you to configure IQ Server from JSON\
      data, thus supporting the config-as-code requirement of Sonatype customers')
     parser.add_argument('-u', '--url', help='', default="http://localhost:8070", required=False)
     parser.add_argument('-a', '--auth', help='', default="admin:admin123", required=False)
     parser.add_argument('-f', '--file_name', default="conf/configuration.json", required=True)
     parser.add_argument('-d', '--debug', default=False, required=False)
+    parser.add_argument('-s', '--self_signed', default=False, required=False)
 
     args = vars(parser.parse_args())
     iq_url = args["url"]
     credentials = args["auth"].split(":")
     debug = args["debug"]
+    self_signed = args["self_signed"]
     iq_session = requests.Session()
     iq_session.cookies.set('CLM-CSRF-TOKEN', 'api')
     iq_session.headers = {'X-CSRF-TOKEN': 'api'}
@@ -180,25 +184,25 @@ def handle_resp(resp, root=""):
 
 def get_url(url, root=""):
     # common get call
-    resp = iq_session.get(url, auth=iq_auth)
+    resp = iq_session.get(url, auth=iq_auth, verify=not self_signed)
     return handle_resp(resp, root)
 
 
 def post_url(url, params, root=""):
     # common post call
-    resp = iq_session.post(url, json=params, auth=iq_auth)
+    resp = iq_session.post(url, json=params, auth=iq_auth, verify=not self_signed)
     return handle_resp(resp, root)
 
 
 def put_url(url, params, root=""):
     # common put call
-    resp = iq_session.put(url, json=params, auth=iq_auth)
+    resp = iq_session.put(url, json=params, auth=iq_auth, verify=not self_signed)
     return handle_resp(resp, root)
 
 
 def delete_url(url, params, root=""):
     # common put call
-    resp = iq_session.delete(url, json=params, auth=iq_auth)
+    resp = iq_session.delete(url, json=params, auth=iq_auth, verify=not self_signed)
     return handle_resp(resp, root)
 
 
