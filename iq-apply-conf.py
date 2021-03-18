@@ -125,6 +125,7 @@ def root_configuration(config):
     license_threat_groups(config.get('license_threat_groups'))
     data_purging(config.get('data_purging'))
     add_source_control(config.get('source_control'))
+    add_policy(data=config.get('policy'))
     entity = dict()
     entity['name'] = "Root Organisation"
     apply_access(entity, config.get('access'))
@@ -139,6 +140,7 @@ def org_configuration(org):
     continuous_monitoring(org.get('continuous_monitoring_stage'), org=org['eid'])
     data_purging(org.get('data_purging'), org['eid'])
     apply_access(org, org.get('access'), org=org['eid'])
+    add_policy(data=org.get('policy'), org=org['eid'])
     data = org.get('proprietary_components')
     if data is not None and len(data) > 0:
         for ppc in data:
@@ -154,6 +156,7 @@ def app_configuration(app):
     continuous_monitoring(app.get('continuous_monitoring_stage'), app=app['publicId'])
     eid = new_app['id']
     apply_access(new_app, app.get('access'), app=eid)
+    add_policy(data=app.get('policy'), app=eid)
     data = app.get('proprietary_components')
     if data is not None and len(data) > 0:
         for ppc in data:
@@ -193,6 +196,17 @@ def post_url(url, params, root=""):
     resp = iq_session.post(url, json=params, auth=iq_auth, verify=not self_signed)
     return handle_resp(resp, root)
 
+def multipart_post_url(url, data, root=""):
+    encoded = json.dumps(data, indent=1).encode('utf-8')
+    files = {
+        'file': (
+            f'policy.json',
+            encoded,
+            'multipart/form-data'
+        )
+    }
+    resp = iq_session.post(url, files=files, auth=iq_auth, verify=not self_signed)
+    return handle_resp(resp, root)
 
 def put_url(url, params, root=""):
     # common put call
@@ -499,6 +513,14 @@ def add_source_control(data, org=None, app=None):
         print_debug(data)
     else:
         print('Source control configuration already exists.')
+
+
+def add_policy(data, org='ROOT_ORGANIZATION_ID', app=None):
+    if data is None or len(data) == 0:
+        return
+    url = f'{iq_url}/rest/policy/{org_or_app(org, app)}/import'
+    print(url)
+    multipart_post_url(url, data)
 
 
 def add_success_metrics(data):
