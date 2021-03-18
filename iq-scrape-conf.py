@@ -462,9 +462,9 @@ def persist_source_control(org='ROOT_ORGANIZATION_ID', app=None):
     print_debug(data)
     return data
 
+
 def persist_policy(org='ROOT_ORGANIZATION_ID', app=None):
     url = f'{iq_url}/rest/policy/{org_or_app(org, app)}/export'
-
     data = get_url(url)
     if data is not None:
         for policy in data['policies']:
