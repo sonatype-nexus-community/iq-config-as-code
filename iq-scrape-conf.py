@@ -138,7 +138,9 @@ def org_configuration(org):
     orgconf['component_labels'] = persist_component_labels(org=org['id'])
     orgconf['license_threat_groups'] = persist_license_threat_groups(org=org['id'])
     orgconf['access'] = persist_access(org=org['id'])
+    orgconf['policy'] = persist_policy(org=org['id'])
     orgconf['name'] = org['name']
+    orgconf['policy'] = persist_policy()
     return orgconf
 
 
@@ -155,6 +157,7 @@ def app_configuration(app):
     app_conf['publicId'] = app['publicId']
     app_conf['applicationTags'] = check_categories(app['applicationTags'])
     app_conf['access'] = persist_access(app=app['id'])
+    app_conf['policy'] = persist_policy(app=app['id'])
     # persist_data(app_conf, f'{output_dir}{app["name"]}-config.json')
     return app_conf
 
@@ -456,6 +459,18 @@ def persist_source_control(org='ROOT_ORGANIZATION_ID', app=None):
     #     persist_data(data, f'{output_dir}{app["name"]}-source_control.json')
     # elif org is not None:
     #     persist_data(data, f'{output_dir}{get_organization_name(org)}-source_control.json')
+    print_debug(data)
+    return data
+
+def persist_policy(org='ROOT_ORGANIZATION_ID', app=None):
+    url = f'{iq_url}/rest/policy/{org_or_app(org, app)}/export'
+
+    data = get_url(url)
+    if data is not None:
+        for policy in data['policies']:
+            policy.pop('id')
+            for constraint in policy['constraints']:
+                constraint.pop('id')
     print_debug(data)
     return data
 
