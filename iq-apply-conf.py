@@ -520,7 +520,6 @@ def add_policy(data, org='ROOT_ORGANIZATION_ID', app=None):
     if data is None or len(data) == 0 or app is not None:
         return
     url = f'{iq_url}/rest/policy/{org_or_app(org, app)}/import'
-    print(url)
     multipart_post_url(url, data)
 
 
