@@ -464,6 +464,9 @@ def persist_source_control(org='ROOT_ORGANIZATION_ID', app=None):
 
 
 def persist_policy(org='ROOT_ORGANIZATION_ID', app=None):
+    if app is not None:
+        # app level policy import/export is not supported
+        return
     url = f'{iq_url}/rest/policy/{org_or_app(org, app)}/export'
     data = get_url(url)
     if data is not None:

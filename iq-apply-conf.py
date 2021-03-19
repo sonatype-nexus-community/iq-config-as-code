@@ -516,7 +516,8 @@ def add_source_control(data, org=None, app=None):
 
 
 def add_policy(data, org='ROOT_ORGANIZATION_ID', app=None):
-    if data is None or len(data) == 0:
+    # importing policy at the application level is not currently supported; only org
+    if data is None or len(data) == 0 or app is not None:
         return
     url = f'{iq_url}/rest/policy/{org_or_app(org, app)}/import'
     print(url)
