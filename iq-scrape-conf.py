@@ -140,7 +140,6 @@ def org_configuration(org):
     orgconf['access'] = persist_access(org=org['id'])
     orgconf['policy'] = persist_policy(org=org['id'])
     orgconf['name'] = org['name']
-    orgconf['policy'] = persist_policy()
     return orgconf
 
 
