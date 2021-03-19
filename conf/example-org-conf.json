@@ -107,7 +107,8 @@
       "license_threat_groups": [
         {
           "name": "Client-Banned",
-          "threatLevel": 10
+          "threatLevel": 10,
+          "licenses": []
         }
       ],
       "applications": [
