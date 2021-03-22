@@ -10,15 +10,7 @@
       "continuous_monitoring_stage": {
         "stageTypeId": "operate"
       },
-      "source_control": {
-        "repositoryUrl": null,
-        "username": null,
-        "token": null,
-        "provider": null,
-        "baseBranch": null,
-        "enablePullRequests": null,
-        "enableStatusChecks": true
-      },
+      "source_control": null,
       "data_purging": {
         "applicationReports": {
           "stages": {
@@ -90,25 +82,48 @@
           "ownerType": "ORGANIZATION"
         }
       ],
-      "license_threat_groups": [
-        {
-          "name": "Client-Banned",
-          "threatLevel": 10,
-          "licenses": []
-        }
-      ],
+      "license_threat_groups": null,
       "access": [
-        {
-          "role": "Developer",
-          "user_or_group_name": "developerteam1",
-          "role_type": "GROUP"
-        },
         {
           "role": "Owner",
           "user_or_group_name": "leads1",
           "role_type": "GROUP"
         }
       ],
+      "policy": {
+        "policies": [],
+        "labels": [
+          {
+            "id": "92e1e313d0fa49caa73c7bc8f4e00f92",
+            "ownerId": "c1778114afb144308edf0a203e76f2f5",
+            "label": "Org-Architecture-Blacklisted",
+            "labelLowercase": "org-architecture-blacklisted",
+            "description": "Components which have been blacklisted from use",
+            "color": "light-green"
+          }
+        ],
+        "licenseThreatGroups": [],
+        "licenseThreatGroupLicenses": [],
+        "tags": [
+          {
+            "id": "18564940543d435aabbbb234adb51092",
+            "organizationId": "c1778114afb144308edf0a203e76f2f5",
+            "name": "Secret",
+            "nameLowercaseNoWhitespace": "secret",
+            "description": "Application is classified Secret",
+            "color": "light-red"
+          },
+          {
+            "id": "7b69f160c8e8497b817fe64472faddc7",
+            "organizationId": "c1778114afb144308edf0a203e76f2f5",
+            "name": "Top-Secret",
+            "nameLowercaseNoWhitespace": "top-secret",
+            "description": "Application is classified Top-Secret",
+            "color": "dark-red"
+          }
+        ],
+        "policyTags": []
+      },
       "name": "Example-Org",
       "applications": [
         {
@@ -136,23 +151,20 @@
           "component_labels": null,
           "source_control": {
             "repositoryUrl": "https://bitbucket.org/CSMonkee/webgoat-legacy",
-            "username": null,
-            "token": null,
+            "username": "CSMonkee",
+            "token": "#~FAKE~SECRET~KEY~#",
             "provider": null,
-            "baseBranch": null,
-            "enablePullRequests": null,
+            "baseBranch": "master",
+            "enablePullRequests": true,
             "enableStatusChecks": true
           },
           "publicId": "webgoat-legacy-bitbucket",
           "applicationTags": [
             {
-              "name": "Distributed"
-            },
-            {
-              "name": "Secret"
-            },
-            {
               "name": "Other"
+            },
+            {
+              "name": "Distributed"
             }
           ],
           "access": [
@@ -162,11 +174,17 @@
               "role_type": "USER"
             },
             {
+              "role": "Developer",
+              "user_or_group_name": "developerteam1",
+              "role_type": "GROUP"
+            },
+            {
               "role": "Owner",
               "user_or_group_name": "admin",
               "role_type": "USER"
             }
-          ]
+          ],
+          "policy": null
         }
       ]
     }
