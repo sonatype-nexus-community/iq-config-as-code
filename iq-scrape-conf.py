@@ -56,7 +56,6 @@ def get_arguments():
     # Remove outer whitespace from entity (org, app)
     for entity in entities:
         if entity.strip() not in entities:
-            entities.remove(entity)
             entities.append(entity.strip())
 
     iq_session = requests.Session()
