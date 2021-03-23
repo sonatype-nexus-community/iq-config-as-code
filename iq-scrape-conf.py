@@ -52,7 +52,13 @@ def get_arguments():
 
     debug = args["debug"]
     self_signed = args["self_signed"]
-    entities = args["scope"].replace(" ", "").split(",")
+    entities = args["scope"].split(",")
+    # Remove outer whitespace from entity (org, app)
+    for entity in entities:
+        if entity.strip() not in entities:
+            entities.remove(entity)
+            entities.append(entity.strip())
+
     iq_session = requests.Session()
     iq_session.cookies.set('CLM-CSRF-TOKEN', 'api')
     iq_session.headers = {'X-CSRF-TOKEN': 'api'}
