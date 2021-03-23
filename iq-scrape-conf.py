@@ -26,15 +26,14 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 iq_session = requests.Session
 iq_url, iq_auth, output_dir, debug = "", "", "", False
-categories, organizations, applications, ldap_connections = [], [], [], []
+categories, organizations, applications, ldap_connections, entities = [], [], [], [], []
 roleType = ['USER', 'GROUP']
 roles = {}
 self_signed = False
 
 
-
 def get_arguments():
-    global iq_url, iq_session, iq_auth, output_dir, debug, self_signed
+    global iq_url, iq_session, iq_auth, output_dir, debug, self_signed, entities
     parser = argparse.ArgumentParser(description='This script enables you to persist the configuration of IQ Server to JSON\
      data, thus supporting the config-as-code requirement of Sonatype customers')
     parser.add_argument('-u', '--url', help='', default="http://localhost:8070", required=False)
@@ -42,6 +41,7 @@ def get_arguments():
     parser.add_argument('-o', '--output', default="./scrape", required=False)
     parser.add_argument('-d', '--debug', default=False, required=False)
     parser.add_argument('-s', '--self_signed', default=False, required=False)
+    parser.add_argument('-y', '--scope', default="all", required=False)
 
     args = vars(parser.parse_args())
     iq_url = args["url"]
@@ -52,6 +52,7 @@ def get_arguments():
 
     debug = args["debug"]
     self_signed = args["self_signed"]
+    entities = args["scope"].replace(" ", "").split(",")
     iq_session = requests.Session()
     iq_session.cookies.set('CLM-CSRF-TOKEN', 'api')
     iq_session.headers = {'X-CSRF-TOKEN': 'api'}
@@ -59,7 +60,6 @@ def get_arguments():
     iq_auth = requests.auth.HTTPBasicAuth(credentials[0], credentials[1])
     iq_session.auth = iq_auth
     return args
-
 
 def main():
     # grab defaults or args passed into script.
@@ -96,16 +96,19 @@ def main():
             org_apps = []
             for app in applications:
                 if app['organizationId'] == org['id']:
-                    org_apps.append(app_configuration(app))
-            org_conf['applications'] = org_apps
-            od = {}
-            od['organizations'] = []
-            od['organizations'].append(org_conf)
-            orgs.append(org_conf)
-            persist_data(od, f'{output_dir}{get_organization_name(org["id"])}-config.json')
+                    if in_scope(app):
+                        org_apps.append(app_configuration(app))
+            if len(org_apps):
+                org_conf['applications'] = org_apps
+                od = {}
+                od['organizations'] = []
+                od['organizations'].append(org_conf)
+                orgs.append(org_conf)
+                persist_data(od, f'{output_dir}{get_organization_name(org["id"])}-config.json')
 
         data['organizations'] = orgs
-        persist_data(data, f'{output_dir}All-Organizations-Conf.json')
+        if in_scope(None):
+            persist_data(data, f'{output_dir}All-Organizations-Conf.json')
 
 
 def nexus_administration():
@@ -221,6 +224,13 @@ def orgs_or_apps(org, app):
 
 
 # --------------------------------------------------------------------------
+
+def in_scope(app):
+    if app is not None:
+        return get_organization_name(app["organizationId"]) in entities or \
+               app['publicId'] in entities or \
+               "all" in entities
+    return "all" in entities
 
 
 def set_applications():
