@@ -62,7 +62,7 @@ Usage: iq-apply-config [ARGS]...
 Usage: iq-scrape-config [ARGS]...
 
   Example usage:
-
+    
     # Run python script though docker container with all packages installed on it!
     docker run -w /tmp --rm -i -v $PWD:/tmp broadinstitute/python-requests iq-scrape-conf.py -u "http://<iq-hostname>:<iq-port>"
 
@@ -77,7 +77,7 @@ Usage: iq-scrape-config [ARGS]...
     python3 iq-scrape-conf.py  -a <user>:<password> -u <protocol>://<hostname>:<port> -o /tmp -y "application-x"
 
     # Scrape specific organisation(s) and specific application(s)
-    python3 iq-scrape-conf.py  -a <user>:<password> -u <protocol>://<hostname>:<port> -o /tmp -y "My Org, Your Org, application-x, application-y"
+    python3 iq-scrape-conf.py  -a <user>:<password> -u <protocol>://<hostname>:<port> -o /tmp -y "My Org,Your Org,application-x,application-y"
 
 Options:
 
@@ -111,6 +111,9 @@ Limitations/Scope:
 
       The email server account password is null when scraped. A boolean flag to denote password present defaults to 'false'. Be sure to 
       address this when editing this data, ahead of applying it to another environment.
+      
+      When performing a 'scrape', System-Config.json is always persisted!
+
   
 
 Changelog
