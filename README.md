@@ -126,6 +126,8 @@ Changelog
 
 17th March 2021 - Override self-signed certificate verification
 
+23rd March 2021 - Enable scrape of specific selected application(s) and/or organisation(s)
+
 LICENSE
 =========
 
