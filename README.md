@@ -55,7 +55,9 @@ Usage: iq-apply-config [ARGS]...
 
     # Run the script natively on your host
     python3 iq-apply-conf.py -f conf/<conf-file>.json -a <user>:<password> -u <protocol>://<hostname>:<port>
+    
     python3 iq-apply-conf.py -f scrape/System-Config.json  -a <user>:<password> -u <protocol>://<hostname>:<port> -s True
+    
     python3 iq-apply-conf.py -f scrape/All-Organizations-Config.json  -a <user>:<password> -u <protocol>://<hostname>:<port>
 
 
@@ -76,7 +78,7 @@ Usage: iq-scrape-config [ARGS]...
     # The application public-id is id by which you identify an application when scanning with the cli.
     python3 iq-scrape-conf.py  -a <user>:<password> -u <protocol>://<hostname>:<port> -o /tmp -y "application-x"
 
-    # Scrape specific organisation(s) and specific application(s)
+    # Scrape specific organisation(s) and specific application(s) public-id(s)
     python3 iq-scrape-conf.py  -a <user>:<password> -u <protocol>://<hostname>:<port> -o /tmp -y "My Org,Your Org,application-x,application-y"
 
 Options:
@@ -101,8 +103,6 @@ Limitations/Scope:
       
       SAML configuration is not supported.
       
-      Policies are nogt supported. See: https://support.sonatype.com/hc/en-us/articles/360008133574
-
       The 'roles' API does not return the role permissionCategories via the GET call. Therefore this data cannot be scraped and persisted. 
       Custom Role permissions must be re-applied.
 
