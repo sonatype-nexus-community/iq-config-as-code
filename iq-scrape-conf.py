@@ -101,9 +101,9 @@ def main():
             org_apps = []
             for app in applications:
                 if app['organizationId'] == org['id']:
-                    if in_scope(app):
+                    if in_scope(app=app):
                         org_apps.append(app_configuration(app))
-            if len(org_apps):
+            if len(org_apps) or in_scope(org=org):
                 org_conf['applications'] = org_apps
                 od = {}
                 od['organizations'] = []
@@ -230,10 +230,13 @@ def orgs_or_apps(org, app):
 
 # --------------------------------------------------------------------------
 
-def in_scope(app):
+def in_scope(app=None, org=None):
     if app is not None:
         return get_organization_name(app["organizationId"]) in entities or \
                app['publicId'] in entities or \
+               "all" in entities
+    if org is not None:
+        return org['name'] in entities or \
                "all" in entities
     return "all" in entities
 
