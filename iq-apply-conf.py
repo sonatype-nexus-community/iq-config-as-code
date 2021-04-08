@@ -273,7 +273,7 @@ def check_application(new_app):
 def check_organization(name):
     ret = None
     for org in organizations:
-        if name in org['name']:
+        if name == org['name']:
             ret = org['id']
             break
     return ret
