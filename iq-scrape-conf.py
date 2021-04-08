@@ -108,7 +108,10 @@ def main():
                 od = {}
                 od['organizations'] = []
                 od['organizations'].append(org_conf)
-                orgs.append(org_conf)
+                if (org_conf['name'] == 'Root Organization'):
+                    orgs.insert(0, org_conf)
+                else:
+                    orgs.append(org_conf)
                 persist_data(od, f'{output_dir}{get_organization_name(org["id"])}-config.json')
 
         data['organizations'] = orgs
