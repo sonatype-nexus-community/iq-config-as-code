@@ -124,6 +124,7 @@ def main():
         if in_scope(None):
             persist_data(data, f'{output_dir}All-Organizations-Healthcheck.json')
 
+
 def item_count(data=None, single=False):
     if data is None:
         return 0
@@ -230,12 +231,6 @@ def put_url(url, params, root=""):
     return handle_resp(resp, root)
 
 
-def delete_url(url, params, root=""):
-    # common put call
-    resp = iq_session.delete(url, json=params, auth=iq_auth, verify=not self_signed)
-    return handle_resp(resp, root)
-
-
 def org_or_app(org, app):
     if app:
         return f'application/{app}'
@@ -244,16 +239,7 @@ def org_or_app(org, app):
     return f'organization/{org}'
 
 
-def orgs_or_apps(org, app):
-    if app:
-        return f'applications/{app}'
-    if org is None:
-        org = 'ROOT_ORGANIZATION_ID'
-    return f'organizations/{org}'
-
-
 # --------------------------------------------------------------------------
-
 def in_scope(app=None, org=None):
     if app is not None:
         return get_organization_name(app["organizationId"]) in entities or \
@@ -284,26 +270,6 @@ def set_categories():
     categories = get_url(url)
 
 
-def check_application(new_app):
-    # name is required, default to PublicId
-    if not new_app['name']:
-        new_app['name'] = new_app['publicId']
-
-    # Look to see if new app already exists
-    for app in applications:
-        if app['publicId'] == new_app['publicId']:
-            return app
-    return None
-
-
-def get_organization_id(name):
-    ret = None
-    for org in organizations:
-        if name in org['name']:
-            ret = org['id']
-            break
-    return ret
-
 def get_organization_name(id):
     ret = None
     for org in organizations:
@@ -311,19 +277,6 @@ def get_organization_name(id):
             ret = org['name']
             break
     return ret
-
-
-def check_ldap_connection(name):
-    ret = ''
-    for connection in ldap_connections:
-        if name in connection['name']:
-            ret = connection['id']
-    if len(ret) == 0:
-        ret = add_ldap_connection(name)
-    if len(ret) > 0:
-        return ret
-    else:
-        return None
 
 
 def check_categories(app_tags):
@@ -337,6 +290,7 @@ def check_categories(app_tags):
         return ret
     return None
 
+
 def check_category(ac):
     ret = ''
     if len(ac) == 0:
@@ -348,73 +302,6 @@ def check_category(ac):
     if len(ret) > 0:
         return {'name': ret}
     return None
-
-def category_exists(ac):
-    ret = ''
-    if len(ac) == 0:
-        return None
-    for c in categories:
-        if ac['id'] == c['id']:
-            ret = c['name']
-            break
-    if len(ret) > 0:
-        return {'name': ret}
-    return None
-
-def check_roles(name, roles):
-    ret = ''
-    if len(name) == 0:
-        return None
-    for role in roles:
-        if name in role['name']:
-            ret = role['id']
-            break
-    if len(ret) > 0:
-        return {'tagId': ret}
-    print(f"Role {name} is not available within Nexus IQ")
-    return None
-
-
-def check_user_or_group(user_or_group):
-    if len(user_or_group) == 0:
-        return None
-    if (user_or_group.upper() == "GROUP") or (user_or_group.upper() == "USER"):
-        return user_or_group.upper()
-
-    print(f"User type '{user_or_group}' does not exist! 'USER' or 'GROUP' are the valid types.")
-    return None
-
-
-
-def add_ldap_connection(ldap_conn_name):
-    data = {"name": ldap_conn_name}
-    url = f'{iq_url}/rest/config/ldap'
-    resp = post_url(url, data)
-    if resp is not None:
-        ldap_connections.append(resp)
-        print(f"Created LDAP connection: {ldap_conn_name}")
-        return resp['id']
-    return ''
-
-
-# Apply roles to the endpoint identified within the URL
-def apply_role(url, role_id, user_or_group_name, role_type):
-    data = {
-        "memberMappings": [
-            {
-                "roleId": role_id,
-                "members": [
-                    {
-                        "type": role_type,
-                        "userOrGroupName": user_or_group_name
-                    }
-                ]
-            }
-        ]
-    }
-    put_url(url, data)
-    print("Applied RBAC data:")
-    print_debug(data)
 
 
 def persist_access(org='ROOT_ORGANIZATION_ID', app=None):
@@ -568,6 +455,7 @@ def persist_continuous_monitoring(org='ROOT_ORGANIZATION_ID', app=None):
         return cmData
     return None
 
+
 def persist_data_purging(org='ROOT_ORGANIZATION_ID'):
     url = f'{iq_url}/api/v2/dataRetentionPolicies/organizations/{org}'
     data = get_url(url)
@@ -633,33 +521,6 @@ def persist_users():
     return f'Local Users : {item_count(get_url(url), True)}'
 
 
-# GET not supported for this API
-# def persist_system_notice():
-#     url = f'{iq_url}/rest/config/systemNotice'
-#     data = get_url(url)
-#     # persist_data(data, '{output_dir}system-system_notice.json')
-#     print_debug(data)
-#     return data
-
-
-def parse_ldap_connection(conn):
-    data = {'name': conn['name']}
-    url = f'{iq_url}/rest/config/ldap/{conn["id"]}/connection'
-    response = get_url(url)
-    response.pop('id', None)
-    serverId = response.pop('serverId', None)
-
-    data['connection'] = response
-    url = f'{iq_url}/rest/config/ldap/{serverId}/userMapping'
-    response = get_url(url)
-    response.pop('id', None)
-    response.pop('serverId', None)
-
-    data['mappings'] = response
-    print("Mapped LDAP connection:")
-    return data
-
-
 def set_roles():
     global roles
     url = f'{iq_url}/api/v2/applications/roles'
@@ -668,17 +529,9 @@ def set_roles():
         roles[role['id']] = role['name']
 
 
-def name_available(name):
-    for app in applications:
-        if app['name'] == name:
-            return False
-    return True
-
-
 # Write the data to a file...
 def persist_data(data, filename):
     with open(filename, 'w') as outfile:
-        #print(data)
         json.dump(data, outfile, indent=2)
     print(f'Persisted data to {filename}')
 
