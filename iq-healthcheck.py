@@ -141,15 +141,15 @@ def purge_empty_attributes(data):
 
 
 def nexus_administration():
-    systemConf = {'users': persist_users(), 'custom_roles': persist_roles(),
-                  'ldap_connections': persist_ldap_instances(), 'email_server': persist_email_server_connection(),
-                  'proxy': persist_proxy(), 'webhooks': persist_webhooks(),
-                  'success_metrics': persist_success_metrics(), 'automatic_applications': persist_auto_applications(),
-                  'automatic_source_control': persist_automatic_source_control(),
-                  'success_metrics_reports': persist_success_metrics_reports()}
+    systemConf = {'Users': persist_users(), 'Custom Roles': persist_roles(),
+                  'LDAP Connections': persist_ldap_instances(), 'Email Server': persist_email_server_connection(),
+                  'Proxy': persist_proxy(), 'Webhooks': persist_webhooks(),
+                  'Success Metrics': persist_success_metrics(), 'Automatic Applications': persist_auto_applications(),
+                  'Automatic Source Control': persist_automatic_source_control(),
+                  'Success Metrics Reports': persist_success_metrics_reports()}
     # Parses and applies all the 'administrative' configuration for Nexus IQ
     # systemConf['system_notice'] = persist_system_notice()
-    persist_data(systemConf, f'{output_dir}System-Healthcheck.json')
+    persist_data(purge_empty_attributes(systemConf), f'{output_dir}System-Healthcheck.json')
 
 
 def org_configuration(org):
@@ -312,8 +312,9 @@ def persist_access(org='ROOT_ORGANIZATION_ID', app=None):
 
 def persist_auto_applications():
     url = f'{iq_url}/rest/config/automaticApplications'
-    data = get_url(url)
-    return f'Automatic Application Enabled : {data["enabled"]}'
+    if get_url(url)["enabled"]:
+        return f'Automatic application creation enabled.'
+    return f'Automatic application creation disabled.'
 
 
 def persist_grandfathering(org='ROOT_ORGANIZATION_ID', app=None):
@@ -340,13 +341,19 @@ def persist_grandfathering(org='ROOT_ORGANIZATION_ID', app=None):
 
 def persist_webhooks():
     url = f'{iq_url}/rest/config/webhook'
-    return f'Webhooks : {item_count(get_url(url))}'
+    wh = item_count(get_url(url), True)
+    if wh:
+        return f'{wh} Webhooks.'
+    return None
 
 
 def persist_proxy():
     # This API applies the config regardless of whether the proxy is already configured.
     url = f'{iq_url}/api/v2/config/httpProxyServer'
-    return f'Proxy Servers : {item_count(get_url(url), True)}'
+    ps = item_count(get_url(url), True)
+    if ps:
+        return f'Proxy server.'
+    return None
 
 
 def persist_source_control(org='ROOT_ORGANIZATION_ID', app=None):
@@ -394,17 +401,20 @@ def persist_policy(org='ROOT_ORGANIZATION_ID', app=None):
 def persist_success_metrics():
     url = f'{iq_url}/rest/successMetrics'
     # This API applies the config regardless of whether the proxy is already configured.
-    return f'Success Metrics Enabled : {get_url(url)["enabled"]}'
-
+    if get_url(url)["enabled"]:
+        return f'Success metrics enabled.'
+    return f'Success metrics disabled.'
 
 def persist_success_metrics_reports():
     url = f'{iq_url}/rest/successMetrics/report'
-    return f'Success Metrics Reports : {item_count(get_url(url))}'
+    return f'{item_count(get_url(url))} Success metrics reports.'
 
 
 def persist_automatic_source_control():
     url = f'{iq_url}/rest/config/automaticScmConfiguration'
-    return f'Automatic SCM Enabled : {get_url(url)["enabled"]}'
+    if get_url(url)["enabled"]:
+        return f'Automatic SCM enabled.'
+    return f'Automatic SCM disabled.'
 
 
 def persist_proprietary_components(org='ROOT_ORGANIZATION_ID', app=None):
@@ -440,8 +450,9 @@ def persist_roles():
     for element in data:
         if element.pop('builtIn') is False:
             count = count + 1
-    # persist_data(data, '{output_dir}system_roles.json')
-    return f'Custom Roles : {count} '
+    if count:
+        return f'{count} Customer roles.'
+    return None
 
 
 def persist_continuous_monitoring(org='ROOT_ORGANIZATION_ID', app=None):
@@ -506,17 +517,20 @@ def persist_license_threat_groups(org='ROOT_ORGANIZATION_ID'):
 
 def persist_ldap_instances():
     url = f'{iq_url}/rest/config/ldap'
-    return f'LDAP connections : {item_count(get_url(url))}'
+    lc = item_count(get_url(url))
+    return f'{lc} LDAP server(s).'
 
 
 def persist_email_server_connection():
     url = f'{iq_url}/api/v2/config/mail'
-    return f'Email Servers : {item_count(get_url(url), True)}'
+    es = item_count(get_url(url), True)
+    return f'{es} Email server.'
 
 
 def persist_users():
     url = f'{iq_url}/rest/user'
-    return f'Local Users : {item_count(get_url(url), True)}'
+    uc = item_count(get_url(url))
+    return f'{uc} local users.'
 
 
 def set_roles():
