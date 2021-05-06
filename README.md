@@ -19,8 +19,12 @@
 
 This project provides the capability to automate the configuration of the IQ Server, by applying configuration data 
 from JSON config file(s). It further supports the capability to 'scrape' existing config and persist to JSON config files
-from where it can be re-applied. Both the 'apply' and 'scrape' may be scoped to specific data. This capability supports 
-Sonatype customers aspiration to stand-up/tear-down an IQ environment in support of business continuity and service resiliency. 
+from where it can be re-applied. Additional evaluation of the configuration on IQ server is provided by a healthcheck 
+capability, which informs your configuration in a more human readable format. Discuss the findings with your Sonatype CSE.
+The 'apply', 'healthcheck' and 'scrape' may be scoped to specific data. 
+
+This capability supports Sonatype customers aspiration to stand-up/tear-down an IQ environment in support of business 
+continuity and service resiliency. 
 
 Configuration is applied in 2 layers:
 
@@ -38,13 +42,15 @@ Proxy Server Note:
     If you are using a Proxy Server (A server that acts a gateway between the client and the internet) - please be aware that this project only supports the 
     use of a HTTP Proxy and if it is defined within the system properties. This script will not work if a HTTPS Proxy is being used or if your Broswer is 
     utilizing a .pac file
- 
 
 Usage
+
+    $ python3 iq-healthcheck.py --help
 
     $ python3 iq-scrape-conf.py --help
 
     $ python3 iq-apply-conf.py --help
+
 
 Usage: iq-apply-config [ARGS]...
 
@@ -60,6 +66,25 @@ Usage: iq-apply-config [ARGS]...
     
     python3 iq-apply-conf.py -f scrape/All-Organizations-Config.json  -a <user>:<password> -u <protocol>://<hostname>:<port>
 
+Usage: iq-healthcheck [ARGS]...
+
+  Example usage:
+    
+    # Run python script though docker container with all packages installed on it!
+    docker run -w /tmp --rm -i -v $PWD:/tmp broadinstitute/python-requests iq-scrape-conf.py -u "http://<iq-hostname>:<iq-port>"
+
+    # Run the script natively on your host
+    python3 iq-healthcheck.py  -a <user>:<password> -u <protocol>://<hostname>:<port> -o /tmp
+
+    # Healthcheck a specific organisation
+    python3 iq-healthcheck.py  -a <user>:<password> -u <protocol>://<hostname>:<port> -o /tmp -y "My Org"
+
+    # Healthcheck a specific application public-id
+    # The application public-id is id by which you identify an application when scanning with the cli.
+    python3 iq-healthcheck.py  -a <user>:<password> -u <protocol>://<hostname>:<port> -o /tmp -y "application-x"
+
+    # Healthcheck a specific organisation(s) and specific application(s) public-id(s)
+    python3 iq-healthcheck.py  -a <user>:<password> -u <protocol>://<hostname>:<port> -o /tmp -y "My Org,Your Org,application-x,application-y"
 
 Usage: iq-scrape-config [ARGS]...
 
@@ -81,6 +106,7 @@ Usage: iq-scrape-config [ARGS]...
     # Scrape specific organisation(s) and specific application(s) public-id(s)
     python3 iq-scrape-conf.py  -a <user>:<password> -u <protocol>://<hostname>:<port> -o /tmp -y "My Org,Your Org,application-x,application-y"
 
+
 Options:
 
       -u, --url           Nexus IQ Server URL                                               # defaults to http://localhost:8070
@@ -91,11 +117,11 @@ Options:
       
       -s, --self_signed   Override validation when a self-signed certificate is installed.  # defaults to False
 
-      -f, --file_name     <config-file>.json                                                # iq-apply_conf.py only
+      -f, --file_name     <config-file>.json                                                # iq-apply_conf.py & iq-healthcheck only
       
-      -o, --output        <output-path>                                                     # iq-scrape-conf.py only - defaults to ./scrape
+      -o, --output        <output-path>                                                     # iq-scrape-conf.py & iq-healthcheck only - defaults to ./scrape
       
-      -y, --scope         Comma delimited list of org name(s) and/or app public-id(s)       # iq-scrape-conf.py only - defaults to "all"
+      -y, --scope         Comma delimited list of org name(s) and/or app public-id(s)       # iq-scrape-conf.py & iq-healthcheck only - defaults to "all"
 
 Limitations/Scope:
 
@@ -114,6 +140,7 @@ Limitations/Scope:
       
       When performing a 'scrape', System-Config.json is always persisted!
 
+      When performing a 'healthcheck', System-Healthcheck.json is always persisted!
   
 
 Changelog
@@ -127,6 +154,9 @@ Changelog
 17th March 2021 - Override self-signed certificate verification
 
 23rd March 2021 - Enable scrape of specific selected application(s) and/or organisation(s)
+
+6th May 2021 - Add healthcheck capability
+
 
 LICENSE
 =========
