@@ -31,12 +31,13 @@ categories, organizations, applications, ldap_connections, entities = [], [], []
 roleType = ['USER', 'GROUP']
 roles = {}
 self_signed = False
+ROOT_ORG_NAME = 'Root Organization'
 
 
 def get_arguments():
     global iq_url, iq_session, iq_auth, output_dir, debug, self_signed, entities
-    parser = argparse.ArgumentParser(description='This script enables you to persist the configuration of IQ Server to JSON\
-     data, thus supporting the config-as-code requirement of Sonatype customers')
+    parser = argparse.ArgumentParser(description="This script enables you to persist the configuration of IQ Server to JSON\
+     data, thus supporting the config-as-code requirement of Sonatype customers")
     parser.add_argument('-u', '--url', help='', default="http://localhost:8070", required=False)
     parser.add_argument('-a', '--auth', help='', default="admin:admin123", required=False)
     parser.add_argument('-o', '--output', default="./scrape", required=False)
@@ -72,18 +73,18 @@ def get_arguments():
     iq_session.auth = iq_auth
     return args
 
+
 def main():
     # grab defaults or args passed into script.
     args = get_arguments()
 
     # Create the 'output' directory
     try:
-        os.makedirs(output_dir, 0o755);
+        os.makedirs(output_dir, 0o755)
     except FileExistsError:
         if os.access(output_dir, os.W_OK) is False:
             print(f"Directory {output_dir} is not writeable!")
             return
-
 
     # store current applications, categories, and organizations
     set_categories()
@@ -93,7 +94,6 @@ def main():
 
     # Admin level configuration and integrations
     nexus_administration()
-
     data = {}
 
     # Iterate over the Organisations
@@ -111,10 +111,9 @@ def main():
                         org_apps.append(app_configuration(app))
             if len(org_apps) or in_scope(org=org):
                 org_conf['Applications'] = org_apps
-                od = {}
-                od['Organizations'] = []
+                od = {'Organizations': []}
                 od['Organizations'].append(org_conf)
-                if (org_conf['Name'] == 'Root Organization'):
+                if org_conf['Name'] == ROOT_ORG_NAME:
                     orgs.insert(0, org_conf)
                 else:
                     orgs.append(org_conf)
@@ -142,54 +141,40 @@ def purge_empty_attributes(data):
 
 
 def nexus_administration():
-
-    systemConf = {}
+    systemConf = {'users': persist_users(), 'custom_roles': persist_roles(),
+                  'ldap_connections': persist_ldap_instances(), 'email_server': persist_email_server_connection(),
+                  'proxy': persist_proxy(), 'webhooks': persist_webhooks(),
+                  'success_metrics': persist_success_metrics(), 'automatic_applications': persist_auto_applications(),
+                  'automatic_source_control': persist_automatic_source_control(),
+                  'success_metrics_reports': persist_success_metrics_reports()}
     # Parses and applies all the 'administrative' configuration for Nexus IQ
-    systemConf['users'] = persist_users()
-    systemConf['custom_roles'] = persist_roles()
-    systemConf['ldap_connections'] = persist_ldap_instances()
-    systemConf['email_server'] = persist_email_server_connection()
-    systemConf['proxy'] = persist_proxy()
-    systemConf['webhooks'] = persist_webhooks()
     # systemConf['system_notice'] = persist_system_notice()
-    systemConf['success_metrics'] = persist_success_metrics()
-    systemConf['automatic_applications'] = persist_auto_applications()
-    systemConf['automatic_source_control'] = persist_automatic_source_control()
-    systemConf['success_metrics_reports'] = persist_success_metrics_reports()
     persist_data(systemConf, f'{output_dir}System-Healthcheck.json')
 
 
 def org_configuration(org):
-    orgconf = {}
+    orgconf = {'Grandfathering': persist_grandfathering(org=org['id']),
+               'Continuous Monitoring': persist_continuous_monitoring(org=org['id']),
+               'Source Control': persist_source_control(org=org['id']),
+               'Data Purging': persist_data_purging(org=org['id']),
+               'Proprietary Components': persist_proprietary_components(org=org['id']),
+               'Application Categories': persist_application_categories(org=org['id']),
+               'Component Labels': persist_component_labels(org=org['id']),
+               'License Threat Groups': persist_license_threat_groups(org=org['id']),
+               'Access': persist_access(org=org['id']), 'Policy': persist_policy(org=org['id']), 'Name': org['name']}
     # Parses and applies all of the child Org configuration
-    orgconf['Grandfathering'] = persist_grandfathering(org=org['id'])
-    orgconf['Continuous Monitoring'] = persist_continuous_monitoring(org=org['id'])
-    orgconf['Source Control'] = persist_source_control(org=org['id'])
-    orgconf['Data Purging'] = persist_data_purging(org=org['id'])
-    orgconf['Proprietary Components'] = persist_proprietary_components(org=org['id'])
-    orgconf['Application Categories'] = persist_application_categories(org=org['id'])
-    orgconf['Component Labels'] = persist_component_labels(org=org['id'])
-    orgconf['License Threat Groups'] = persist_license_threat_groups(org=org['id'])
-    orgconf['Access'] = persist_access(org=org['id'])
-    orgconf['Policy'] = persist_policy(org=org['id'])
-    orgconf['Name'] = org['name']
     return purge_empty_attributes(orgconf)
 
 
 def app_configuration(app):
-
-    app_conf = {}
+    app_conf = {'Name': app['name'], 'Grandfathering': persist_grandfathering(app=app['publicId']),
+                'Continuous Monitoring': persist_continuous_monitoring(app=app['publicId']),
+                'Proprietary Components': persist_proprietary_components(app=app),
+                'Component Labels': persist_component_labels(app=app['publicId']),
+                'Source Control': persist_source_control(app=app['id']), 'Public Id': app['publicId'],
+                'Application Tags': check_categories(app['applicationTags']), 'Access': persist_access(app=app['id']),
+                'Policy': persist_policy(app=app['id'])}
     # Parses and applies all of the application configuration
-    app_conf['Name'] = app['name']
-    app_conf['Grandfathering'] = persist_grandfathering(app=app['publicId'])
-    app_conf['Continuous Monitoring'] = persist_continuous_monitoring(app=app['publicId'])
-    app_conf['Proprietary Components'] = persist_proprietary_components(app=app)
-    app_conf['Component Labels'] = persist_component_labels(app=app['publicId'])
-    app_conf['Source Control'] = persist_source_control(app=app['id'])
-    app_conf['Public Id'] = app['publicId']
-    app_conf['Application Tags'] = check_categories(app['applicationTags'])
-    app_conf['Access'] = persist_access(app=app['id'])
-    app_conf['Policy'] = persist_policy(app=app['id'])
     return purge_empty_attributes(app_conf)
 
 
@@ -332,19 +317,22 @@ def persist_auto_applications():
 
 
 def persist_grandfathering(org='ROOT_ORGANIZATION_ID', app=None):
-
     url = f'{iq_url}/rest/policyViolationGrandfathering/{org_or_app(org, app)}'
     data = purge_empty_attributes(get_url(url))
     if data is not None:
         gfData = []
         try:
-            if data["inheritedFromOrganizationName"] is not None:
+            if data["inheritedFromOrganizationName"] != ROOT_ORG_NAME:
                 gfData.append(f'Is inherited from {data["inheritedFromOrganizationName"]}')
         except KeyError:
-            if data["enabled"] is True: gfData.append(f'Is enabled')
-            if data["allowChange"] is True: gfData.append(f'May be changed')
-
-        if data["allowOverride"] is True: gfData.append(f'May be overridden')
+            if data["enabled"] is True:
+                gfData.append(f'Is enabled')
+            else:
+                gfData.append(f'Is disabled')
+            if data["allowChange"] is True:
+                gfData.append(f'May be changed')
+        if data["allowOverride"] is True:
+            gfData.append(f'May be overridden')
         if len(gfData):
             return gfData
     return None
@@ -370,11 +358,21 @@ def persist_source_control(org='ROOT_ORGANIZATION_ID', app=None):
         if data is None:
             scData.append('SCM inherited')
         else:
-            data.pop('token')
-            data.pop('id')
-            data.pop('ownerId')
-            scData.append(purge_empty_attributes(data))
-        return scData
+            if data['provider'] is not None:
+                scData.append(f'Provider is {data["provider"]}')
+            if data['repositoryUrl'] is not None:
+                scData.append(f'URL is {data["repositoryUrl"]}')
+            if data['username'] is not None:
+                scData.append(f'Username is {data["username"]}')
+            if data['baseBranch'] is not None:
+                scData.append(f'Base branch is {data["baseBranch"]}')
+            if data['enablePullRequests'] is not None:
+                scData.append(f'Pull requests are enabled')
+
+            # Always enabled at Root and propagated through. Not point reporting!
+            # if data['enableStatusChecks'] is not None:
+            #     scData.append(f'status checks are enabled')
+        if len(scData): return scData
     return None
 
 
