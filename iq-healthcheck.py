@@ -332,8 +332,8 @@ def persist_grandfathering(org='ROOT_ORGANIZATION_ID', app=None):
                 gfData.append(f'Is disabled')
             if data["allowChange"] is True:
                 gfData.append(f'May be changed')
-        if data["allowOverride"] is True:
-            gfData.append(f'May be overridden')
+            if data["allowOverride"] is True:
+                gfData.append(f'May be overridden')
         if len(gfData):
             return gfData
     return None
@@ -362,24 +362,25 @@ def persist_source_control(org='ROOT_ORGANIZATION_ID', app=None):
     data = get_url(url)
     if data is not None:
         scData = []
-        if data is None:
-            scData.append('SCM inherited')
-        else:
-            if data['provider'] is not None:
-                scData.append(f'Provider is {data["provider"]}')
-            if data['repositoryUrl'] is not None:
-                scData.append(f'URL is {data["repositoryUrl"]}')
-            if data['username'] is not None:
-                scData.append(f'Username is {data["username"]}')
-            if data['baseBranch'] is not None:
-                scData.append(f'Base branch is {data["baseBranch"]}')
-            if data['enablePullRequests'] is not None:
+        if data['provider'] is not None:
+            scData.append(f'Provider is {data["provider"]}')
+        if data['repositoryUrl'] is not None:
+            scData.append(f'URL is {data["repositoryUrl"]}')
+        if data['username'] is not None:
+            scData.append(f'Username is {data["username"]}')
+        if data['baseBranch'] is not None:
+            scData.append(f'Base branch is {data["baseBranch"]}')
+        if data['enablePullRequests'] is not None:
+            if data['enablePullRequests']:
                 scData.append(f'Pull requests are enabled')
+            else:
+                scData.append(f'Pull requests are disabled')
 
             # Always enabled at Root and propagated through. Not point reporting!
             # if data['enableStatusChecks'] is not None:
             #     scData.append(f'status checks are enabled')
-        if len(scData): return scData
+        if len(scData):
+            return scData
     return None
 
 
