@@ -107,12 +107,13 @@ def main():
         for org in organizations:
             # Apply Organisation configuration
             org_conf = {}
-            org_conf = org_configuration(org)
+            template = resolve_template_org(org['name'])
+            org_conf = org_configuration(org, template)
             org_apps = []
-#            for app in applications:
-#                if app['organizationId'] == org['id']:
-#                    if in_scope(app=app):
-#                        org_apps.append(app_configuration(app))
+            for app in applications:
+                if app['organizationId'] == org['id']:
+                    if in_scope(app=app):
+                        org_apps.append(app_configuration(app, resolve_template_app(template['applications'], app['name'])))
             if len(org_apps) or in_scope(org=org):
                 org_conf['Applications'] = org_apps
                 od = {'Organizations': []}
@@ -166,32 +167,41 @@ def resolve_template_org(org_name):
     return template
 
 
-def org_configuration(org):
-    template = resolve_template_org(org['name'])
+def resolve_template_app(template, app_name):
+    for tapp in template:
+        if tapp['name'] == 'Template-App':
+            template = tapp
+        if tapp['name'] == app_name:
+            return tapp
+    return template
 
-    orgconf = {'Grandfathering': persist_grandfathering(template["grandfathering"], org=org['id']),
-               'Continuous Monitoring': persist_continuous_monitoring(template["continuous_monitoring_stage"], org=org['id']),
-               'Source Control': persist_source_control(template["source_control"],org=org['id']),
+
+def org_configuration(org, template):
+    orgconf = {'Grandfathering': persist_grandfathering(template["grandfathering"], org=org),
+               'Continuous Monitoring': persist_continuous_monitoring(template["continuous_monitoring_stage"], org=org),
+               'Source Control': persist_source_control(template["source_control"],org=org),
                'Data Purging': persist_data_purging(template["data_purging"],org=org['id']),
-               'Proprietary Components': persist_proprietary_components(template["proprietary_components"],org=org['id']),
+               'Proprietary Components': persist_proprietary_components(template["proprietary_components"],org=org),
                'Application Categories': persist_application_categories(template["application_categories"],org=org['id']),
-               'Component Labels': persist_component_labels(template["component_labels"],org=org['id']),
+               'Component Labels': persist_component_labels(template["component_labels"],org=org),
                'License Threat Groups': persist_license_threat_groups(template["license_threat_groups"], org=org['id']),
-               'Access': persist_access(template["access"], org=org['id']),
-               'Policy': persist_policy(template["policy"]["policies"], org=org['id']), 'Name': org['name']}
+               'Access': persist_access(template["access"], org=org),
+               'Policy': persist_policy(template["policy"]["policies"], org=org),
+               'Name': org['name']}
     # Parses and applies all of the child Org configuration
     return purge_empty_attributes(orgconf)
 
 
-def app_configuration(app):
-    app_conf = {'Name': app['name'], 'Grandfathering': persist_grandfathering(None, app=app['publicId']),
-                'Continuous Monitoring': persist_continuous_monitoring(None, app=app['publicId']),
-                'Proprietary Components': persist_proprietary_components(None, app=app),
-                'Component Labels': persist_component_labels(None, app=app['publicId']),
-                'Source Control': persist_source_control(None, app=app['id']), 'Public Id': app['publicId'],
-                'Application Tags': check_categories(None, app['applicationTags']),
-                'Access': persist_access(None, app=app['id']),
-                'Policy': persist_policy(None, app=app['id'])}
+def app_configuration(app, template):
+    app_conf = {'Name': app['name'], 'Grandfathering': persist_grandfathering(template["grandfathering"], app=app),
+                'Continuous Monitoring': persist_continuous_monitoring(template["continuous_monitoring_stage"], app=app),
+                'Proprietary Components': persist_proprietary_components(template["proprietary_components"], app=app),
+                'Component Labels': persist_component_labels(template["component_labels"], app=app),
+                'Source Control': persist_source_control(template["source_control"], app=app),
+                'Public Id': app['publicId'],
+                'Application Tags': check_categories(app['applicationTags']),
+                'Access': persist_access(template["access"], app=app),
+                'Policy': persist_policy(template["policy"], app=app)}
     # Parses and applies all of the application configuration
     return purge_empty_attributes(app_conf)
 
@@ -234,12 +244,12 @@ def put_url(url, params, root=""):
     return handle_resp(resp, root)
 
 
-def org_or_app(org, app):
-    if app:
-        return f'application/{app}'
+def org_or_app_id(org, app):
+    if app is not None and app["publicId"]:
+        return f'application/{app["publicId"]}'
     if org is None:
         org = 'ROOT_ORGANIZATION_ID'
-    return f'organization/{org}'
+    return f'organization/{org["id"]}'
 
 
 # --------------------------------------------------------------------------
@@ -271,6 +281,13 @@ def set_template_organizations():
     global template_organizations
     with open('conf/All-Organizations-Template-Conf.json') as json_file:
         template_organizations = json.load(json_file)["organizations"]
+
+
+def set_template_applications(org):
+    # Load the template data against which configuration health will be benchmarked.
+    global template_applications
+    with open('conf/All-Organizations-Template-Conf.json') as json_file:
+        template_applications = json.load(json_file)["applications"]
 
 
 def set_categories():
@@ -314,18 +331,19 @@ def check_category(ac):
     return None
 
 
-def persist_access(template, org='ROOT_ORGANIZATION_ID', app=None):
+def persist_access(template, org=None, app=None):
     if app is not None:
-        url = f'{iq_url}/api/v2/roleMemberships/application/{app}'
-        eid = app
+        url = f'{iq_url}/api/v2/roleMemberships/application/{app["id"]}'
+        eid = app["id"]
+        entity_name = app["name"]
     else:
-        url = f'{iq_url}/api/v2/roleMemberships/organization/{org}'
-        eid = org
+        url = f'{iq_url}/api/v2/roleMemberships/organization/{org["id"]}'
+        eid = org["id"]
+        entity_name = org["name"]
 
     data = get_url(url)
     if data == template:
         return None
-    org_name = get_organization_name(org)
     if data is not None:
         accessData = []
         access = []
@@ -344,17 +362,17 @@ def persist_access(template, org='ROOT_ORGANIZATION_ID', app=None):
                     # Check the current org/app access against the template
                     try:
                         template.index(access[i])
-                    except ValueError:
+                    except (ValueError, AttributeError):
                         # It should not be in the org/app if its not in the template!
-                        accessData.append(f'Access {access[i]} should be removed from {org_name}')
+                        accessData.append(f'Access {access[i]} should be removed from {entity_name}')
 
         # Iterate over the accessors in the template checking they exist within the current org/app
         for taccess in template:
             try:
                 access.index(taccess)
-            except ValueError:
+            except (ValueError, AttributeError):
                 # It should be in the org/app if its in the template!
-                accessData.append(f'Access {taccess} should be added to {org_name}')
+                accessData.append(f'Access {taccess} should be added to {entity_name}')
 
     if len(accessData):
         return accessData
@@ -368,14 +386,18 @@ def persist_auto_applications():
     return f'Automatic application creation disabled.'
 
 
-def persist_grandfathering(template, org='ROOT_ORGANIZATION_ID', app=None):
-    url = f'{iq_url}/rest/policyViolationGrandfathering/{org_or_app(org, app)}'
+def persist_grandfathering(template, org=None, app=None):
+    url = f'{iq_url}/rest/policyViolationGrandfathering/{org_or_app_id(org, app)}'
     template = purge_empty_attributes(template)
     data = purge_empty_attributes(get_url(url))
     if data == template:
         return None
-    org_name = get_organization_name(org)
-    gf_data = f'Grandfathering should be configured: {template} for {org_name}.'
+    if app is not None:
+        entity_name = app["name"]
+    else:
+        entity_name = org["name"]
+
+    gf_data = f'Grandfathering should be configured: {template} for {entity_name}.'
     return gf_data
 
 
@@ -396,36 +418,45 @@ def persist_proxy():
     return None
 
 
-def persist_source_control(template, org='ROOT_ORGANIZATION_ID', app=None):
-    url = f'{iq_url}/api/v2/sourceControl/{org_or_app(org, app)}'
+def persist_source_control(template, org=None, app=None):
+    url = f'{iq_url}/api/v2/sourceControl/{org_or_app_id(org, app)}'
     # This API applies the config regardless of whether the proxy is already configured.
     data = get_url(url)
     if data is None:
         return None
+    if app is not None:
+        entity_name = app["name"]
+    else:
+        entity_name = org["name"]
+
     data.pop('id')
     data.pop('ownerId')
     if data == template:
         return None
 
     data.pop('enableStatusChecks')
-    org_name = get_organization_name(org)
     for attr in data:
         if data[attr] is not None:
             if template is None:
-                return (f'Source control should be inherited for {org_name}.')
+                return (f'Source control should be inherited for {entity_name}.')
             else:
-                return (f'Source control should be configured:  {template} for {org_name}.')
+                return (f'Source control should be configured:  {template} for {entity_name}.')
     return None
 
 
-def persist_policy(template, org='ROOT_ORGANIZATION_ID', app=None):
+def persist_policy(template, org=None, app=None):
     if app is not None:
         # app level policy import/export is not supported
         return
-    url = f'{iq_url}/rest/policy/{org_or_app(org, app)}/export'
+
+    if app is not None:
+        entity_name = app["name"]
+    else:
+        entity_name = org["name"]
+
+    url = f'{iq_url}/rest/policy/{org_or_app_id(org, app)}/export'
     data = get_url(url)['policies']
     policyData = []
-    org_name = get_organization_name(org)
     if data is not None:
         for policy in data:
             try:
@@ -434,13 +465,13 @@ def persist_policy(template, org='ROOT_ORGANIZATION_ID', app=None):
                     constraint.pop('id')
                 template.index(policy)
             except ValueError:
-                policyData.append(f'Policy: {policy} should be removed from {org_name}')
+                policyData.append(f'Policy: {policy} should be removed from {entity_name}')
         if template is not None:
             for policy in template:
                 try:
                     data.index(policy)
                 except (ValueError, AttributeError):
-                    policyData.append(f'Policy: {policy} should be added to {org_name}.')
+                    policyData.append(f'Policy: {policy} should be added to {entity_name}.')
 
         if len(policyData):
             return policyData
@@ -466,15 +497,17 @@ def persist_automatic_source_control():
     return f'Automatic SCM disabled.'
 
 
-def persist_proprietary_components(template, org='ROOT_ORGANIZATION_ID', app=None):
+def persist_proprietary_components(template, org=None, app=None):
     # This API applies the config regardless of whether the proxy is already configured.
 
     if app is not None:
         url = f'{iq_url}/rest/proprietary/application/{app["publicId"]}'
         eid = app['id']
+        entity_name = app['name']
     else:
-        url = f'{iq_url}/rest/proprietary/organization/{org}'
-        eid = org
+        url = f'{iq_url}/rest/proprietary/organization/{org["id"]}'
+        eid = org["id"]
+        entity_name = org['name']
 
     pcs = get_url(url)
     pcs = pcs['proprietaryConfigByOwners']
@@ -482,7 +515,6 @@ def persist_proprietary_components(template, org='ROOT_ORGANIZATION_ID', app=Non
         return None
 
     if pcs is not None:
-        org_name = get_organization_name(org)
         pcsData = []
         pcsx = []
 
@@ -497,14 +529,14 @@ def persist_proprietary_components(template, org='ROOT_ORGANIZATION_ID', app=Non
                 try:
                     template.index(data)
                 except (ValueError, AttributeError):
-                    pcsData.append(f'Proprietary component {data} should be removed from {org_name}')
+                    pcsData.append(f'Proprietary component {data} should be removed from {entity_name}')
 
     if template is not None:
         for tpc in template:
             try:
                 pcsx.index(tpc)
             except (ValueError, AttributeError):
-                pcsData.append(f'Proprietary component {tpc} should be added to {org_name}')
+                pcsData.append(f'Proprietary component {tpc} should be added to {entity_name}')
 
     if len(pcsData):
         return pcsData
@@ -523,21 +555,25 @@ def persist_roles():
     return None
 
 
-def persist_continuous_monitoring(template, org='ROOT_ORGANIZATION_ID', app=None):
-    url = f'{iq_url}/rest/policyMonitoring/{org_or_app(org, app)}'
+def persist_continuous_monitoring(template, org=None, app=None):
+    url = f'{iq_url}/rest/policyMonitoring/{org_or_app_id(org, app)}'
     data = get_url(url)
     if data is None:
         return None
-    org_name = get_organization_name(org)
+    if app is not None:
+        entity_name = app["name"]
+    else:
+        entity_name = org["name"]
+
     data.pop('id')
     data.pop('ownerId')
     if template == data:
         return None
 
     if template is not None:
-        return (f'Continuous monitoring should be configured:  {template} for {org_name}.')
+        return f'Continuous monitoring should be configured: {template} for {entity_name}.'
     else:
-        return (f'Continuous monitoring should be inherited for {org_name}.')
+        return f'Continuous monitoring should be inherited for {entity_name}.'
 
 
 def persist_data_purging(template, org='ROOT_ORGANIZATION_ID'):
@@ -589,13 +625,17 @@ def persist_application_categories(template, org='ROOT_ORGANIZATION_ID'):
         return acData
     return None
 
-def persist_component_labels(template, org='ROOT_ORGANIZATION_ID', app=None):
-    url = f'{iq_url}/api/v2/labels/{org_or_app(org, app)}'
+def persist_component_labels(template, org=None, app=None):
+    url = f'{iq_url}/api/v2/labels/{org_or_app_id(org, app)}'
     data = get_url(url)
     if data == template:
         return None
+    if app is not None:
+        entity_name = app["name"]
+    else:
+        entity_name = org["name"]
+
     cl_data = []
-    org_name = get_organization_name(org)
     if data is not None:
         for cl in data:
             try:
@@ -603,13 +643,13 @@ def persist_component_labels(template, org='ROOT_ORGANIZATION_ID', app=None):
                 cl.pop("ownerId")
                 template.index(cl)
             except (ValueError, AttributeError):
-                cl_data.append(f'Component label {cl} should be removed from {org_name}.')
+                cl_data.append(f'Component label {cl} should be removed from {entity_name}.')
     if template is not None:
         for cl in template:
             try:
                 data.index(cl)
             except (ValueError, AttributeError):
-                cl_data.append(f'Component label {cl} should be added to {org_name}.')
+                cl_data.append(f'Component label {cl} should be added to {entity_name}.')
     if len(cl_data):
         return cl_data
     return None
