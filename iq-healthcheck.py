@@ -178,7 +178,7 @@ def org_configuration(org):
                'Component Labels': persist_component_labels(template["component_labels"],org=org['id']),
                'License Threat Groups': persist_license_threat_groups(template["license_threat_groups"], org=org['id']),
                'Access': persist_access(template["access"], org=org['id']),
-               'Policy': persist_policy(org=org['id']), 'Name': org['name']}
+               'Policy': persist_policy(template["policy"]["policies"], org=org['id']), 'Name': org['name']}
     # Parses and applies all of the child Org configuration
     return purge_empty_attributes(orgconf)
 
@@ -189,8 +189,9 @@ def app_configuration(app):
                 'Proprietary Components': persist_proprietary_components(None, app=app),
                 'Component Labels': persist_component_labels(None, app=app['publicId']),
                 'Source Control': persist_source_control(None, app=app['id']), 'Public Id': app['publicId'],
-                'Application Tags': check_categories(app['applicationTags']), 'Access': persist_access(None, app=app['id']),
-                'Policy': persist_policy(app=app['id'])}
+                'Application Tags': check_categories(None, app['applicationTags']),
+                'Access': persist_access(None, app=app['id']),
+                'Policy': persist_policy(None, app=app['id'])}
     # Parses and applies all of the application configuration
     return purge_empty_attributes(app_conf)
 
@@ -268,7 +269,7 @@ def set_organizations():
 def set_template_organizations():
     # Load the template data against which configuration health will be benchmarked.
     global template_organizations
-    with open('scrape/All-Organizations-Template-Conf.json') as json_file:
+    with open('conf/All-Organizations-Template-Conf.json') as json_file:
         template_organizations = json.load(json_file)["organizations"]
 
 
@@ -417,16 +418,30 @@ def persist_source_control(template, org='ROOT_ORGANIZATION_ID', app=None):
     return None
 
 
-def persist_policy(org='ROOT_ORGANIZATION_ID', app=None):
+def persist_policy(template, org='ROOT_ORGANIZATION_ID', app=None):
     if app is not None:
         # app level policy import/export is not supported
         return
     url = f'{iq_url}/rest/policy/{org_or_app(org, app)}/export'
-    data = get_url(url)
+    data = get_url(url)['policies']
     policyData = []
+    org_name = get_organization_name(org)
     if data is not None:
-        for policy in data['policies']:
-            policyData.append(f'Policy: {policy["name"]}')
+        for policy in data:
+            try:
+                policy.pop('id')
+                for constraint in policy['constraints']:
+                    constraint.pop('id')
+                template.index(policy)
+            except ValueError:
+                policyData.append(f'Policy: {policy} should be removed from {org_name}')
+        if template is not None:
+            for policy in template:
+                try:
+                    data.index(policy)
+                except (ValueError, AttributeError):
+                    policyData.append(f'Policy: {policy} should be added to {org_name}.')
+
         if len(policyData):
             return policyData
     return None
@@ -465,17 +480,36 @@ def persist_proprietary_components(template, org='ROOT_ORGANIZATION_ID', app=Non
     pcs = pcs['proprietaryConfigByOwners']
     if pcs == template:
         return None
-    elif pcs is not None:
+
+    if pcs is not None:
+        org_name = get_organization_name(org)
         pcsData = []
+        pcsx = []
+
         for pc in pcs:
             data = pc['proprietaryConfig']
             if data['ownerId'] == eid:
-                if len(data['packages']):
-                    pcsData.append(f'Packages : {data["packages"]}.')
-                if len(data['regexes']):
-                    pcsData.append(f'Regexes : {data["regexes"]}.')
-        if len(pcsData):
-            return pcsData
+                if not (len(data['packages']) or len(data['packages'])):
+                    continue
+                data['id'] = None
+                data.pop('ownerId')
+                pcsx.append(data)
+                try:
+                    template.index(data)
+                except (ValueError, AttributeError):
+                    pcsData.append(f'Proprietary component {data} should be removed from {org_name}')
+
+    if template is not None:
+        for tpc in template:
+            try:
+                pcsx.index(tpc)
+            except ValueError:
+                pcsData.append(f'Proprietary component {tpc} should be added to {org_name}')
+            except AttributeError:
+                pass
+
+    if len(pcsData):
+        return pcsData
     return None
 
 
@@ -497,6 +531,11 @@ def persist_continuous_monitoring(template, org='ROOT_ORGANIZATION_ID', app=None
     if data is None:
         return None
     org_name = get_organization_name(org)
+    data.pop('id')
+    data.pop('ownerId')
+    if template == data:
+        return None
+
     if template is not None:
         return (f'Continuous monitoring should be configured:  {template} for {org_name}.')
     else:
@@ -547,7 +586,7 @@ def persist_application_categories(template, org='ROOT_ORGANIZATION_ID'):
             try:
                 data.index(ac)
             except (ValueError, AttributeError):
-                acData.append(f'Application Category {ac} should be added too {org_name}.')
+                acData.append(f'Application Category {ac} should be added to {org_name}.')
     if len(acData):
         return acData
     return None
@@ -572,7 +611,7 @@ def persist_component_labels(template, org='ROOT_ORGANIZATION_ID', app=None):
             try:
                 data.index(cl)
             except (ValueError, AttributeError):
-                cl_data.append(f'Component label {cl} should be added too {org_name}.')
+                cl_data.append(f'Component label {cl} should be added to {org_name}.')
     if len(cl_data):
         return cl_data
     return None
@@ -607,7 +646,7 @@ def persist_license_threat_groups(template, org='ROOT_ORGANIZATION_ID'):
             try:
                 data.index(ltg)
             except (ValueError, AttributeError):
-                ltg_data.append(f'License threat group {ltg} should be added too {org_name}.')
+                ltg_data.append(f'License threat group {ltg} should be added to {org_name}.')
     if len(ltg_data):
         return ltg_data
     return None
