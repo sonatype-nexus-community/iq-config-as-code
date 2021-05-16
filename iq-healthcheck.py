@@ -503,10 +503,8 @@ def persist_proprietary_components(template, org='ROOT_ORGANIZATION_ID', app=Non
         for tpc in template:
             try:
                 pcsx.index(tpc)
-            except ValueError:
+            except (ValueError, AttributeError):
                 pcsData.append(f'Proprietary component {tpc} should be added to {org_name}')
-            except AttributeError:
-                pass
 
     if len(pcsData):
         return pcsData
