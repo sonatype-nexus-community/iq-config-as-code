@@ -193,7 +193,8 @@ def org_configuration(org, template):
 
 
 def app_configuration(app, template):
-    app_conf = {'Name': app['name'], 'Grandfathering': persist_grandfathering(template["grandfathering"], app=app),
+    app_conf = {'Name': app['name'],
+                'Grandfathering': persist_grandfathering(template["grandfathering"], app=app),
                 'Continuous Monitoring': persist_continuous_monitoring(template["continuous_monitoring_stage"], app=app),
                 'Proprietary Components': persist_proprietary_components(template["proprietary_components"], app=app),
                 'Component Labels': persist_component_labels(template["component_labels"], app=app),
