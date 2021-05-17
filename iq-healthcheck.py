@@ -205,7 +205,7 @@ def app_configuration(app, template):
                 'Component Labels': persist_component_labels(template["component_labels"], app=app),
                 'Source Control': persist_source_control(template["source_control"], app=app),
                 'Public Id': app['publicId'],
-                'Application Tags': check_categories(app['applicationTags']),
+                'Application Tags': check_categories(template['applicationTags'], app),
                 'Access': persist_access(template["access"], app=app),
                 'Policy': persist_policy(template["policy"], app=app)}
     # Parses and applies all of the application configuration
@@ -305,13 +305,24 @@ def get_organization_name(id):
     return ret
 
 
-def check_categories(app_tags):
+def check_categories(template, app):
     # If the application category does not exist, it will be added to the root organisation by default, by design.
     ret = []
-    for tag in app_tags:
+    applied_tags = []
+    for tag in app["applicationTags"]:
         tag_ = check_category(tag)
-        if tag_ is not None:
-            ret.append(tag_)
+        try:
+            template.index(tag_)
+            applied_tags.append(tag_)
+        except ValueError:
+            ret.append(f'Application tag {tag_} should be removed from {app["name"]}')
+
+    for tag in template:
+        try:
+            applied_tags.index(tag)
+        except ValueError:
+            ret.append(f'Application tag {tag} should be added to {app["name"]}')
+
     if len(ret):
         return ret
     return None
@@ -390,12 +401,12 @@ def persist_grandfathering(template, org=None, app=None):
     data = purge_empty_attributes(get_url(url))
 
     # Some data does not contain override from, so remove it from the template for comparison
-    try:
-        if data["inheritedFromOrganizationName"] == ROOT_ORG_NAME:
-            # If GF is inherited, the rest of the GF config is of not interest.
-            return None
-    except AttributeError:
-        pass
+    # try:
+    #     if data["inheritedFromOrganizationName"] == ROOT_ORG_NAME:
+    #         # If GF is inherited, the rest of the GF config is of not interest.
+    #         return None
+    # except AttributeError:
+    #     pass
 
     if data == template:
         return None
