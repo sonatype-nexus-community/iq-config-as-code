@@ -4,7 +4,7 @@
       "grandfathering": {
         "enabled": true,
         "inheritedFromOrganizationName": null,
-        "allowOverride": true,
+        "allowOverride": false,
         "allowChange": true
       },
       "continuous_monitoring_stage": {
@@ -11593,7 +11593,7 @@
         "enabled": true,
         "inheritedFromOrganizationName": "Root Organization",
         "allowOverride": false,
-        "allowChange": true
+        "allowChange": false
       },
       "continuous_monitoring_stage": null,
       "source_control": null,
@@ -11672,13 +11672,7 @@
             "allowChange": false
           },
           "continuous_monitoring_stage": null,
-          "proprietary_components": [
-            {
-              "id": null,
-              "packages": [],
-              "regexes": []
-            }
-          ],
+          "proprietary_components": null,
           "component_labels": null,
           "source_control": {
             "repositoryUrl": "https://bitbucket.org/CSMonkee/webgoat-legacy",

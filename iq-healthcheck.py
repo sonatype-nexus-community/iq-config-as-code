@@ -37,7 +37,7 @@ ROOT_ORG_NAME = 'Root Organization'
 
 
 def get_arguments():
-    global iq_url, iq_session, iq_auth, output_dir, debug, self_signed, entities
+    global iq_url, iq_session, iq_auth, output_dir, debug, self_signed, entities, template_file
     parser = argparse.ArgumentParser(description="This script enables you to persist the configuration of IQ Server to JSON\
      data, thus supporting the config-as-code requirement of Sonatype customers")
     parser.add_argument('-u', '--url', help='', default="http://localhost:8070", required=False)
@@ -46,6 +46,7 @@ def get_arguments():
     parser.add_argument('-d', '--debug', default=False, required=False)
     parser.add_argument('-s', '--self_signed', default=False, required=False)
     parser.add_argument('-y', '--scope', default="all", required=False)
+    parser.add_argument('-t', '--template', default="conf/All-Organizations-Template-Conf.json", required=False)
 
     args = vars(parser.parse_args())
     iq_url = args["url"]
@@ -57,6 +58,7 @@ def get_arguments():
     debug = args["debug"]
     self_signed = args["self_signed"]
     entities = args["scope"].split(",")
+    template_file = args["template"]
     # Remove outer whitespace from entity (org, app)
     entities2 = []
 
@@ -91,7 +93,7 @@ def main():
     # store current applications, categories, and organizations
     set_categories()
     set_organizations()
-    set_template_organizations()
+    set_template_organizations(template_file)
     set_applications()
     set_roles()
 
@@ -177,14 +179,17 @@ def resolve_template_app(template, app_name):
 
 
 def org_configuration(org, template):
+    if template is None:
+        return f"Cannot perform health check for {org['name']} because there is no org of that name or Template-Org " \
+               f"within {template_file} "
     orgconf = {'Grandfathering': persist_grandfathering(template["grandfathering"], org=org),
                'Continuous Monitoring': persist_continuous_monitoring(template["continuous_monitoring_stage"], org=org),
-               'Source Control': persist_source_control(template["source_control"],org=org),
-               'Data Purging': persist_data_purging(template["data_purging"],org=org['id']),
-               'Proprietary Components': persist_proprietary_components(template["proprietary_components"],org=org),
-               'Application Categories': persist_application_categories(template["application_categories"],org=org['id']),
-               'Component Labels': persist_component_labels(template["component_labels"],org=org),
-               'License Threat Groups': persist_license_threat_groups(template["license_threat_groups"], org=org['id']),
+               'Source Control': persist_source_control(template["source_control"], org=org),
+               'Data Purging': persist_data_purging(template["data_purging"], org=org['id']),
+               'Proprietary Components': persist_proprietary_components(template["proprietary_components"], org=org),
+               'Application Categories': persist_application_categories(template["application_categories"], org),
+               'Component Labels': persist_component_labels(template["component_labels"], org=org),
+               'License Threat Groups': persist_license_threat_groups(template["license_threat_groups"], org),
                'Access': persist_access(template["access"], org=org),
                'Policy': persist_policy(template["policy"]["policies"], org=org),
                'Name': org['name']}
@@ -277,18 +282,11 @@ def set_organizations():
     organizations = get_url(url, "organizations")
 
 
-def set_template_organizations():
+def set_template_organizations(template):
     # Load the template data against which configuration health will be benchmarked.
     global template_organizations
-    with open('conf/All-Organizations-Template-Conf.json') as json_file:
+    with open(template) as json_file:
         template_organizations = json.load(json_file)["organizations"]
-
-
-def set_template_applications(org):
-    # Load the template data against which configuration health will be benchmarked.
-    global template_applications
-    with open('conf/All-Organizations-Template-Conf.json') as json_file:
-        template_applications = json.load(json_file)["applications"]
 
 
 def set_categories():
@@ -389,8 +387,16 @@ def persist_auto_applications():
 
 def persist_grandfathering(template, org=None, app=None):
     url = f'{iq_url}/rest/policyViolationGrandfathering/{org_or_app_id(org, app)}'
-    template = purge_empty_attributes(template)
     data = purge_empty_attributes(get_url(url))
+
+    # Some data does not contain override from, so remove it from the template for comparison
+    try:
+        if data["inheritedFromOrganizationName"] == ROOT_ORG_NAME:
+            # If GF is inherited, the rest of the GF config is of not interest.
+            return None
+    except AttributeError:
+        pass
+
     if data == template:
         return None
     if app is not None:
@@ -522,7 +528,7 @@ def persist_proprietary_components(template, org=None, app=None):
         for pc in pcs:
             data = pc['proprietaryConfig']
             if data['ownerId'] == eid:
-                if not (len(data['packages']) or len(data['packages'])):
+                if not (len(data['packages']) or len(data['regexes'])):
                     continue
                 data['id'] = None
                 data.pop('ownerId')
@@ -535,6 +541,8 @@ def persist_proprietary_components(template, org=None, app=None):
     if template is not None:
         for tpc in template:
             try:
+                if not (len(tpc['packages']) or len(tpc['regexes'])):
+                    continue
                 pcsx.index(tpc)
             except (ValueError, AttributeError):
                 pcsData.append(f'Proprietary component {tpc} should be added to {entity_name}')
@@ -601,13 +609,13 @@ def persist_data_purging(template, org='ROOT_ORGANIZATION_ID'):
     return None
 
 
-def persist_application_categories(template, org='ROOT_ORGANIZATION_ID'):
-    url = f'{iq_url}/api/v2/applicationCategories/organization/{org}'
+def persist_application_categories(template, org):
+    url = f'{iq_url}/api/v2/applicationCategories/organization/{org["id"]}'
     data = get_url(url)
     if data == template:
         return None
     acData = []
-    org_name = get_organization_name(org)
+    org_name = org['name']
     if data is not None:
         for ac in data:
             try:
@@ -656,13 +664,13 @@ def persist_component_labels(template, org=None, app=None):
     return None
 
 
-def persist_license_threat_groups(template, org='ROOT_ORGANIZATION_ID'):
-    url = f'{iq_url}/rest/licenseThreatGroup/organization/{org}'
+def persist_license_threat_groups(template, org):
+    url = f'{iq_url}/rest/licenseThreatGroup/organization/{org["id"]}'
     data = get_url(url)
     if data == template:
         return None
     ltg_data = []
-    org_name = get_organization_name(org)
+    org_name = org['name']
     if data is not None:
         for ltg in data:
             ltg.pop("id")
