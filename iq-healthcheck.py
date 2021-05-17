@@ -400,13 +400,11 @@ def persist_grandfathering(template, org=None, app=None):
     url = f'{iq_url}/rest/policyViolationGrandfathering/{org_or_app_id(org, app)}'
     data = purge_empty_attributes(get_url(url))
 
-    # Some data does not contain override from, so remove it from the template for comparison
-    # try:
-    #     if data["inheritedFromOrganizationName"] == ROOT_ORG_NAME:
-    #         # If GF is inherited, the rest of the GF config is of not interest.
-    #         return None
-    # except AttributeError:
-    #     pass
+    # The API does not return this for the root organization.
+    try:
+        data["inheritedFromOrganizationName"]
+    except KeyError:
+        template.pop("inheritedFromOrganizationName")
 
     if data == template:
         return None
