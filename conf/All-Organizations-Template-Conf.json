@@ -11675,7 +11675,7 @@
           "proprietary_components": null,
           "component_labels": null,
           "source_control": {
-            "repositoryUrl": "https://bitbucket.org/CSMonkee/webgoat-legacy",
+            "repositoryUrl": "https://bitbucket.org/<USER>/<PROJECT>",
             "username": null,
             "token": null,
             "provider": null,
@@ -11684,14 +11684,7 @@
             "enableStatusChecks": true
           },
           "publicId": "webgoat-legacy-bitbucket",
-          "applicationTags": [
-            {
-              "name": "Other"
-            },
-            {
-              "name": "Distributed"
-            }
-          ],
+          "applicationTags": null,
           "access": [
             {
               "role": "Developer",

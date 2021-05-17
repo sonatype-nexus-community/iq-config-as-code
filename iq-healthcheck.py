@@ -191,7 +191,8 @@ def org_configuration(org, template):
         print(f"Cannot perform health check for {org['name']} because there is no org of that name or Template-Org "
               f"within your template file - {template_file} ")
         return None
-    orgconf = {'Grandfathering': persist_grandfathering(template["grandfathering"], org=org),
+    orgconf = {'Name': org['name'],
+               'Grandfathering': persist_grandfathering(template["grandfathering"], org=org),
                'Continuous Monitoring': persist_continuous_monitoring(template["continuous_monitoring_stage"], org=org),
                'Source Control': persist_source_control(template["source_control"], org=org),
                'Data Purging': persist_data_purging(template["data_purging"], org=org['id']),
@@ -200,8 +201,7 @@ def org_configuration(org, template):
                'Component Labels': persist_component_labels(template["component_labels"], org=org),
                'License Threat Groups': persist_license_threat_groups(template["license_threat_groups"], org),
                'Access': persist_access(template["access"], org=org),
-               'Policy': persist_policy(template["policy"]["policies"], org=org),
-               'Name': org['name']}
+               'Policy': persist_policy(template["policy"]["policies"], org=org)}
 
     def org_or_app_id(org, app):
         if app is not None and app["publicId"]:
@@ -342,14 +342,15 @@ def check_categories(template, app):
         try:
             template.index(tag_)
             applied_tags.append(tag_)
-        except ValueError:
+        except (ValueError, AttributeError):
             ret.append(f'Application tag {tag_} should be removed from {app["name"]}')
 
-    for tag in template:
-        try:
-            applied_tags.index(tag)
-        except ValueError:
-            ret.append(f'Application tag {tag} should be added to {app["name"]}')
+    if template is not None:
+        for tag in template:
+            try:
+                applied_tags.index(tag)
+            except ValueError:
+                ret.append(f'Application tag {tag} should be added to {app["name"]}')
 
     if len(ret):
         return ret
@@ -477,6 +478,14 @@ def persist_source_control(template, org=None, app=None):
 
     data.pop('id')
     data.pop('ownerId')
+    full_template = deepcopy(template)
+    if data["repositoryUrl"] is not None:
+        data.pop("repositoryUrl")
+        try:
+            template.pop("repositoryUrl")
+        except (KeyError, AttributeError):
+            pass
+
     if data == template:
         return None
 
@@ -486,7 +495,7 @@ def persist_source_control(template, org=None, app=None):
             if template is None:
                 return (f'Source control should be inherited for {entity_name}.')
             else:
-                return (f'Source control should be configured:  {template} for {entity_name}.')
+                return (f'Source control should be configured:  {full_template} for {entity_name}.')
     return None
 
 
@@ -519,8 +528,8 @@ def persist_policy(template, org=None, app=None):
                 except (ValueError, AttributeError):
                     policyData.append(f'Policy: {policy} should be added to {entity_name}.')
 
-        if len(policyData):
-            return policyData
+    if len(policyData):
+        return policyData
     return None
 
 
