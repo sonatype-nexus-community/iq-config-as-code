@@ -115,11 +115,13 @@ def main():
             for app in applications:
                 if app['organizationId'] == org['id']:
                     if in_scope(app=app):
-                        org_apps.append(app_configuration(app, resolve_template_app(template, app['name'])))
+                        app = app_configuration(app, resolve_template_app(template, app['name']))
+                        if app is not None:
+                            org_apps.append(app)
             if len(org_apps) or in_scope(org=org):
                 try:
-                    org_conf['Applications'] = org_apps
                     od = {'Organizations': []}
+                    org_conf['Applications'] = org_apps
                     od['Organizations'].append(org_conf)
                     if org_conf['Name'] == ROOT_ORG_NAME:
                         orgs.insert(0, org_conf)
@@ -200,6 +202,13 @@ def org_configuration(org, template):
                'Access': persist_access(template["access"], org=org),
                'Policy': persist_policy(template["policy"]["policies"], org=org),
                'Name': org['name']}
+
+    def org_or_app_id(org, app):
+        if app is not None and app["publicId"]:
+            return f'application/{app["publicId"]}'
+        if org is None:
+            org = 'ROOT_ORGANIZATION_ID'
+        return f'organization/{org["id"]}'
     # Parses and applies all of the child Org configuration
     return purge_empty_attributes(orgconf)
 
@@ -210,12 +219,12 @@ def app_configuration(app, template):
               f"within {template_file} ")
         return None
     app_conf = {'Name': app['name'],
+                'Public Id': app['publicId'],
                 'Grandfathering': persist_grandfathering(template["grandfathering"], app=app),
                 'Continuous Monitoring': persist_continuous_monitoring(template["continuous_monitoring_stage"], app=app),
                 'Proprietary Components': persist_proprietary_components(template["proprietary_components"], app=app),
                 'Component Labels': persist_component_labels(template["component_labels"], app=app),
                 'Source Control': persist_source_control(template["source_control"], app=app),
-                'Public Id': app['publicId'],
                 'Application Tags': check_categories(template['applicationTags'], app),
                 'Access': persist_access(template["access"], app=app),
                 'Policy': persist_policy(template["policy"], app=app)}
