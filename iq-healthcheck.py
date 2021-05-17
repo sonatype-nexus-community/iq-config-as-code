@@ -466,12 +466,14 @@ def persist_source_control(template, org=None, app=None):
     url = f'{iq_url}/api/v2/sourceControl/{org_or_app_id(org, app)}'
     # This API applies the config regardless of whether the proxy is already configured.
     data = get_url(url)
-    if data is None:
-        return None
     if app is not None:
         entity_name = app["name"]
     else:
         entity_name = org["name"]
+
+    if data is None:
+        print(f'{entity_name} does not have source control integration configured.')
+        return None
 
     data.pop('id')
     data.pop('ownerId')
