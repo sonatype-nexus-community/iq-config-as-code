@@ -115,16 +115,19 @@ def main():
             for app in applications:
                 if app['organizationId'] == org['id']:
                     if in_scope(app=app):
-                        org_apps.append(app_configuration(app, resolve_template_app(template['applications'], app['name'])))
+                        org_apps.append(app_configuration(app, resolve_template_app(template, app['name'])))
             if len(org_apps) or in_scope(org=org):
-                org_conf['Applications'] = org_apps
-                od = {'Organizations': []}
-                od['Organizations'].append(org_conf)
-                if org_conf['Name'] == ROOT_ORG_NAME:
-                    orgs.insert(0, org_conf)
-                else:
-                    orgs.append(org_conf)
-                persist_data(od, f'{output_dir}{get_organization_name(org["id"])}-Healthcheck.json')
+                try:
+                    org_conf['Applications'] = org_apps
+                    od = {'Organizations': []}
+                    od['Organizations'].append(org_conf)
+                    if org_conf['Name'] == ROOT_ORG_NAME:
+                        orgs.insert(0, org_conf)
+                    else:
+                        orgs.append(org_conf)
+                    persist_data(od, f'{output_dir}{get_organization_name(org["id"])}-Healthcheck.json')
+                except TypeError:
+                    pass
 
         data['Organizations'] = orgs
         if in_scope(None):
@@ -170,7 +173,10 @@ def resolve_template_org(org_name):
 
 
 def resolve_template_app(template, app_name):
-    for tapp in template:
+    if template is None:
+        return None
+
+    for tapp in template["applications"]:
         if tapp['name'] == 'Template-App':
             template = tapp
         if tapp['name'] == app_name:
@@ -180,8 +186,9 @@ def resolve_template_app(template, app_name):
 
 def org_configuration(org, template):
     if template is None:
-        return f"Cannot perform health check for {org['name']} because there is no org of that name or Template-Org " \
-               f"within {template_file} "
+        print(f"Cannot perform health check for {org['name']} because there is no org of that name or Template-Org "
+              f"within your template file - {template_file} ")
+        return None
     orgconf = {'Grandfathering': persist_grandfathering(template["grandfathering"], org=org),
                'Continuous Monitoring': persist_continuous_monitoring(template["continuous_monitoring_stage"], org=org),
                'Source Control': persist_source_control(template["source_control"], org=org),
@@ -198,6 +205,10 @@ def org_configuration(org, template):
 
 
 def app_configuration(app, template):
+    if template is None:
+        print(f"Cannot perform health check for {app['name']} because there is no app of that name or Template-App "
+              f"within {template_file} ")
+        return None
     app_conf = {'Name': app['name'],
                 'Grandfathering': persist_grandfathering(template["grandfathering"], app=app),
                 'Continuous Monitoring': persist_continuous_monitoring(template["continuous_monitoring_stage"], app=app),
@@ -250,9 +261,17 @@ def put_url(url, params, root=""):
     return handle_resp(resp, root)
 
 
-def org_or_app_id(org, app):
+def org_or_app(org, app):
     if app is not None and app["publicId"]:
         return f'application/{app["publicId"]}'
+    if org is None:
+        org = 'ROOT_ORGANIZATION_ID'
+    return f'organization/{org["id"]}'
+
+
+def org_or_app_id(org, app):
+    if app is not None and app["id"]:
+        return f'application/{app["id"]}'
     if org is None:
         org = 'ROOT_ORGANIZATION_ID'
     return f'organization/{org["id"]}'
@@ -397,7 +416,7 @@ def persist_auto_applications():
 
 
 def persist_grandfathering(template, org=None, app=None):
-    url = f'{iq_url}/rest/policyViolationGrandfathering/{org_or_app_id(org, app)}'
+    url = f'{iq_url}/rest/policyViolationGrandfathering/{org_or_app(org, app)}'
     data = purge_empty_attributes(get_url(url))
 
     # The API does not return this for the root organization.
@@ -470,7 +489,7 @@ def persist_policy(template, org=None, app=None):
     else:
         entity_name = org["name"]
 
-    url = f'{iq_url}/rest/policy/{org_or_app_id(org, app)}/export'
+    url = f'{iq_url}/rest/policy/{org_or_app(org, app)}/export'
     data = get_url(url)['policies']
     policyData = []
     if data is not None:
@@ -574,7 +593,7 @@ def persist_roles():
 
 
 def persist_continuous_monitoring(template, org=None, app=None):
-    url = f'{iq_url}/rest/policyMonitoring/{org_or_app_id(org, app)}'
+    url = f'{iq_url}/rest/policyMonitoring/{org_or_app(org, app)}'
     data = get_url(url)
     if data is None:
         return None
@@ -644,7 +663,7 @@ def persist_application_categories(template, org):
     return None
 
 def persist_component_labels(template, org=None, app=None):
-    url = f'{iq_url}/api/v2/labels/{org_or_app_id(org, app)}'
+    url = f'{iq_url}/api/v2/labels/{org_or_app(org, app)}'
     data = get_url(url)
     if data == template:
         return None
