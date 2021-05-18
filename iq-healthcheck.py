@@ -127,13 +127,13 @@ def main():
                         orgs.insert(0, org_conf)
                     else:
                         orgs.append(org_conf)
-                    persist_data(od, f'{output_dir}{get_organization_name(org["id"])}-Healthcheck.json')
+                    validate_data(od, f'{output_dir}{get_organization_name(org["id"])}-Healthcheck.json')
                 except TypeError:
                     pass
 
         data['Organizations'] = orgs
         if in_scope(None):
-            persist_data(data, f'{output_dir}All-Organizations-Healthcheck.json')
+            validate_data(data, f'{output_dir}All-Organizations-Healthcheck.json')
 
 
 def item_count(data=None, single=False):
@@ -153,15 +153,15 @@ def purge_empty_attributes(data):
 
 
 def nexus_administration():
-    systemConf = {'Users': persist_users(), 'Custom Roles': persist_roles(),
-                  'LDAP Connections': persist_ldap_instances(), 'Email Server': persist_email_server_connection(),
-                  'Proxy': persist_proxy(), 'Webhooks': persist_webhooks(),
-                  'Success Metrics': persist_success_metrics(), 'Automatic Applications': persist_auto_applications(),
-                  'Automatic Source Control': persist_automatic_source_control(),
-                  'Success Metrics Reports': persist_success_metrics_reports()}
+    systemConf = {'Users': validate_users(), 'Custom Roles': validate_roles(),
+                  'LDAP Connections': validate_ldap_instances(), 'Email Server': validate_email_server_connection(),
+                  'Proxy': validate_proxy(), 'Webhooks': validate_webhooks(),
+                  'Success Metrics': validate_success_metrics(), 'Automatic Applications': validate_auto_applications(),
+                  'Automatic Source Control': validate_automatic_source_control(),
+                  'Success Metrics Reports': validate_success_metrics_reports()}
     # Parses and applies all the 'administrative' configuration for Nexus IQ
-    # systemConf['system_notice'] = persist_system_notice()
-    persist_data(purge_empty_attributes(systemConf), f'{output_dir}System-Healthcheck.json')
+    # systemConf['system_notice'] = validate_system_notice()
+    validate_data(purge_empty_attributes(systemConf), f'{output_dir}System-Healthcheck.json')
 
 
 def resolve_template_org(org_name):
@@ -192,16 +192,16 @@ def org_configuration(org, template):
               f"within your template file - {template_file} ")
         return None
     orgconf = {'Name': org['name'],
-               'Grandfathering': persist_grandfathering(template["grandfathering"], org=org),
-               'Continuous Monitoring': persist_continuous_monitoring(template["continuous_monitoring_stage"], org=org),
-               'Source Control': persist_source_control(template["source_control"], org=org),
-               'Data Purging': persist_data_purging(template["data_purging"], org=org['id']),
-               'Proprietary Components': persist_proprietary_components(template["proprietary_components"], org=org),
-               'Application Categories': persist_application_categories(template["application_categories"], org),
-               'Component Labels': persist_component_labels(template["component_labels"], org=org),
-               'License Threat Groups': persist_license_threat_groups(template["license_threat_groups"], org),
-               'Access': persist_access(template["access"], org=org),
-               'Policy': persist_policy(template["policy"]["policies"], org=org)}
+               'Grandfathering': validate_grandfathering(template["grandfathering"], org=org),
+               'Continuous Monitoring': validate_continuous_monitoring(template["continuous_monitoring_stage"], org=org),
+               'Source Control': validate_source_control(template["source_control"], org=org),
+               'Data Purging': validate_data_purging(template["data_purging"], org=org['id']),
+               'Proprietary Components': validate_proprietary_components(template["proprietary_components"], org=org),
+               'Application Categories': validate_application_categories(template["application_categories"], org),
+               'Component Labels': validate_component_labels(template["component_labels"], org=org),
+               'License Threat Groups': validate_license_threat_groups(template["license_threat_groups"], org),
+               'Access': validate_access(template["access"], org=org),
+               'Policy': validate_policy(template["policy"]["policies"], org=org)}
 
     def org_or_app_id(org, app):
         if app is not None and app["publicId"]:
@@ -220,14 +220,14 @@ def app_configuration(app, template):
         return None
     app_conf = {'Name': app['name'],
                 'Public Id': app['publicId'],
-                'Grandfathering': persist_grandfathering(template["grandfathering"], app=app),
-                'Continuous Monitoring': persist_continuous_monitoring(template["continuous_monitoring_stage"], app=app),
-                'Proprietary Components': persist_proprietary_components(template["proprietary_components"], app=app),
-                'Component Labels': persist_component_labels(template["component_labels"], app=app),
-                'Source Control': persist_source_control(template["source_control"], app=app),
+                'Grandfathering': validate_grandfathering(template["grandfathering"], app=app),
+                'Continuous Monitoring': validate_continuous_monitoring(template["continuous_monitoring_stage"], app=app),
+                'Proprietary Components': validate_proprietary_components(template["proprietary_components"], app=app),
+                'Component Labels': validate_component_labels(template["component_labels"], app=app),
+                'Source Control': validate_source_control(template["source_control"], app=app),
                 'Application Tags': check_categories(template['applicationTags'], app),
-                'Access': persist_access(template["access"], app=app),
-                'Policy': persist_policy(template["policy"], app=app)}
+                'Access': validate_access(template["access"], app=app),
+                'Policy': validate_policy(template["policy"], app=app)}
     # Parses and applies all of the application configuration
     return purge_empty_attributes(app_conf)
 
@@ -343,14 +343,14 @@ def check_categories(template, app):
             template.index(tag_)
             applied_tags.append(tag_)
         except (ValueError, AttributeError):
-            ret.append(f'Application tag {tag_} should be removed from {app["name"]}')
+            ret.append(f'Application tag {rendor_json(tag_)} should be removed from {app["name"]}')
 
     if template is not None:
         for tag in template:
             try:
                 applied_tags.index(tag)
             except ValueError:
-                ret.append(f'Application tag {tag} should be added to {app["name"]}')
+                ret.append(f'Application tag {rendor_json(tag)} should be added to {app["name"]}')
 
     if len(ret):
         return ret
@@ -370,7 +370,12 @@ def check_category(ac):
     return None
 
 
-def persist_access(template, org=None, app=None):
+def difference_lists(l1,l2):
+    list = l1 + l2
+    return [value for value in list if (value in l1) - (value in l2)]
+
+
+def validate_access(template, org=None, app=None):
     if app is not None:
         url = f'{iq_url}/api/v2/roleMemberships/application/{app["id"]}'
         eid = app["id"]
@@ -386,6 +391,8 @@ def persist_access(template, org=None, app=None):
     if data is not None:
         accessData = []
         access = []
+        taccess = []
+
         # Iterate over the roles
         for member in data['memberMappings']:
             role = member['roleId']
@@ -395,40 +402,33 @@ def persist_access(template, org=None, app=None):
                     access.append({})
                     # Add the role to the list of access controls for the current org/app
                     i = len(access)-1
-                    access[i]["role"] = roles[role]
-                    access[i]["user_or_group_name"] = mem['userOrGroupName']
-                    access[i]["role_type"] = mem['type']
-                    # Check the current org/app access against the template
-                    try:
-                        template.index(access[i])
-                    except (ValueError, AttributeError):
-                        # It should not be in the org/app if its not in the template!
-                        accessData.append(f'Access {access[i]} should be removed from {entity_name}')
+                    access[i] = roles[role]
 
-        # Iterate over the accessors in the template checking they exist within the current org/app
-        try:
-            for taccess in template:
-                try:
-                    access.index(taccess)
-                except (ValueError, AttributeError):
-                    # It should be in the org/app if its in the template!
-                    accessData.append(f'Access {taccess} should be added to {entity_name}')
-        except TypeError:
-            pass
+        if template is not None:
+            for t in template:
+                taccess.append(t["role"])
+
+        anomalies = difference_lists(access, taccess)
+        for a in anomalies:
+            try:
+                access.index(a)
+                accessData.append(f'{a} role should be removed from {entity_name}')
+            except ValueError:
+                accessData.append(f'{a} role should be added to {entity_name}')
 
     if len(accessData):
         return accessData
     return None
 
 
-def persist_auto_applications():
+def validate_auto_applications():
     url = f'{iq_url}/rest/config/automaticApplications'
     if get_url(url)["enabled"]:
         return f'Automatic application creation enabled.'
     return f'Automatic application creation disabled.'
 
 
-def persist_grandfathering(template, org=None, app=None):
+def validate_grandfathering(template, org=None, app=None):
     url = f'{iq_url}/rest/policyViolationGrandfathering/{org_or_app(org, app)}'
     data = purge_empty_attributes(get_url(url))
 
@@ -445,11 +445,11 @@ def persist_grandfathering(template, org=None, app=None):
     else:
         entity_name = org["name"]
 
-    gf_data = f'Grandfathering should be configured: {template} for {entity_name}.'
+    gf_data = f'Grandfathering should be configured {rendor_json(template, True)} for {entity_name}.'
     return gf_data
 
 
-def persist_webhooks():
+def validate_webhooks():
     url = f'{iq_url}/rest/config/webhook'
     wh = item_count(get_url(url), True)
     if wh:
@@ -457,7 +457,7 @@ def persist_webhooks():
     return None
 
 
-def persist_proxy():
+def validate_proxy():
     # This API applies the config regardless of whether the proxy is already configured.
     url = f'{iq_url}/api/v2/config/httpProxyServer'
     ps = item_count(get_url(url), True)
@@ -466,7 +466,7 @@ def persist_proxy():
     return None
 
 
-def persist_source_control(template, org=None, app=None):
+def validate_source_control(template, org=None, app=None):
     url = f'{iq_url}/api/v2/sourceControl/{org_or_app_id(org, app)}'
     # This API applies the config regardless of whether the proxy is already configured.
     data = get_url(url)
@@ -498,11 +498,11 @@ def persist_source_control(template, org=None, app=None):
             if template is None:
                 return (f'Source control should be inherited for {entity_name}.')
             else:
-                return (f'Source control should be configured:  {full_template} for {entity_name}.')
+                return (f'Source control should be configured:  {rendor_json(full_template)} for {entity_name}.')
     return None
 
 
-def persist_policy(template, org=None, app=None):
+def validate_policy(template, org=None, app=None):
     if app is not None:
         # app level policy import/export is not supported
         return
@@ -536,26 +536,26 @@ def persist_policy(template, org=None, app=None):
     return None
 
 
-def persist_success_metrics():
+def validate_success_metrics():
     url = f'{iq_url}/rest/successMetrics'
     # This API applies the config regardless of whether the proxy is already configured.
     if get_url(url)["enabled"]:
         return f'Success metrics enabled.'
     return f'Success metrics disabled.'
 
-def persist_success_metrics_reports():
+def validate_success_metrics_reports():
     url = f'{iq_url}/rest/successMetrics/report'
     return f'{item_count(get_url(url))} Success metrics reports.'
 
 
-def persist_automatic_source_control():
+def validate_automatic_source_control():
     url = f'{iq_url}/rest/config/automaticScmConfiguration'
     if get_url(url)["enabled"]:
         return f'Automatic SCM enabled.'
     return f'Automatic SCM disabled.'
 
 
-def persist_proprietary_components(template, org=None, app=None):
+def validate_proprietary_components(template, org=None, app=None):
     # This API applies the config regardless of whether the proxy is already configured.
 
     if app is not None:
@@ -587,7 +587,7 @@ def persist_proprietary_components(template, org=None, app=None):
                 try:
                     template.index(data)
                 except (ValueError, AttributeError):
-                    pcsData.append(f'Proprietary component {data} should be removed from {entity_name}')
+                    pcsData.append(f'Proprietary component {rendor_json(purge_empty_attributes(data), True)} should be removed from {entity_name}')
 
     if template is not None:
         for tpc in template:
@@ -596,14 +596,14 @@ def persist_proprietary_components(template, org=None, app=None):
                     continue
                 pcsx.index(tpc)
             except (ValueError, AttributeError):
-                pcsData.append(f'Proprietary component {tpc} should be added to {entity_name}')
+                pcsData.append(f'Proprietary component {rendor_json(purge_empty_attributes(tpc), True)} should be added to {entity_name}')
 
     if len(pcsData):
         return pcsData
     return None
 
 
-def persist_roles():
+def validate_roles():
     url = f'{iq_url}/rest/security/roles'
     data = get_url(url)
     count = 0
@@ -615,7 +615,7 @@ def persist_roles():
     return None
 
 
-def persist_continuous_monitoring(template, org=None, app=None):
+def validate_continuous_monitoring(template, org=None, app=None):
     url = f'{iq_url}/rest/policyMonitoring/{org_or_app(org, app)}'
     data = get_url(url)
     if data is None:
@@ -631,12 +631,12 @@ def persist_continuous_monitoring(template, org=None, app=None):
         return None
 
     if template is not None:
-        return f'Continuous monitoring should be configured: {template} for {entity_name}.'
+        return f'Continuous monitoring should be configured: {rendor_json(template)} for {entity_name}.'
     else:
         return f'Continuous monitoring should be inherited for {entity_name}.'
 
 
-def persist_data_purging(template, org='ROOT_ORGANIZATION_ID'):
+def validate_data_purging(template, org='ROOT_ORGANIZATION_ID'):
     url = f'{iq_url}/api/v2/dataRetentionPolicies/organizations/{org}'
     data = get_url(url)
     if data == template:
@@ -649,18 +649,21 @@ def persist_data_purging(template, org='ROOT_ORGANIZATION_ID'):
         if arStages != template_arStages:
             for stage in arStages:
                 if arStages[stage] != template_arStages[stage]:
-                    dpData.append(f'Data purging for application reports {stage} stage should be: {template_arStages[stage]} for {org_name}')
+                    if template_arStages[stage]['inheritPolicy']:
+                        dpData.append(f'Data purging for application reports {stage} stage should be inherited for {org_name}')
+                    else:
+                        dpData.append(f'Data purging for application reports {stage} stage should be: {rendor_json(template_arStages[stage], True)} for {org_name}')
 
         sm = deepcopy(data['successMetrics'])
         template_sm = template["successMetrics"]
         if sm != template_sm:
-            dpData.append(f'Data purging for success metrics should be: {template_sm} for {org_name}')
+            dpData.append(f'Data purging for success metrics should be: {rendor_json(template_sm)} for {org_name}')
         if len(dpData):
             return dpData
     return None
 
 
-def persist_application_categories(template, org):
+def validate_application_categories(template, org):
     url = f'{iq_url}/api/v2/applicationCategories/organization/{org["id"]}'
     data = get_url(url)
     if data == template:
@@ -685,7 +688,7 @@ def persist_application_categories(template, org):
         return acData
     return None
 
-def persist_component_labels(template, org=None, app=None):
+def validate_component_labels(template, org=None, app=None):
     url = f'{iq_url}/api/v2/labels/{org_or_app(org, app)}'
     data = get_url(url)
     if data == template:
@@ -715,7 +718,7 @@ def persist_component_labels(template, org=None, app=None):
     return None
 
 
-def persist_license_threat_groups(template, org):
+def validate_license_threat_groups(template, org):
     url = f'{iq_url}/rest/licenseThreatGroup/organization/{org["id"]}'
     data = get_url(url)
     if data == template:
@@ -758,19 +761,19 @@ def persist_license_threat_groups(template, org):
     return None
 
 
-def persist_ldap_instances():
+def validate_ldap_instances():
     url = f'{iq_url}/rest/config/ldap'
     lc = item_count(get_url(url))
     return f'{lc} LDAP server(s).'
 
 
-def persist_email_server_connection():
+def validate_email_server_connection():
     url = f'{iq_url}/api/v2/config/mail'
     es = item_count(get_url(url), True)
     return f'{es} Email server.'
 
 
-def persist_users():
+def validate_users():
     url = f'{iq_url}/rest/user'
     uc = item_count(get_url(url))
     return f'{uc} local users.'
@@ -785,11 +788,26 @@ def set_roles():
 
 
 # Write the data to a file...
-def persist_data(data, filename):
+def validate_data(data, filename):
     with open(filename, 'w') as outfile:
         json.dump(data, outfile, indent=2)
     print(f'Persisted data to {filename}')
 
+
+def rendor_json(data, keys=False):
+    text = ""
+    if type(data) is dict:
+        if keys:
+            for d in data:
+                text += f"'{d}:{data[d]}',"
+        else:
+            for d in data:
+                text += f"'{data[d]}',"
+
+    elif type(data) is list:
+        for d in data:
+            text += f"'{d}', "
+    return text[:len(text)-1]
 
 # --------------------------------------------------------------------
 if __name__ == "__main__":

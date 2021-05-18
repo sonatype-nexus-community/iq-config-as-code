@@ -11693,7 +11693,7 @@
             "enablePullRequests": null,
             "enableStatusChecks": true
           },
-          "publicId": "webgoat-legacy-bitbucket",
+          "publicId": null,
           "applicationTags": null,
           "access": null,
           "policy": null
