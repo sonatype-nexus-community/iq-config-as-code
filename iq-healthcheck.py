@@ -42,11 +42,11 @@ def get_arguments():
      data, thus supporting the config-as-code requirement of Sonatype customers")
     parser.add_argument('-u', '--url', help='', default="http://localhost:8070", required=False)
     parser.add_argument('-a', '--auth', help='', default="admin:admin123", required=False)
-    parser.add_argument('-o', '--output', default="./scrape", required=False)
+    parser.add_argument('-o', '--output', default="./healthcheck", required=False)
     parser.add_argument('-d', '--debug', default=False, required=False)
     parser.add_argument('-s', '--self_signed', default=False, required=False)
     parser.add_argument('-y', '--scope', default="all", required=False)
-    parser.add_argument('-t', '--template', default="conf/All-Organizations-Template-Conf.json", required=False)
+    parser.add_argument('-t', '--template', default=False, required=True)
 
     args = vars(parser.parse_args())
     iq_url = args["url"]
@@ -406,12 +406,15 @@ def persist_access(template, org=None, app=None):
                         accessData.append(f'Access {access[i]} should be removed from {entity_name}')
 
         # Iterate over the accessors in the template checking they exist within the current org/app
-        for taccess in template:
-            try:
-                access.index(taccess)
-            except (ValueError, AttributeError):
-                # It should be in the org/app if its in the template!
-                accessData.append(f'Access {taccess} should be added to {entity_name}')
+        try:
+            for taccess in template:
+                try:
+                    access.index(taccess)
+                except (ValueError, AttributeError):
+                    # It should be in the org/app if its in the template!
+                    accessData.append(f'Access {taccess} should be added to {entity_name}')
+        except TypeError:
+            pass
 
     if len(accessData):
         return accessData
