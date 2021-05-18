@@ -432,21 +432,28 @@ def validate_grandfathering(template, org=None, app=None):
     url = f'{iq_url}/rest/policyViolationGrandfathering/{org_or_app(org, app)}'
     data = purge_empty_attributes(get_url(url))
 
-    # The API does not return this for the root organization.
-    try:
-        data["inheritedFromOrganizationName"]
-    except KeyError:
-        template.pop("inheritedFromOrganizationName")
-
     if data == template:
         return None
+
     if app is not None:
         entity_name = app["name"]
     else:
         entity_name = org["name"]
 
-    gf_data = f'Grandfathering should be configured {rendor_json(template, True)} for {entity_name}.'
-    return gf_data
+    try:
+        # The API does not return this for the root organization.
+        if data['inheritedFromOrganizationName'] == template['inheritedFromOrganizationName']:
+            return None
+    except KeyError:
+        # Must be the root
+        if entity_name == ROOT_ORG_NAME:
+            template.pop("inheritedFromOrganizationName")
+            if data == template:
+                return None
+            else:
+                return f"Grandfathering should be {rendor_json(template, True)} enabled for '{entity_name}'."
+
+    return f"Grandfathering should be inherited from '{template['inheritedFromOrganizationName']}' for '{entity_name}'."
 
 
 def validate_webhooks():
@@ -618,22 +625,22 @@ def validate_roles():
 def validate_continuous_monitoring(template, org=None, app=None):
     url = f'{iq_url}/rest/policyMonitoring/{org_or_app(org, app)}'
     data = get_url(url)
-    if data is None:
-        return None
+
     if app is not None:
         entity_name = app["name"]
     else:
         entity_name = org["name"]
 
-    data.pop('id')
-    data.pop('ownerId')
+    if data is not None:
+        data.pop('id')
+        data.pop('ownerId')
+
     if template == data:
         return None
 
-    if template is not None:
-        return f'Continuous monitoring should be configured: {rendor_json(template)} for {entity_name}.'
-    else:
+    if template is None:
         return f'Continuous monitoring should be inherited for {entity_name}.'
+    return f'Continuous monitoring stage should be the {rendor_json(template)} for {entity_name}.'
 
 
 def validate_data_purging(template, org='ROOT_ORGANIZATION_ID'):
