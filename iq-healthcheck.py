@@ -482,6 +482,10 @@ def validate_source_control(template, org=None, app=None):
     else:
         entity_name = org["name"]
 
+    # No data, so SCM not set despite there being a template to define it
+    if data is None:
+        return f'Source control should be configured for {entity_name}.'
+
     # Parity - So nothing to do!
     if data == template:
         return None
@@ -489,10 +493,6 @@ def validate_source_control(template, org=None, app=None):
     # No template and data exists, it must be inherited
     if template is None:
         return None
-
-    # No data, so SCM not set despite there being a template to define it
-    if data is None:
-        return f'Source control should be configured for {entity_name}.'
 
     # Remove the id's which are unique to the data
     data.pop('id')
@@ -534,20 +534,29 @@ def validate_policy(template, org=None, app=None):
     url = f'{iq_url}/rest/policy/{org_or_app(org, app)}/export'
     data = get_url(url)['policies']
     policyData = []
+
     if data is not None:
+        # Iterate over the entity policies
         for policy in data:
             try:
+                # Remove the IDs so the policy can be compared for parity with the template policies
                 policy.pop('id')
                 for constraint in policy['constraints']:
                     constraint.pop('id')
+                # Does the template contain the entity policy?
                 template.index(policy)
             except ValueError:
+                # No! Remove it.
                 policyData.append(f'Policy: {policy} should be removed from {entity_name}')
+
         if template is not None:
+            # Iterate over the template policies
             for policy in template:
                 try:
+                    # Does the entity data contain the template policy?
                     data.index(policy)
                 except (ValueError, AttributeError):
+                    # No! Add it.
                     policyData.append(f'Policy: {policy} should be added to {entity_name}.')
 
     if len(policyData):
@@ -595,26 +604,38 @@ def validate_proprietary_components(template, org=None, app=None):
         pcsData = []
         pcsx = []
 
+        # Iterate over the proprietary config items list
         for pc in pcs:
             data = pc['proprietaryConfig']
+            # Only evaluate the PCs that are scoped to the current entity - list contains the inherited ones too!
             if data['ownerId'] == eid:
+                # If the content is 'empty' ignore it
                 if not (len(data['packages']) or len(data['regexes'])):
                     continue
+
+                # Negate the IDs so the PC data can be compared for parity with the template
                 data['id'] = None
                 data.pop('ownerId')
                 pcsx.append(data)
                 try:
+                    # Does the data align with the template content?
                     template.index(data)
                 except (ValueError, AttributeError):
-                    pcsData.append(f'Proprietary component {rendor_json(purge_empty_attributes(data), True)} should be removed from {entity_name}')
+                    # No! Remove it from IQ.
+                    pcsData.append(f'Proprietary component {rendor_json(purge_empty_attributes(data), True)} should '
+                                   f'be removed from {entity_name}')
 
+    # Iterate over the template PC data
     if template is not None:
         for tpc in template:
             try:
+                # If the data is empty, move on!
                 if not (len(tpc['packages']) or len(tpc['regexes'])):
                     continue
+                # Does the template PC data align with the entity data
                 pcsx.index(tpc)
             except (ValueError, AttributeError):
+                # No! Add it.
                 pcsData.append(f'Proprietary component {rendor_json(purge_empty_attributes(tpc), True)} should be added to {entity_name}')
 
     if len(pcsData):
@@ -690,22 +711,31 @@ def validate_application_categories(template, org):
     acData = []
     org_name = org['name']
     if data is not None:
+        # Iterate over the ACs
         for ac in data:
             try:
+                # Remove the IDs so the data can be compared for parity with the template AC data
                 ac.pop("id")
                 ac.pop("organizationId")
+                # Does the AC exist in the template for the org?
                 template.index(ac)
             except (ValueError, AttributeError):
+                # No! Remove it.
                 acData.append(f'Application Category {ac} should be removed from {org_name}.')
+
     if template is not None:
+        # Iterate over the ACs in the template
         for ac in template:
             try:
+                # Does the template AC exist in the data for the org?
                 data.index(ac)
             except (ValueError, AttributeError):
+                # No! Add it.
                 acData.append(f'Application Category {ac} should be added to {org_name}.')
     if len(acData):
         return acData
     return None
+
 
 def validate_component_labels(template, org=None, app=None):
     url = f'{iq_url}/api/v2/labels/{org_or_app(org, app)}'
@@ -719,19 +749,28 @@ def validate_component_labels(template, org=None, app=None):
 
     cl_data = []
     if data is not None:
+        # Iterate over the CLs for the entity
         for cl in data:
             try:
+                # Remove the IDs so the CL data can be compated for parity with the template data
                 cl.pop("id")
                 cl.pop("ownerId")
+                # Does the CL exist in the template?
                 template.index(cl)
             except (ValueError, AttributeError):
+                # No! Remove it.
                 cl_data.append(f'Component label {cl} should be removed from {entity_name}.')
+
     if template is not None:
+        # Iterate over the CL for the template
         for cl in template:
             try:
+                # Does the template CL exist in the entity CL list?
                 data.index(cl)
             except (ValueError, AttributeError):
+                # No! Add it.
                 cl_data.append(f'Component label {cl} should be added to {entity_name}.')
+
     if len(cl_data):
         return cl_data
     return None
@@ -744,39 +783,46 @@ def validate_license_threat_groups(template, org):
         return None
     ltg_data = []
     org_name = org['name']
+
     if data is not None:
+        # Iterate over the TGs in the org data
         for ltg in data:
+            # Remove the attributes that will enable parity comparison with the template data
             ltg.pop("id")
             ltg.pop("ownerId")
             ltg.pop("nameLowercaseNoWhitespace")
+
     if template is not None:
+        # Iterate over the template
         for ltg in template:
             try:
+                # Remove the license association (likely to have come from a 'scrape' file being used as a template)
                 ltg.pop("licenses")
             except KeyError:
                 pass
+
     if data is not None:
+        # Iterate over the LTGs in the Org data
         for ltg in data:
             try:
+                # Does the LTG exist in the template?
                 template.index(ltg)
             except (ValueError, AttributeError):
+                # No! Remove it.
                 ltg_data.append(f'License threat group {ltg} should be removed from {org_name}.')
+
     if template is not None:
+        # Iterate over the LTGs in the template
         for ltg in template:
             try:
+                # Does the LTG exist in the Org data
                 data.index(ltg)
             except (ValueError, AttributeError):
+                # No! Add it.
                 ltg_data.append(f'License threat group {ltg} should be added to {org_name}.')
+
     if len(ltg_data):
         return ltg_data
-    return None
-
-
-    if data is not None:
-        ltgData = []
-        for ltg in data:
-            ltgData.append(f'{ltg["name"]} has threat level of {ltg["threatLevel"]}')
-        return ltgData
     return None
 
 
