@@ -24,7 +24,7 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 iq_session = requests.Session
 iq_url, iq_auth, debug = "", "", False
-categories, organizations, applications, ldap_connections = [], [], [], []
+app_categories, organizations, applications, ldap_connections = [], [], [], []
 roleType = ['USER', 'GROUP']
 self_signed = False
 
@@ -252,7 +252,7 @@ def set_organizations():
 
 
 def set_categories():
-    global categories
+    global app_categories
     # using categories from root organization.
     url = f'{iq_url}/api/v2/applicationCategories/organization/ROOT_ORGANIZATION_ID'
     categories = get_url(url)
@@ -306,7 +306,7 @@ def check_category(name):
     ret = ''
     if len(name) == 0:
         return None
-    for c in categories:
+    for c in app_categories:
         if name['name'] == c['name']:
             ret = c['id']
             break
@@ -378,7 +378,7 @@ def add_ldap_connection(ldap_conn_name):
 
 
 def add_category(name):
-    global categories
+    global app_categories
 
     url = f'{iq_url}/api/v2/applicationCategories/organization/ROOT_ORGANIZATION_ID'
     data = {"name": name,
@@ -609,7 +609,7 @@ def application_categories(data, org='ROOT_ORGANIZATION_ID'):
     for app_cat in data:
         resp = post_url(url, app_cat)
         if resp is not None:
-            categories.append(resp)
+            app_categories.append(resp)
         print('Applied Application Category configuration:')
         print_debug(app_cat)
 

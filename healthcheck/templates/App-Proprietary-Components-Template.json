@@ -25,7 +25,7 @@
             "develop": {
               "inheritPolicy": false,
               "enablePurging": true,
-              "maxAge": "1 month"
+              "maxAge": "3 months"
             },
             "source": {
               "inheritPolicy": false,
@@ -45,16 +45,17 @@
             "release": {
               "inheritPolicy": false,
               "enablePurging": true,
-              "maxAge": "7 years"
+              "maxAge": "10 years"
             },
             "operate": {
               "inheritPolicy": false,
-              "enablePurging": false
+              "enablePurging": true,
+              "maxAge": "10 years"
             },
             "continuous-monitoring": {
               "inheritPolicy": false,
               "enablePurging": true,
-              "maxAge": "7 years"
+              "maxAge": "3 months"
             }
           }
         },

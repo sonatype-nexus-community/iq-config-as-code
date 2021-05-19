@@ -25,7 +25,7 @@
             "develop": {
               "inheritPolicy": false,
               "enablePurging": true,
-              "maxAge": "1 month"
+              "maxAge": "3 months"
             },
             "source": {
               "inheritPolicy": false,
@@ -45,16 +45,17 @@
             "release": {
               "inheritPolicy": false,
               "enablePurging": true,
-              "maxAge": "7 years"
+              "maxAge": "10 years"
             },
             "operate": {
               "inheritPolicy": false,
-              "enablePurging": false
+              "enablePurging": true,
+              "maxAge": "10 years"
             },
             "continuous-monitoring": {
               "inheritPolicy": false,
               "enablePurging": true,
-              "maxAge": "7 years"
+              "maxAge": "3 months"
             }
           }
         },
@@ -11603,7 +11604,7 @@
             "develop": {
               "inheritPolicy": true,
               "enablePurging": true,
-              "maxAge": "1 month"
+              "maxAge": "3 months"
             },
             "source": {
               "inheritPolicy": true,
@@ -11623,16 +11624,17 @@
             "release": {
               "inheritPolicy": true,
               "enablePurging": true,
-              "maxAge": "7 years"
+              "maxAge": "10 years"
             },
             "operate": {
               "inheritPolicy": true,
-              "enablePurging": false
+              "enablePurging": true,
+              "maxAge": "10 years"
             },
             "continuous-monitoring": {
               "inheritPolicy": true,
               "enablePurging": true,
-              "maxAge": "7 years"
+              "maxAge": "3 months"
             }
           }
         },
@@ -11662,7 +11664,7 @@
           "user_or_group_name": "leads1",
           "role_type": "GROUP"
         }
-      ],
+     ],
       "policy": {
         "policies": [],
         "labels": [],

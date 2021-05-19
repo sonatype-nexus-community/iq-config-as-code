@@ -11601,43 +11601,44 @@
         "applicationReports": {
           "stages": {
             "develop": {
-              "inheritPolicy": true,
+              "inheritPolicy": false,
               "enablePurging": true,
-              "maxAge": "1 month"
+              "maxAge": "3 months"
             },
             "source": {
-              "inheritPolicy": true,
+              "inheritPolicy": false,
               "enablePurging": true,
               "maxAge": "3 months"
             },
             "build": {
-              "inheritPolicy": true,
+              "inheritPolicy": false,
               "enablePurging": true,
               "maxAge": "3 months"
             },
             "stage-release": {
-              "inheritPolicy": true,
+              "inheritPolicy": false,
               "enablePurging": true,
               "maxAge": "3 months"
             },
             "release": {
-              "inheritPolicy": true,
+              "inheritPolicy": false,
               "enablePurging": true,
-              "maxAge": "7 years"
+              "maxAge": "10 years"
             },
             "operate": {
-              "inheritPolicy": true,
-              "enablePurging": false
+              "inheritPolicy": false,
+              "enablePurging": true,
+              "maxAge": "10 years"
             },
             "continuous-monitoring": {
-              "inheritPolicy": true,
+              "inheritPolicy": false,
               "enablePurging": true,
-              "maxAge": "7 years"
+              "maxAge": "3 months"
             }
           }
         },
         "successMetrics": {
-          "inheritPolicy": true,
+          "inheritPolicy": false,
           "enablePurging": true,
           "maxAge": "1 year"
         }

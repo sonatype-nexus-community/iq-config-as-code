@@ -29,7 +29,7 @@ from copy import deepcopy
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 iq_session = requests.Session
 iq_url, iq_auth, output_dir, debug = "", "", "", False
-categories, organizations, template_organizations, applications, ldap_connections, entities = [], [], [], [], [], []
+app_categories, organizations, template_organizations, applications, ldap_connections, entities = [], [], [], [], [], []
 roleType = ['USER', 'GROUP']
 roles = {}
 self_signed = False
@@ -91,7 +91,7 @@ def main():
             return
 
     # store current applications, categories, and organizations
-    set_categories()
+    set_app_categories()
     set_organizations()
     set_template_organizations(template_file)
     set_applications()
@@ -191,11 +191,14 @@ def org_configuration(org, template):
         print(f"Cannot perform health check for {org['name']} because there is no org of that name or Template-Org "
               f"within your template file - {template_file} ")
         return None
+
+    set_app_categories(org['id'])
+
     orgconf = {'Name': org['name'],
                'Grandfathering': validate_grandfathering(template["grandfathering"], org=org),
                'Continuous Monitoring': validate_continuous_monitoring(template["continuous_monitoring_stage"], org=org),
                'Source Control': validate_source_control(template["source_control"], org=org),
-               'Data Purging': validate_data_purging(template["data_purging"], org=org['id']),
+               'Data Purging': validate_data_purging(template["data_purging"], org=org),
                'Proprietary Components': validate_proprietary_components(template["proprietary_components"], org=org),
                'Application Categories': validate_application_categories(template["application_categories"], org),
                'Component Labels': validate_component_labels(template["component_labels"], org=org),
@@ -225,7 +228,7 @@ def app_configuration(app, template):
                 'Proprietary Components': validate_proprietary_components(template["proprietary_components"], app=app),
                 'Component Labels': validate_component_labels(template["component_labels"], app=app),
                 'Source Control': validate_source_control(template["source_control"], app=app),
-                'Application Tags': check_categories(template['applicationTags'], app),
+                'Application Tags': validate_application_tags(template['applicationTags'], app),
                 'Access': validate_access(template["access"], app=app),
                 'Policy': validate_policy(template["policy"], app=app)}
     # Parses and applies all of the application configuration
@@ -317,11 +320,14 @@ def set_template_organizations(template):
         template_organizations = json.load(json_file)["organizations"]
 
 
-def set_categories():
-    global categories
+def set_app_categories(org='ROOT_ORGANIZATION_ID'):
+    global app_categories
     # using categories from root organization.
-    url = f'{iq_url}/api/v2/applicationCategories/organization/ROOT_ORGANIZATION_ID'
-    categories = get_url(url)
+    url = f'{iq_url}/api/v2/applicationCategories/organization/{org}'
+    try:
+        app_categories += get_url(url)
+    except TypeError:
+        pass
 
 
 def get_organization_name(id):
@@ -333,35 +339,41 @@ def get_organization_name(id):
     return ret
 
 
-def check_categories(template, app):
+def validate_application_tags(template, app):
     # If the application category does not exist, it will be added to the root organisation by default, by design.
     ret = []
     applied_tags = []
     for tag in app["applicationTags"]:
-        tag_ = check_category(tag)
-        try:
-            template.index(tag_)
-            applied_tags.append(tag_)
-        except (ValueError, AttributeError):
-            ret.append(f'Application tag {rendor_json(tag_)} should be removed from {app["name"]}')
+        tag_ = check_app_category(tag)
+        if tag_ is not None:
+            try:
+                applied_tags.append(tag_)
+                template.index(tag_)
+            except (AttributeError, ValueError):
+                ret.append(f"Application tag {tag_} should be removed from {app['name']}'")
 
     if template is not None:
         for tag in template:
             try:
                 applied_tags.index(tag)
             except ValueError:
-                ret.append(f'Application tag {rendor_json(tag)} should be added to {app["name"]}')
+                ret.append(f"Application tag {tag} should be added to '{app['name']}'")
 
     if len(ret):
         return ret
     return None
 
 
-def check_category(ac):
+def check_app_category(ac):
     ret = ''
     if len(ac) == 0:
         return None
-    for c in categories:
+    # try:
+    #     app_categories.index(ac)
+    # except ValueError:
+    #     app_categories.append(ac)
+
+    for c in app_categories:
         if ac['tagId'] == c['id']:
             ret = c['name']
             break
@@ -399,10 +411,13 @@ def validate_access(template, org=None, app=None):
             for mem in member['members']:
                 # If the owner is scoped to the current org/app
                 if mem['ownerId'] == eid:
-                    access.append({})
-                    # Add the role to the list of access controls for the current org/app
-                    i = len(access)-1
-                    access[i] = roles[role]
+                    try:
+                        access.index(roles[role])
+                    except ValueError:
+                        access.append({})
+                        # Add the role to the list of access controls for the current org/app
+                        i = len(access)-1
+                        access[i] = roles[role]
 
         if template is not None:
             for t in template:
@@ -676,28 +691,44 @@ def validate_continuous_monitoring(template, org=None, app=None):
     return f'Continuous monitoring stage should be the {rendor_json(template)} for {entity_name}.'
 
 
-def validate_data_purging(template, org='ROOT_ORGANIZATION_ID'):
-    url = f'{iq_url}/api/v2/dataRetentionPolicies/organizations/{org}'
+def validate_data_purging(template, org):
+    url = f'{iq_url}/api/v2/dataRetentionPolicies/organizations/{org["id"]}'
     data = get_url(url)
+
     if data == template:
         return None
     if data is not None:
         arStages = deepcopy(data['applicationReports']['stages'])
         template_arStages = template["applicationReports"]["stages"]
         dpData = []
-        org_name = get_organization_name(org)
+        org_name = org["name"]
         if arStages != template_arStages:
             for stage in arStages:
                 if arStages[stage] != template_arStages[stage]:
                     if template_arStages[stage]['inheritPolicy']:
                         dpData.append(f'Data purging for application reports {stage} stage should be inherited for {org_name}')
+                    elif org_name == ROOT_ORG_NAME:
+                        # ROOT can't inherit!
+                        td = deepcopy(template_arStages[stage])
+                        td.pop('inheritPolicy')
+                        dpData.append(f'Data purging for application reports {stage} stage should be: {td} for {org_name}')
                     else:
-                        dpData.append(f'Data purging for application reports {stage} stage should be: {rendor_json(template_arStages[stage], True)} for {org_name}')
+                        dpData.append(f'Data purging for application reports {stage} stage should be: {template_arStages[stage]} for {org_name}')
 
         sm = deepcopy(data['successMetrics'])
         template_sm = template["successMetrics"]
-        if sm != template_sm:
-            dpData.append(f'Data purging for success metrics should be: {rendor_json(template_sm)} for {org_name}')
+        if template_sm['inheritPolicy']:
+            dpData.append(f'Data purging for application reports success metrics stage should be inherited for {org_name}')
+        elif org_name == ROOT_ORG_NAME:
+            # ROOT can't inherit!
+            td = deepcopy(template_sm)
+            td.pop('inheritPolicy')
+            dpData.append(f'Data purging for application reports success metrics should be: {td} for {org_name}')
+        else:
+            dpData.append(f'Data purging for application reports success metrics should be: {template_sm} for {org_name}')
+
+        # if sm != template_sm:
+        #     dpData.append(f'Data purging for success metrics should be: {template_sm} for {org_name}')
         if len(dpData):
             return dpData
     return None
@@ -721,7 +752,7 @@ def validate_application_categories(template, org):
                 template.index(ac)
             except (ValueError, AttributeError):
                 # No! Remove it.
-                acData.append(f'Application Category {ac} should be removed from {org_name}.')
+                acData.append(f"Application Category '{ac['name']}' should be removed from '{org_name}'.")
 
     if template is not None:
         # Iterate over the ACs in the template
@@ -731,7 +762,7 @@ def validate_application_categories(template, org):
                 data.index(ac)
             except (ValueError, AttributeError):
                 # No! Add it.
-                acData.append(f'Application Category {ac} should be added to {org_name}.')
+                acData.append(f"Application Category '{ac['name']}' should be added to '{org_name}'.")
     if len(acData):
         return acData
     return None
@@ -759,7 +790,7 @@ def validate_component_labels(template, org=None, app=None):
                 template.index(cl)
             except (ValueError, AttributeError):
                 # No! Remove it.
-                cl_data.append(f'Component label {cl} should be removed from {entity_name}.')
+                cl_data.append(f"Component label '{cl['label']}' should be removed from '{entity_name}'.")
 
     if template is not None:
         # Iterate over the CL for the template
@@ -769,7 +800,7 @@ def validate_component_labels(template, org=None, app=None):
                 data.index(cl)
             except (ValueError, AttributeError):
                 # No! Add it.
-                cl_data.append(f'Component label {cl} should be added to {entity_name}.')
+                cl_data.append(f"Component label '{cl['label']}' should be added to '{entity_name}'.")
 
     if len(cl_data):
         return cl_data

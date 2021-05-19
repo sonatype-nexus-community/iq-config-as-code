@@ -26,7 +26,7 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 iq_session = requests.Session
 iq_url, iq_auth, output_dir, debug = "", "", "", False
-categories, organizations, applications, ldap_connections, entities = [], [], [], [], []
+app_categories, organizations, applications, ldap_connections, entities = [], [], [], [], []
 roleType = ['USER', 'GROUP']
 roles = {}
 self_signed = False
@@ -170,7 +170,7 @@ def app_configuration(app):
     app_conf['component_labels'] = persist_component_labels(app=app['publicId'])
     app_conf['source_control'] = persist_source_control(app=app['id'])
     app_conf['publicId'] = app['publicId']
-    app_conf['applicationTags'] = check_categories(app['applicationTags'])
+    app_conf['applicationTags'] = persist_application_tags(app['applicationTags'])
     app_conf['access'] = persist_access(app=app['id'])
     app_conf['policy'] = persist_policy(app=app['id'])
     # persist_data(app_conf, f'{output_dir}{app["name"]}-config.json')
@@ -262,10 +262,10 @@ def set_organizations():
 
 
 def set_categories():
-    global categories
+    global app_categories
     # using categories from root organization.
     url = f'{iq_url}/api/v2/applicationCategories/organization/ROOT_ORGANIZATION_ID'
-    categories = get_url(url)
+    app_categories = get_url(url)
 
 
 def check_application(new_app):
@@ -310,7 +310,7 @@ def check_ldap_connection(name):
         return None
 
 
-def check_categories(app_tags):
+def persist_application_tags(app_tags):
     # If the application category does not exist, it will be added to the root organisation by default, by design.
     ret = []
     for tag in app_tags:
@@ -324,7 +324,7 @@ def check_category(ac):
     ret = ''
     if len(ac) == 0:
         return None
-    for c in categories:
+    for c in app_categories:
         if ac['tagId'] == c['id']:
             ret = c['name']
             break
@@ -336,7 +336,7 @@ def category_exists(ac):
     ret = ''
     if len(ac) == 0:
         return None
-    for c in categories:
+    for c in app_categories:
         if ac['id'] == c['id']:
             ret = c['name']
             break
@@ -600,7 +600,7 @@ def persist_application_categories(org='ROOT_ORGANIZATION_ID'):
     if data is not None:
         for ac in data:
             if category_exists(ac) is None:
-                categories.append(ac.copy())
+                app_categories.append(ac.copy())
             ac.pop('id')
             ac.pop('organizationId')
 
