@@ -370,7 +370,7 @@ def check_category(ac):
     return None
 
 
-def difference_lists(l1,l2):
+def difference(l1, l2):
     list = l1 + l2
     return [value for value in list if (value in l1) - (value in l2)]
 
@@ -408,7 +408,7 @@ def validate_access(template, org=None, app=None):
             for t in template:
                 taccess.append(t["role"])
 
-        anomalies = difference_lists(access, taccess)
+        anomalies = difference(access, taccess)
         for a in anomalies:
             try:
                 access.index(a)
@@ -482,31 +482,43 @@ def validate_source_control(template, org=None, app=None):
     else:
         entity_name = org["name"]
 
-    if data is None:
-        print(f'{entity_name} does not have source control integration configured.')
-        return None
-
-    data.pop('id')
-    data.pop('ownerId')
-    full_template = deepcopy(template)
-    if data["repositoryUrl"] is not None:
-        data.pop("repositoryUrl")
-        try:
-            template.pop("repositoryUrl")
-        except (KeyError, AttributeError):
-            pass
-
+    # Parity - So nothing to do!
     if data == template:
         return None
 
+    # No template and data exists, it must be inherited
+    if template is None:
+        return None
+
+    # No data, so SCM not set despite there being a template to define it
+    if data is None:
+        return f'Source control should be configured for {entity_name}.'
+
+    # Remove the id's which are unique to the data
+    data.pop('id')
+    data.pop('ownerId')
+    # This attribute value appears indeterminate. Removing it from the template:data comparison to come!
     data.pop('enableStatusChecks')
-    for attr in data:
-        if data[attr] is not None:
-            if template is None:
-                return (f'Source control should be inherited for {entity_name}.')
-            else:
-                return (f'Source control should be configured:  {rendor_json(full_template)} for {entity_name}.')
+    # The URL can not be specific within the template
+    d_url = data.pop('repositoryUrl')
+    try:
+        template.pop('enableStatusChecks')
+        template.pop('repositoryUrl')
+    except (KeyError, AttributeError):
+        pass
+
+    # The data should now match the template
+    if not (data == template):
+        # It doesn't! So report the need to do so.
+        return f'Source control should be configured: {template} for {entity_name}.'
+
+    if d_url is not None:
+        # Data URL ensure its and app
+        if not len(d_url):
+            # If it's set then the SCM integration is configured
+            return f'Source control should be configured: {template} for {entity_name}.'
     return None
+
 
 
 def validate_policy(template, org=None, app=None):
