@@ -346,18 +346,24 @@ def validate_application_tags(template, app):
     for tag in app["applicationTags"]:
         tag_ = check_app_category(tag)
         if tag_ is not None:
-            try:
-                applied_tags.append(tag_)
-                template.index(tag_)
-            except (AttributeError, ValueError):
-                ret.append(f"Application tag {tag_} should be removed from {app['name']}'")
+            # The regard here is that a tag has been applied. Tags speak to HOW the application is delivered
+            # and can influence policies in scope.
+            ret.append(f"Application tag '{tag_['name']}' has been applied to '{app['name']}'")
+            # try:
+            #     applied_tags.append(tag_)
+            #     template.index(tag_)
+            # except (AttributeError, ValueError):
+            #     ret.append(f"Application tag {tag_} should be removed from {app['name']}'")
 
     if template is not None:
-        for tag in template:
-            try:
-                applied_tags.index(tag)
-            except ValueError:
-                ret.append(f"Application tag {tag} should be added to '{app['name']}'")
+        # If tags exist in the template, advise that one should be applied.
+        if not len(ret):
+            ret.append(f"Application '{app['name']}' should have an application tag applied.")
+        # for tag in template:
+        #     try:
+        #         applied_tags.index(tag)
+        #     except ValueError:
+        #         ret.append(f"Application tag {tag} should be added to '{app['name']}'")
 
     if len(ret):
         return ret
@@ -368,10 +374,6 @@ def check_app_category(ac):
     ret = ''
     if len(ac) == 0:
         return None
-    # try:
-    #     app_categories.index(ac)
-    # except ValueError:
-    #     app_categories.append(ac)
 
     for c in app_categories:
         if ac['tagId'] == c['id']:
@@ -412,6 +414,7 @@ def validate_access(template, org=None, app=None):
                 # If the owner is scoped to the current org/app
                 if mem['ownerId'] == eid:
                     try:
+                        # Just checking for the presence of the role. There might be N users/groups that fulfil it!
                         access.index(roles[role])
                     except ValueError:
                         access.append({})
@@ -423,9 +426,11 @@ def validate_access(template, org=None, app=None):
             for t in template:
                 taccess.append(t["role"])
 
+        # Find the difference between the fulfilled roes and the templated roles
         anomalies = difference(access, taccess)
         for a in anomalies:
             try:
+                # If the anomaly exists in the fulfilled roles, it is in excess of the template.
                 access.index(a)
                 accessData.append(f'{a} role should be removed from {entity_name}')
             except ValueError:
