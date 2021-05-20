@@ -1539,11 +1539,6 @@
           ]
         },
         {
-          "name": "Vetting",
-          "threatLevel": 10,
-          "licenses": []
-        },
-        {
           "name": "Weak Copyleft",
           "threatLevel": 2,
           "licenses": [

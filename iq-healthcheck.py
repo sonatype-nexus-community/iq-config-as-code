@@ -497,48 +497,53 @@ def validate_source_control(template, org=None, app=None):
     url = f'{iq_url}/api/v2/sourceControl/{org_or_app_id(org, app)}'
     # This API applies the config regardless of whether the proxy is already configured.
     data = get_url(url)
+
     if app is not None:
         entity_name = app["name"]
+        error = f'SCM configuration URL should be set for {entity_name}'
     else:
         entity_name = org["name"]
+        error = f'SCM configuration should be set for {entity_name}, aligned to {template} data'
 
-    # No data, so SCM not set despite there being a template to define it
-    if data is None:
-        return f'Source control should be configured for {entity_name}.'
-
-    # Parity - So nothing to do!
+    # Neither configured - So nothing to do!
     if data == template:
         return None
 
-    # No template and data exists, it must be inherited
-    if template is None:
-        return None
+    if data is not None:
+        # Source control is applied to the Org/App
+        try:
+            # The URL only pertains to the application config!
+            # Remove the id's which are unique to the data
+            data.pop('id')
+            data.pop('ownerId')
+            # This attribute value appears indeterminate. Removing it from the template:data comparison to come!
+            data.pop('enableStatusChecks')
+            # The URL can not be specific within the template
+            data.pop('repositoryUrl')
+        except (KeyError, AttributeError):
+            pass
 
-    # Remove the id's which are unique to the data
-    data.pop('id')
-    data.pop('ownerId')
-    # This attribute value appears indeterminate. Removing it from the template:data comparison to come!
-    data.pop('enableStatusChecks')
-    # The URL can not be specific within the template
-    d_url = data.pop('repositoryUrl')
-    try:
-        template.pop('enableStatusChecks')
-        template.pop('repositoryUrl')
-    except (KeyError, AttributeError):
-        pass
+        # SCM applied, but no template?
+        # If SCM inherits the purge will ensure zero length
+        if template is None and len(purge_empty_attributes(data)):
+            return f'Source control should be removed for {entity_name}.'
 
-    # The data should now match the template
-    if not (data == template):
-        # It doesn't! So report the need to do so.
-        return f'Source control should be configured: {template} for {entity_name}.'
+    if template is not None:
+        try:
+            # This attribute value appears indeterminate. Removing it from the template:data comparison to come!
+            tcopy = deepcopy(template)
+            tcopy.pop('repositoryUrl')
+            tcopy.pop('enableStatusChecks')
+        except (KeyError, AttributeError):
+            # It doesn't! So report the need to do so.
+            pass
 
-    if d_url is not None:
-        # Data URL ensure its and app
-        if not len(d_url):
-            # If it's set then the SCM integration is configured
-            return f'Source control should be configured: {template} for {entity_name}.'
+        # if both exist, the data should now match the template
+        if data != tcopy:
+            # If not, the template config is applicable
+            return error
+
     return None
-
 
 
 def validate_policy(template, org=None, app=None):
@@ -757,7 +762,7 @@ def validate_application_categories(template, org):
                 template.index(ac)
             except (ValueError, AttributeError):
                 # No! Remove it.
-                acData.append(f"Application Category '{ac['name']}' should be removed from '{org_name}'.")
+                acData.append(f"Application Category '{ac}' should be removed from '{org_name}'.")
 
     if template is not None:
         # Iterate over the ACs in the template
@@ -767,7 +772,7 @@ def validate_application_categories(template, org):
                 data.index(ac)
             except (ValueError, AttributeError):
                 # No! Add it.
-                acData.append(f"Application Category '{ac['name']}' should be added to '{org_name}'.")
+                acData.append(f"Application Category '{ac}' should be added to '{org_name}'.")
     if len(acData):
         return acData
     return None
