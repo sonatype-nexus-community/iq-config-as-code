@@ -18,8 +18,6 @@
 
 import argparse
 import json
-
-from deepdiff import DeepDiff
 import requests
 import os
 
@@ -221,6 +219,7 @@ def app_configuration(app, template):
         print(f"Cannot perform health check for {app['name']} because there is no app of that name or Template-App "
               f"within {template_file} ")
         return None
+
     app_conf = {'Name': app['name'],
                 'Public Id': app['publicId'],
                 'Grandfathering': validate_grandfathering(template["grandfathering"], app=app),
@@ -348,7 +347,8 @@ def validate_application_tags(template, app):
         if tag_ is not None:
             # The regard here is that a tag has been applied. Tags speak to HOW the application is delivered
             # and can influence policies in scope.
-            ret.append(f"Application tag '{tag_['name']}' has been applied to '{app['name']}'")
+            # ret.append(f"Application tag '{tag_['name']}' has been applied to '{app['name']}'")
+            return None
             # try:
             #     applied_tags.append(tag_)
             #     template.index(tag_)
