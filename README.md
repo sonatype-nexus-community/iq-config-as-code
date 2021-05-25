@@ -74,17 +74,33 @@ Usage: iq-healthcheck [ARGS]...
     docker run -w /tmp --rm -i -v $PWD:/tmp broadinstitute/python-requests iq-scrape-conf.py -u "http://<iq-hostname>:<iq-port>"
 
     # Run the script natively on your host
-    python3 iq-healthcheck.py  -a <user>:<password> -u <protocol>://<hostname>:<port> -o /tmp
+    python3 iq-healthcheck.py  -a <user>:<password> -u <protocol>://<hostname>:<port> -o /tmp -t healthcheck/templates/App-RBAC-Template.json
 
     # Healthcheck a specific organisation
-    python3 iq-healthcheck.py  -a <user>:<password> -u <protocol>://<hostname>:<port> -o /tmp -y "My Org"
+    python3 iq-healthcheck.py  -a <user>:<password> -u <protocol>://<hostname>:<port> -o /tmp -y "My Org" -t healthcheck/templates/Org-RBAC-Template.json
 
     # Healthcheck a specific application public-id
     # The application public-id is id by which you identify an application when scanning with the cli.
-    python3 iq-healthcheck.py  -a <user>:<password> -u <protocol>://<hostname>:<port> -o /tmp -y "application-x"
+    python3 iq-healthcheck.py  -a <user>:<password> -u <protocol>://<hostname>:<port> -o /tmp -y "application-x" -t healthcheck/templates/App-RBAC-Template.json
 
     # Healthcheck a specific organisation(s) and specific application(s) public-id(s)
-    python3 iq-healthcheck.py  -a <user>:<password> -u <protocol>://<hostname>:<port> -o /tmp -y "My Org,Your Org,application-x,application-y"
+    python3 iq-healthcheck.py  -a <user>:<password> -u <protocol>://<hostname>:<port> -o /tmp -y "My Org,Your Org,application-x,application-y" 
+                                                                                                                -t healthcheck/templates/Org-RBAC-Template.json
+                                                                                                                
+    The healthcheck/templates directory contains two template configurations. The sole difference pertains to provisioning of role based access control (RBAC). 
+    How the template works...
+    
+    The template configuration baselines best practice pertaining to the 'Root Organisation'. If you want a specific organisation to deviate from the template
+    you must 'scrape' it's data and copy/paste it into the template json file. Thereafter, the 'Template-Org' containing a 'Template-App' configuration exists. 
+    The configuration of organisations/applications that are not specifically identified by name within the template is benchmarked against the template org/app.
+    Output is written to the 'healthcheck' directory by default. The '<Org-Name>-Healthcheck.json' file informs the compliance of your organisation and application
+    against the template.
+    
+    You may be required to adjust the template to align with your SDLC. For example 'Root Organisation' proprietary component matching uses data that must be
+    modified in order to align with your company namespaces. The 'policy' configuration utilises role based notifications which ensure stakeholders receive
+    notification of new policy violations. Does your business benefit from this capability?
+    
+    Please feel free to discuss this with the Sonatype Customer Success team: success@sonatype.com
 
 Usage: iq-scrape-config [ARGS]...
 
@@ -122,6 +138,9 @@ Options:
       -o, --output        <output-path>                                                     # iq-scrape-conf.py & iq-healthcheck only - defaults to ./scrape
       
       -y, --scope         Comma delimited list of org name(s) and/or app public-id(s)       # iq-scrape-conf.py & iq-healthcheck only - defaults to "all"
+      
+      -t, --template      The template configuration against which the environment configuration is benchmarked.
+                                                                                            # iq-healthcheck.py only
 
 Limitations/Scope:
 
@@ -155,7 +174,9 @@ Changelog
 
 23rd March 2021 - Enable scrape of specific selected application(s) and/or organisation(s)
 
-6th May 2021 - Add healthcheck capability
+06th May 2021 - Add healthcheck capability
+
+25th May 2021 - Enhanced healthcheck benchmarks environment configuration against a 'template' configuration aligned with recommended best practice.
 
 
 LICENSE
