@@ -1,0 +1,68 @@
+{
+  "organizations": [
+    {
+      "proprietary_components": [
+        {
+          "id": null,
+          "packages": [
+            "com.company.organization"
+          ],
+          "regexes": [
+            "com.company.organization.*"
+          ]
+        }
+      ],
+      "access": [
+        {
+          "role": "Application Evaluator",
+          "user_or_group_name": "BuildAgent",
+          "role_type": "USER"
+        }
+      ],
+      "name": "Best-Practice-Template",
+      "applications": [
+        {
+          "name": "Webgoat Legacy",
+          "proprietary_components": [
+            {
+              "id": null,
+              "packages": [
+                "com.company.application"
+              ],
+              "regexes": [
+                "com.company.application.*"
+              ]
+            }
+          ],
+          "source_control": {
+            "repositoryUrl": "https://bitbucket.org/CSMonkee/webgoat-legacy",
+            "username": null,
+            "token": null,
+            "provider": null,
+            "baseBranch": null,
+            "enablePullRequests": null,
+            "enableStatusChecks": true
+          },
+          "publicId": "webgoat-legacy",
+          "applicationTags": [
+            {
+              "name": "Distributed"
+            }
+          ],
+          "access": [
+            {
+              "role": "Developer",
+              "user_or_group_name": "developerteam1",
+              "role_type": "GROUP"
+            },
+            {
+              "role": "Owner",
+              "user_or_group_name": "leads1",
+              "role_type": "GROUP"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
