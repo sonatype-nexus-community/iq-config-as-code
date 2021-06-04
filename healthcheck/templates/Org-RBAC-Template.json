@@ -78,18 +78,8 @@
       ],
       "application_categories": [
         {
-          "name": "Company-Confidential",
-          "description": "Contains bespoke company IP and is subject to rigorous policy.",
-          "color": "orange"
-        },
-        {
-          "name": "COTS Third-Party Vendor",
-          "description": "Commercial off-the-shelf application, supplied under license by a third-party vendor.",
-          "color": "light-blue"
-        },
-        {
           "name": "Distributed",
-          "description": "Applications that are provided for consumption outside the company.",
+          "description": "Applications that are provided for consumption outside the company",
           "color": "yellow"
         },
         {
@@ -101,16 +91,6 @@
           "name": "Internal",
           "description": "Applications that are used only by your employees",
           "color": "dark-green"
-        },
-        {
-          "name": "Other",
-          "description": "Other",
-          "color": "dark-blue"
-        },
-        {
-          "name": "Patent Protection",
-          "description": "Application that is subject to patent protection or is a candidate for such protection.",
-          "color": "dark-red"
         }
       ],
       "component_labels": [
@@ -130,12 +110,6 @@
           "label": "Architecture-Deprecated",
           "description": "Components we want to discourage from developer use",
           "color": "orange",
-          "ownerType": "ORGANIZATION"
-        },
-        {
-          "label": "External License",
-          "description": "Denotes a component that is subject to an external commercial license.",
-          "color": "dark-red",
           "ownerType": "ORGANIZATION"
         }
       ],
