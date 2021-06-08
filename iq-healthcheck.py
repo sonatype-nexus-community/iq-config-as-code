@@ -32,7 +32,8 @@ roleType = ['USER', 'GROUP']
 roles = {}
 self_signed = False
 ROOT_ORG_NAME = 'Root Organization'
-
+TEMPLATE_ORG_NAME = 'Template-Org'
+TEMPLATE_APP_NAME = 'Template-App'
 
 def get_arguments():
     global iq_url, iq_session, iq_auth, output_dir, debug, self_signed, entities, template_file
@@ -197,7 +198,7 @@ def org_configuration(org, template):
                'Continuous Monitoring': validate_continuous_monitoring(template["continuous_monitoring_stage"], org=org),
                'Source Control': validate_source_control(template["source_control"], org=org),
                'Data Purging': validate_data_purging(template["data_purging"], org=org),
-               'Proprietary Components': validate_proprietary_components(template["proprietary_components"], org=org),
+               'Proprietary Components': validate_proprietary_components(template, org=org),
                'Application Categories': validate_application_categories(template["application_categories"], org),
                'Component Labels': validate_component_labels(template["component_labels"], org=org),
                'License Threat Groups': validate_license_threat_groups(template["license_threat_groups"], org),
@@ -224,7 +225,7 @@ def app_configuration(app, template):
                 'Public Id': app['publicId'],
                 'Grandfathering': validate_grandfathering(template["grandfathering"], app=app),
                 'Continuous Monitoring': validate_continuous_monitoring(template["continuous_monitoring_stage"], app=app),
-                'Proprietary Components': validate_proprietary_components(template["proprietary_components"], app=app),
+                'Proprietary Components': validate_proprietary_components(template, app=app),
                 'Component Labels': validate_component_labels(template["component_labels"], app=app),
                 'Source Control': validate_source_control(template["source_control"], app=app),
                 'Application Tags': validate_application_tags(template['applicationTags'], app),
@@ -610,7 +611,8 @@ def validate_automatic_source_control():
 
 def validate_proprietary_components(template, org=None, app=None):
     # This API applies the config regardless of whether the proxy is already configured.
-
+    default_template_org_or_app = template["name"] == TEMPLATE_APP_NAME or template["name"] == TEMPLATE_ORG_NAME
+    template = template["proprietary_components"]
     if app is not None:
         url = f'{iq_url}/rest/proprietary/application/{app["publicId"]}'
         eid = app['id']
@@ -646,9 +648,19 @@ def validate_proprietary_components(template, org=None, app=None):
                     # Does the data align with the template content?
                     template.index(data)
                 except (ValueError, AttributeError):
-                    # No! Remove it from IQ.
-                    pcsData.append(f'Proprietary component {rendor_json(purge_empty_attributes(data), True)} should '
-                                   f'be removed from {entity_name}')
+                    # Is the entity matched with the default template?
+                    if default_template_org_or_app:
+                        # The template-org/app cannot specify proprietary component matches for every org/app.
+                        # Therefore, if the org/app has PC and the template doesn't, inform that it should be removed.
+                        if not template or not len(template):
+                            pcsData.append(f'{entity_name} has proprietary component configuration that should be '
+                                           f'removed. The default template does not specify proprietary component '
+                                           f'configuration.')
+                    # No. It's a named entity, so the PC config can be explicitly specified.
+                    else:
+                        # No! Remove it from IQ.
+                        pcsData.append(f'Proprietary component {rendor_json(purge_empty_attributes(data), True)} should '
+                               f'be removed from {entity_name}')
 
     # Iterate over the template PC data
     if template is not None:
@@ -660,8 +672,17 @@ def validate_proprietary_components(template, org=None, app=None):
                 # Does the template PC data align with the entity data
                 pcsx.index(tpc)
             except (ValueError, AttributeError):
-                # No! Add it.
-                pcsData.append(f'Proprietary component {rendor_json(purge_empty_attributes(tpc), True)} should be added to {entity_name}')
+                # Is the entity matched with the default template?
+                if default_template_org_or_app:
+                    # Therefore, if the template has PC and the org/app doesn't, inform that it should be added.
+                    if not len(pcsx):
+                        pcsData.append(f'{entity_name} is missing proprietary component configuration. The default '
+                                       f'template specifies proprietary component configuration.')
+                # No. It's a named entity, so the PC config can be explicitly specified.
+                else:
+                    # No! Add it.
+                    pcsData.append(f'Proprietary component {rendor_json(purge_empty_attributes(tpc), True)} should be '
+                                   f'added to {entity_name}')
 
     if len(pcsData):
         return pcsData

@@ -79,7 +79,7 @@
       "application_categories": [
         {
           "name": "Distributed",
-          "description": "Applications that are provided for consumption outside the company",
+          "description": "Applications that are provided for consumption outside the company.",
           "color": "yellow"
         },
         {
@@ -11613,7 +11613,17 @@
           "maxAge": "1 year"
         }
       },
-      "proprietary_components": null,
+      "proprietary_components": [
+        {
+          "id": null,
+          "packages": [
+            "com.sonatype.example"
+          ],
+          "regexes": [
+            "com.sonatype.example.*"
+          ]
+        }
+      ],
       "application_categories": null,
       "component_labels": null,
       "license_threat_groups": null,
