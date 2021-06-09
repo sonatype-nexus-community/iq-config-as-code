@@ -675,7 +675,7 @@ def validate_proprietary_components(template, org=None, app=None):
                 # Is the entity matched with the default template?
                 if default_template_org_or_app:
                     # Therefore, if the template has PC and the org/app doesn't, inform that it should be added.
-                    if not len(pcsx):
+                    if pcsx and not len(pcsx):
                         pcsData.append(f'{entity_name} is missing proprietary component configuration. The default '
                                        f'template specifies proprietary component configuration.')
                 # No. It's a named entity, so the PC config can be explicitly specified.
