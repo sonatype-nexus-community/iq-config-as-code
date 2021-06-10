@@ -23,6 +23,7 @@ import os
 
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from copy import deepcopy
+from dictdiffer import diff
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 iq_session = requests.Session
@@ -547,6 +548,56 @@ def validate_source_control(template, org=None, app=None):
     return None
 
 
+def policy_notification_disparities(notifications, tnotifications, ntype):
+    if notifications != tnotifications:
+        return f"{ntype} are not aligned between the policy and the template"
+    return None
+
+
+def advise_policy_disparities(policy, tpolicy):
+    policy_advisories = []
+    name = policy['name']
+    if policy['ownerId'] != tpolicy['ownerId']:
+        policy_advisories.append(f'{name} belongs to {get_organization_name(policy["ownerId"])}, but should belong to {get_organization_name(tpolicy["ownerId"])}.')
+    if policy['threatLevel'] != tpolicy['threatLevel']:
+        policy_advisories.append(f'{name} has threat level {policy["threatLevel"]}, but should have threat level {tpolicy["threatLevel"]}.')
+    if policy['policyViolationGrandfatheringAllowed'] != tpolicy['policyViolationGrandfatheringAllowed']:
+        policy_advisories.append(f'{name} has Grandfathering set {policy["policyViolationGrandfatheringAllowed"]}, but should have it set {tpolicy["policyViolationGrandfatheringAllowed"]}.')
+
+    # Remove the constraint id's to ensure comparison can work.
+    for constraint in policy['constraints']:
+        for condition in constraint['conditions']:
+            condition.pop('value')
+    for constraint in tpolicy['constraints']:
+        for condition in constraint['conditions']:
+            condition.pop('value')
+    if policy['constraints'] != tpolicy['constraints']:
+        policy_advisories.append(f'{name} constraints require the following correction {list(diff(policy["constraints"],tpolicy["constraints"]))}')
+
+    if policy['actions'] != tpolicy['actions']:
+        al = list(diff(policy["actions"], tpolicy["actions"]))
+        for tuple in al:
+            if len(tuple[1]):
+                policy_advisories.append(f"{tuple[0]} '{tuple[1]}' stage action from '{tuple[2][0]}' to '{tuple[2][1]}'")
+            else:
+                policy_advisories.append(f"{tuple[0]} '{tuple[2][0][1]}' action to '{tuple[2][0][0]}' stage ")
+
+    advisory = policy_notification_disparities(policy['notifications']['userNotifications'], tpolicy['notifications']['userNotifications'], 'User notifications')
+    if advisory is not None:
+        policy_advisories.append(advisory)
+    advisory = policy_notification_disparities(policy['notifications']['roleNotifications'], tpolicy['notifications']['roleNotifications'], 'Role notifications')
+    if advisory is not None:
+        policy_advisories.append(advisory)
+    advisory = policy_notification_disparities(policy['notifications']['jiraNotifications'], tpolicy['notifications']['jiraNotifications'], 'Jira notifications')
+    if advisory is not None:
+        policy_advisories.append(advisory)
+    advisory = policy_notification_disparities(policy['notifications']['webhookNotifications'], tpolicy['notifications']['webhookNotifications'], 'Webhook notifications')
+    if advisory is not None:
+        policy_advisories.append(advisory)
+
+    return policy_advisories
+
+
 def validate_policy(template, org=None, app=None):
     if app is not None:
         # app level policy import/export is not supported
@@ -559,7 +610,7 @@ def validate_policy(template, org=None, app=None):
 
     url = f'{iq_url}/rest/policy/{org_or_app(org, app)}/export'
     data = get_url(url)['policies']
-    policyData = []
+    policyData = {}
 
     if data is not None:
         # Iterate over the entity policies
@@ -570,20 +621,22 @@ def validate_policy(template, org=None, app=None):
                 for constraint in policy['constraints']:
                     constraint.pop('id')
                 # Does the template contain the entity policy?
-                template.index(policy)
+                # If the policy matches the template, so remove it from the template for disparity comparison
+                del(template[template.index(policy)])
             except ValueError:
-                # No! Remove it.
-                policyData.append(f'Policy: {policy} should be removed from {entity_name}')
+                # The template policy will be retained for disparity comparison and reporting
+                pass
 
         if template is not None:
             # Iterate over the template policies
-            for policy in template:
-                try:
-                    # Does the entity data contain the template policy?
-                    data.index(policy)
-                except (ValueError, AttributeError):
-                    # No! Add it.
-                    policyData.append(f'Policy: {policy} should be added to {entity_name}.')
+            for tpolicy in template:
+                # Does the entity data contain the template policy?
+                for policy in data:
+                    if policy['name'] == tpolicy['name']:
+                        advisories = advise_policy_disparities(policy, tpolicy)
+                        if len(advisories):
+                            policyData[policy['name']] = advisories
+                        break
 
     if len(policyData):
         return policyData

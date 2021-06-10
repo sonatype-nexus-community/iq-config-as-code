@@ -79,7 +79,7 @@
       "application_categories": [
         {
           "name": "Distributed",
-          "description": "Applications that are provided for consumption outside the company.",
+          "description": "Applications that are provided for consumption outside the company",
           "color": "yellow"
         },
         {
@@ -1767,16 +1767,34 @@
               }
             ],
             "actions": {
-              "proxy": "fail",
+              "proxy": "warn",
               "develop": "warn",
-              "build": "fail",
-              "stage-release": "fail",
-              "release": "fail",
-              "operate": "fail"
+              "source": "warn",
+              "build": "warn",
+              "stage-release": "warn",
+              "release": "warn",
+              "operate": "warn"
             },
             "notifications": {
               "userNotifications": [],
-              "roleNotifications": [],
+              "roleNotifications": [
+                {
+                  "stageIds": [
+                    "build",
+                    "source",
+                    "stage-release"
+                  ],
+                  "roleId": "1da70fae1fd54d6cb7999871ebdb9a36"
+                },
+                {
+                  "stageIds": [
+                    "continuous-monitoring",
+                    "operate",
+                    "release"
+                  ],
+                  "roleId": "1cddabf7fdaa47d6833454af10e0a3ef"
+                }
+              ],
               "jiraNotifications": [],
               "webhookNotifications": []
             }
@@ -1833,7 +1851,7 @@
                   {
                     "conditionTypeId": "License Threat Group",
                     "operator": "is",
-                    "value": "a15ca30e97c74b30a2bec006bda3afda",
+                    "value": "26339022a5474fbba7991197ca918a11",
                     "conditionIndex": 0
                   }
                 ]
@@ -1842,14 +1860,32 @@
             "actions": {
               "proxy": "fail",
               "develop": "warn",
+              "source": "warn",
               "build": "warn",
-              "stage-release": "fail",
-              "release": "fail",
-              "operate": "fail"
+              "stage-release": "warn",
+              "release": "warn",
+              "operate": "warn"
             },
             "notifications": {
               "userNotifications": [],
-              "roleNotifications": [],
+              "roleNotifications": [
+                {
+                  "stageIds": [
+                    "build",
+                    "source",
+                    "stage-release"
+                  ],
+                  "roleId": "1da70fae1fd54d6cb7999871ebdb9a36"
+                },
+                {
+                  "stageIds": [
+                    "continuous-monitoring",
+                    "operate",
+                    "release"
+                  ],
+                  "roleId": "1cddabf7fdaa47d6833454af10e0a3ef"
+                }
+              ],
               "jiraNotifications": [],
               "webhookNotifications": []
             }
@@ -1858,7 +1894,7 @@
             "name": "License-Commercial",
             "ownerId": "ROOT_ORGANIZATION_ID",
             "threatLevel": 7,
-            "policyViolationGrandfatheringAllowed": false,
+            "policyViolationGrandfatheringAllowed": true,
             "constraints": [
               {
                 "name": "License containing commercial terms detected",
@@ -1867,16 +1903,41 @@
                   {
                     "conditionTypeId": "License Threat Group",
                     "operator": "is",
-                    "value": "2cf450b0a8174aff9bb030104709565c",
+                    "value": "ca071427bc6d4897b796feff1be60292",
                     "conditionIndex": 0
                   }
                 ]
               }
             ],
-            "actions": {},
+            "actions": {
+              "proxy": "warn",
+              "develop": "warn",
+              "source": "warn",
+              "build": "warn",
+              "stage-release": "warn",
+              "release": "warn",
+              "operate": "warn"
+            },
             "notifications": {
               "userNotifications": [],
-              "roleNotifications": [],
+              "roleNotifications": [
+                {
+                  "stageIds": [
+                    "build",
+                    "source",
+                    "stage-release"
+                  ],
+                  "roleId": "1da70fae1fd54d6cb7999871ebdb9a36"
+                },
+                {
+                  "stageIds": [
+                    "continuous-monitoring",
+                    "operate",
+                    "release"
+                  ],
+                  "roleId": "1cddabf7fdaa47d6833454af10e0a3ef"
+                }
+              ],
               "jiraNotifications": [],
               "webhookNotifications": []
             }
@@ -1894,7 +1955,7 @@
                   {
                     "conditionTypeId": "License Threat Group",
                     "operator": "is",
-                    "value": "d695ca23c1da40488a9ffe1e7040a144",
+                    "value": "dc3f49ae7f444263908017224df54172",
                     "conditionIndex": 0
                   }
                 ]
@@ -1903,14 +1964,32 @@
             "actions": {
               "proxy": "fail",
               "develop": "warn",
-              "build": "fail",
-              "stage-release": "fail",
-              "release": "fail",
-              "operate": "fail"
+              "source": "warn",
+              "build": "warn",
+              "stage-release": "warn",
+              "release": "warn",
+              "operate": "warn"
             },
             "notifications": {
               "userNotifications": [],
-              "roleNotifications": [],
+              "roleNotifications": [
+                {
+                  "stageIds": [
+                    "build",
+                    "source",
+                    "stage-release"
+                  ],
+                  "roleId": "1da70fae1fd54d6cb7999871ebdb9a36"
+                },
+                {
+                  "stageIds": [
+                    "continuous-monitoring",
+                    "operate",
+                    "release"
+                  ],
+                  "roleId": "1cddabf7fdaa47d6833454af10e0a3ef"
+                }
+              ],
               "jiraNotifications": [],
               "webhookNotifications": []
             }
@@ -1928,7 +2007,7 @@
                   {
                     "conditionTypeId": "License Threat Group",
                     "operator": "is",
-                    "value": "7eca9b4f21a54317b80415e72e1dd381",
+                    "value": "b3d13a89ef4343fd914c830a9d6d99d7",
                     "conditionIndex": 0
                   },
                   {
@@ -1946,10 +2025,35 @@
                 ]
               }
             ],
-            "actions": {},
+            "actions": {
+              "proxy": "warn",
+              "develop": "warn",
+              "source": "warn",
+              "build": "warn",
+              "stage-release": "warn",
+              "release": "warn",
+              "operate": "warn"
+            },
             "notifications": {
               "userNotifications": [],
-              "roleNotifications": [],
+              "roleNotifications": [
+                {
+                  "stageIds": [
+                    "build",
+                    "source",
+                    "stage-release"
+                  ],
+                  "roleId": "1da70fae1fd54d6cb7999871ebdb9a36"
+                },
+                {
+                  "stageIds": [
+                    "continuous-monitoring",
+                    "operate",
+                    "release"
+                  ],
+                  "roleId": "1cddabf7fdaa47d6833454af10e0a3ef"
+                }
+              ],
               "jiraNotifications": [],
               "webhookNotifications": []
             }
@@ -2090,14 +2194,32 @@
             "actions": {
               "proxy": "fail",
               "develop": "warn",
-              "build": "fail",
-              "stage-release": "fail",
-              "release": "fail",
-              "operate": "fail"
+              "source": "warn",
+              "build": "warn",
+              "stage-release": "warn",
+              "release": "warn",
+              "operate": "warn"
             },
             "notifications": {
               "userNotifications": [],
-              "roleNotifications": [],
+              "roleNotifications": [
+                {
+                  "stageIds": [
+                    "build",
+                    "source",
+                    "stage-release"
+                  ],
+                  "roleId": "1da70fae1fd54d6cb7999871ebdb9a36"
+                },
+                {
+                  "stageIds": [
+                    "continuous-monitoring",
+                    "operate",
+                    "release"
+                  ],
+                  "roleId": "1cddabf7fdaa47d6833454af10e0a3ef"
+                }
+              ],
               "jiraNotifications": [],
               "webhookNotifications": []
             }
@@ -2115,16 +2237,41 @@
                   {
                     "conditionTypeId": "License Threat Group",
                     "operator": "is",
-                    "value": "775e3f547f7b42af9268cc75d3458ce3",
+                    "value": "00798638029c435f8407842971eedc01",
                     "conditionIndex": 0
                   }
                 ]
               }
             ],
-            "actions": {},
+            "actions": {
+              "proxy": "warn",
+              "develop": "warn",
+              "source": "warn",
+              "build": "warn",
+              "stage-release": "warn",
+              "release": "warn",
+              "operate": "warn"
+            },
             "notifications": {
               "userNotifications": [],
-              "roleNotifications": [],
+              "roleNotifications": [
+                {
+                  "stageIds": [
+                    "build",
+                    "source",
+                    "stage-release"
+                  ],
+                  "roleId": "1da70fae1fd54d6cb7999871ebdb9a36"
+                },
+                {
+                  "stageIds": [
+                    "continuous-monitoring",
+                    "operate",
+                    "release"
+                  ],
+                  "roleId": "1cddabf7fdaa47d6833454af10e0a3ef"
+                }
+              ],
               "jiraNotifications": [],
               "webhookNotifications": []
             }
@@ -2148,10 +2295,35 @@
                 ]
               }
             ],
-            "actions": {},
+            "actions": {
+              "proxy": "warn",
+              "develop": "warn",
+              "source": "warn",
+              "build": "warn",
+              "stage-release": "warn",
+              "release": "warn",
+              "operate": "warn"
+            },
             "notifications": {
               "userNotifications": [],
-              "roleNotifications": [],
+              "roleNotifications": [
+                {
+                  "stageIds": [
+                    "build",
+                    "source",
+                    "stage-release"
+                  ],
+                  "roleId": "1da70fae1fd54d6cb7999871ebdb9a36"
+                },
+                {
+                  "stageIds": [
+                    "continuous-monitoring",
+                    "operate",
+                    "release"
+                  ],
+                  "roleId": "1cddabf7fdaa47d6833454af10e0a3ef"
+                }
+              ],
               "jiraNotifications": [],
               "webhookNotifications": []
             }
@@ -2178,29 +2350,28 @@
             "actions": {
               "proxy": "fail",
               "develop": "warn",
+              "source": "warn",
               "build": "warn",
-              "stage-release": "fail",
-              "release": "fail",
-              "operate": "fail"
+              "stage-release": "warn",
+              "release": "warn",
+              "operate": "warn"
             },
             "notifications": {
               "userNotifications": [],
               "roleNotifications": [
                 {
                   "stageIds": [
-                    "proxy",
                     "build",
-                    "release",
+                    "source",
                     "stage-release"
                   ],
                   "roleId": "1da70fae1fd54d6cb7999871ebdb9a36"
                 },
                 {
                   "stageIds": [
-                    "proxy",
-                    "build",
-                    "release",
-                    "stage-release"
+                    "continuous-monitoring",
+                    "operate",
+                    "release"
                   ],
                   "roleId": "1cddabf7fdaa47d6833454af10e0a3ef"
                 }
@@ -2237,22 +2408,30 @@
             "actions": {
               "proxy": "fail",
               "develop": "warn",
-              "build": "fail",
-              "stage-release": "fail",
-              "release": "fail",
-              "operate": "fail"
+              "source": "warn",
+              "build": "warn",
+              "stage-release": "warn",
+              "release": "warn",
+              "operate": "warn"
             },
             "notifications": {
               "userNotifications": [],
               "roleNotifications": [
                 {
                   "stageIds": [
-                    "proxy",
                     "build",
-                    "release",
+                    "source",
                     "stage-release"
                   ],
                   "roleId": "1da70fae1fd54d6cb7999871ebdb9a36"
+                },
+                {
+                  "stageIds": [
+                    "continuous-monitoring",
+                    "operate",
+                    "release"
+                  ],
+                  "roleId": "1cddabf7fdaa47d6833454af10e0a3ef"
                 }
               ],
               "jiraNotifications": [],
@@ -2314,14 +2493,32 @@
             "actions": {
               "proxy": "fail",
               "develop": "warn",
-              "build": "fail",
-              "stage-release": "fail",
-              "release": "fail",
-              "operate": "fail"
+              "source": "warn",
+              "build": "warn",
+              "stage-release": "warn",
+              "release": "warn",
+              "operate": "warn"
             },
             "notifications": {
               "userNotifications": [],
-              "roleNotifications": [],
+              "roleNotifications": [
+                {
+                  "stageIds": [
+                    "build",
+                    "source",
+                    "stage-release"
+                  ],
+                  "roleId": "1da70fae1fd54d6cb7999871ebdb9a36"
+                },
+                {
+                  "stageIds": [
+                    "continuous-monitoring",
+                    "operate",
+                    "release"
+                  ],
+                  "roleId": "1cddabf7fdaa47d6833454af10e0a3ef"
+                }
+              ],
               "jiraNotifications": [],
               "webhookNotifications": []
             }
@@ -2352,16 +2549,34 @@
               }
             ],
             "actions": {
-              "proxy": "fail",
+              "proxy": "warn",
               "develop": "warn",
-              "build": "fail",
-              "stage-release": "fail",
-              "release": "fail",
-              "operate": "fail"
+              "source": "warn",
+              "build": "warn",
+              "stage-release": "warn",
+              "release": "warn",
+              "operate": "warn"
             },
             "notifications": {
               "userNotifications": [],
-              "roleNotifications": [],
+              "roleNotifications": [
+                {
+                  "stageIds": [
+                    "build",
+                    "source",
+                    "stage-release"
+                  ],
+                  "roleId": "1da70fae1fd54d6cb7999871ebdb9a36"
+                },
+                {
+                  "stageIds": [
+                    "continuous-monitoring",
+                    "operate",
+                    "release"
+                  ],
+                  "roleId": "1cddabf7fdaa47d6833454af10e0a3ef"
+                }
+              ],
               "jiraNotifications": [],
               "webhookNotifications": []
             }
@@ -2374,7 +2589,7 @@
             "constraints": [
               {
                 "name": "3rd-party component name conflicts with proprietary component name",
-                "operator": "OR",
+                "operator": "AND",
                 "conditions": [
                   {
                     "conditionTypeId": "ProprietaryNameConflict",
@@ -2386,81 +2601,9 @@
               }
             ],
             "actions": {
-              "proxy": "fail"
-            },
-            "notifications": {
-              "userNotifications": [],
-              "roleNotifications": [],
-              "jiraNotifications": [],
-              "webhookNotifications": []
-            }
-          },
-          {
-            "name": "Suspicious Component",
-            "ownerId": "ROOT_ORGANIZATION_ID",
-            "threatLevel": 8,
-            "policyViolationGrandfatheringAllowed": false,
-            "constraints": [
-              {
-                "name": "Suspicious",
-                "operator": "OR",
-                "conditions": [
-                  {
-                    "conditionTypeId": "IntegrityRating",
-                    "operator": "is",
-                    "value": "1",
-                    "conditionIndex": 0
-                  }
-                ]
-              }
-            ],
-            "actions": {
               "proxy": "fail",
               "develop": "warn",
-              "build": "fail",
-              "stage-release": "fail",
-              "release": "fail",
-              "operate": "fail"
-            },
-            "notifications": {
-              "userNotifications": [],
-              "roleNotifications": [
-                {
-                  "stageIds": [
-                    "proxy",
-                    "build",
-                    "release",
-                    "stage-release"
-                  ],
-                  "roleId": "1da70fae1fd54d6cb7999871ebdb9a36"
-                }
-              ],
-              "jiraNotifications": [],
-              "webhookNotifications": []
-            }
-          },
-          {
-            "name": "Unhygienic Component",
-            "ownerId": "ROOT_ORGANIZATION_ID",
-            "threatLevel": 6,
-            "policyViolationGrandfatheringAllowed": false,
-            "constraints": [
-              {
-                "name": "Hygiene-Poor",
-                "operator": "OR",
-                "conditions": [
-                  {
-                    "conditionTypeId": "HygieneRating",
-                    "operator": "is",
-                    "value": "4",
-                    "conditionIndex": 0
-                  }
-                ]
-              }
-            ],
-            "actions": {
-              "proxy": "warn",
-              "develop": "warn",
+              "source": "warn",
               "build": "warn",
               "stage-release": "warn",
               "release": "warn",
@@ -2471,12 +2614,19 @@
               "roleNotifications": [
                 {
                   "stageIds": [
-                    "proxy",
                     "build",
-                    "release",
+                    "source",
                     "stage-release"
                   ],
                   "roleId": "1da70fae1fd54d6cb7999871ebdb9a36"
+                },
+                {
+                  "stageIds": [
+                    "continuous-monitoring",
+                    "operate",
+                    "release"
+                  ],
+                  "roleId": "1cddabf7fdaa47d6833454af10e0a3ef"
                 }
               ],
               "jiraNotifications": [],
