@@ -1,0 +1,51 @@
+{
+  "Organizations": [
+    {
+      "Name": "The A Team",
+      "Data Purging": [
+        "Data purging for application reports develop stage should be inherited for The A Team",
+        "Data purging for application reports build stage should be inherited for The A Team",
+        "Data purging for application reports stage-release stage should be inherited for The A Team",
+        "Data purging for application reports release stage should be inherited for The A Team",
+        "Data purging for application reports operate stage should be inherited for The A Team",
+        "Data purging for application reports continuous-monitoring stage should be inherited for The A Team",
+        "Data purging for application reports success metrics stage should be inherited for The A Team"
+      ],
+      "Proprietary Components": [
+        "The A Team is missing proprietary component configuration. The default template specifies proprietary component configuration."
+      ],
+      "Access": [
+        "Application Evaluator role should be added to The A Team"
+      ],
+      "Applications": [
+        {
+          "Name": "Holy Grail",
+          "Public Id": "App1",
+          "Source Control": "SCM configuration URL should be set for Holy Grail",
+          "Access": [
+            "Developer role should be added to Holy Grail"
+          ]
+        },
+        {
+          "Name": "Grandpa",
+          "Public Id": "Grandpa",
+          "Source Control": "SCM configuration URL should be set for Grandpa",
+          "Access": [
+            "Developer role should be added to Grandpa"
+          ]
+        },
+        {
+          "Name": "Secret Sauce",
+          "Public Id": "SecretSauce",
+          "Proprietary Components": [
+            "Secret Sauce has proprietary component configuration that should be removed. The default template does not specify proprietary component configuration."
+          ],
+          "Source Control": "SCM configuration URL should be set for Secret Sauce",
+          "Access": [
+            "Developer role should be added to Secret Sauce"
+          ]
+        }
+      ]
+    }
+  ]
+}

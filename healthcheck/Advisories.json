@@ -1,0 +1,8 @@
+{
+  "Users": "There are 3 local users.",
+  "Custom Roles": "There are 1 Custom roles.",
+  "LDAP Connections": "There are 0 LDAP servers configured.",
+  "Email Server": "There are 1 Email servers configured.",
+  "Proxy": "There are no proxy servers configured.",
+  "Webhooks": "There are 1 Webhooks configured."
+}

@@ -35,6 +35,7 @@ self_signed = False
 ROOT_ORG_NAME = 'Root Organization'
 TEMPLATE_ORG_NAME = 'Template-Org'
 TEMPLATE_APP_NAME = 'Template-App'
+advisories = {}
 
 def get_arguments():
     global iq_url, iq_session, iq_auth, output_dir, debug, self_signed, entities, template_file
@@ -139,6 +140,16 @@ def main():
             validate_data(data, f'{output_dir}All-Organizations-Healthcheck.json')
 
 
+
+
+
+    extract_advisories()
+
+
+
+
+
+
 def item_count(data=None, single=False):
     if data is None:
         return 0
@@ -166,6 +177,8 @@ def nexus_administration():
     # systemConf['system_notice'] = validate_system_notice()
     validate_data(purge_empty_attributes(systemConf), f'{output_dir}System-Healthcheck.json')
 
+def extract_advisories():
+    validate_data(advisories, f'{output_dir}Advisories.json')
 
 def resolve_template_org(org_name):
     template = None
@@ -485,6 +498,7 @@ def validate_webhooks():
     url = f'{iq_url}/rest/config/webhook'
     wh = item_count(get_url(url), True)
     if wh:
+        advisories.update({'Webhooks' : 'There are '+str(wh)+' Webhooks configured.'})
         return f'{wh} Webhooks.'
     return None
 
@@ -493,7 +507,9 @@ def validate_proxy():
     # This API applies the config regardless of whether the proxy is already configured.
     url = f'{iq_url}/api/v2/config/httpProxyServer'
     ps = item_count(get_url(url), True)
+    advisories.update({'Proxy' : 'There are no proxy servers configured.'})
     if ps:
+        advisories.update({'Proxy' : 'There are '+str(ps)+' proxy servers configured.'})
         return f'Proxy server.'
     return None
 
@@ -753,7 +769,8 @@ def validate_roles():
         if element.pop('builtIn') is False:
             count = count + 1
     if count:
-        return f'{count} Customer roles.'
+        advisories.update({'Custom Roles' : 'There are '+str(count)+' Custom roles.'})
+        return f'{count} Custom roles.'
     return None
 
 
@@ -947,18 +964,21 @@ def validate_license_threat_groups(template, org):
 def validate_ldap_instances():
     url = f'{iq_url}/rest/config/ldap'
     lc = item_count(get_url(url))
+    advisories.update({'LDAP Connections' : 'There are '+str(lc)+' LDAP servers configured.'})
     return f'{lc} LDAP server(s).'
 
 
 def validate_email_server_connection():
     url = f'{iq_url}/api/v2/config/mail'
     es = item_count(get_url(url), True)
+    advisories.update({'Email Server' : 'There are '+str(es)+' Email servers configured.'})
     return f'{es} Email server.'
 
 
 def validate_users():
     url = f'{iq_url}/rest/user'
     uc = item_count(get_url(url))
+    advisories.update({'Users' : 'There are '+str(uc)+' local users.'})
     return f'{uc} local users.'
 
 

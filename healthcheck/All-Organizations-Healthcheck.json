@@ -1,0 +1,249 @@
+{
+  "Organizations": [
+    {
+      "Name": "Root Organization",
+      "Grandfathering": "Grandfathering should be 'enabled:True','allowOverride:False','allowChange:True' enabled for 'Root Organization'.",
+      "Continuous Monitoring": "Continuous monitoring stage should be the 'operate' for Root Organization.",
+      "Source Control": "SCM configuration should be set for Root Organization, aligned to {'repositoryUrl': None, 'username': 'CSMonkee', 'token': '#~FAKE~SECRET~KEY~#', 'provider': 'bitbucket', 'baseBranch': 'master', 'enablePullRequests': True, 'enableStatusChecks': True} data",
+      "Data Purging": [
+        "Data purging for application reports develop stage should be: {'enablePurging': True, 'maxAge': '3 months'} for Root Organization",
+        "Data purging for application reports build stage should be: {'enablePurging': True, 'maxAge': '3 months'} for Root Organization",
+        "Data purging for application reports stage-release stage should be: {'enablePurging': True, 'maxAge': '3 months'} for Root Organization",
+        "Data purging for application reports release stage should be: {'enablePurging': True, 'maxAge': '10 years'} for Root Organization",
+        "Data purging for application reports operate stage should be: {'enablePurging': True, 'maxAge': '10 years'} for Root Organization",
+        "Data purging for application reports continuous-monitoring stage should be: {'enablePurging': True, 'maxAge': '3 months'} for Root Organization",
+        "Data purging for application reports success metrics should be: {'enablePurging': True, 'maxAge': '1 year'} for Root Organization"
+      ],
+      "Proprietary Components": [
+        "Proprietary component 'packages:['com.sonatype']','regexes:['com.sonatype.*']' should be added to Root Organization"
+      ],
+      "Access": [
+        "Developer role should be removed from Root Organization",
+        "SCNR default role should be removed from Root Organization",
+        "Legal Reviewer role should be added to Root Organization"
+      ],
+      "Policy": {
+        "Architecture-Cleanup": [
+          "remove 'warn' action to 'proxy' stage "
+        ],
+        "Architecture-Quality": [
+          "remove 'warn' action to 'proxy' stage "
+        ],
+        "Component-Similar": [
+          "Component-Similar has Grandfathering set False, but should have it set True.",
+          "add 'warn' action to 'source' stage ",
+          "Role notifications are not aligned between the policy and the template"
+        ],
+        "Component-Unknown": [
+          "Component-Unknown constraints require the following correction [('add', [0, 'conditions'], [(2, {'conditionTypeId': 'DataSource', 'operator': 'has support for', 'conditionIndex': 2})])]",
+          "remove 'warn' action to 'proxy' stage "
+        ],
+        "License-Banned": [
+          "add 'warn' action to 'source' stage ",
+          "Role notifications are not aligned between the policy and the template"
+        ],
+        "License-Commercial": [
+          "License-Commercial has Grandfathering set False, but should have it set True.",
+          "add 'warn' action to 'source' stage ",
+          "Role notifications are not aligned between the policy and the template"
+        ],
+        "License-Copyleft": [
+          "change 'proxy' stage action from 'warn' to 'fail'",
+          "add 'warn' action to 'source' stage ",
+          "Role notifications are not aligned between the policy and the template"
+        ],
+        "License-Modified Weak Copyleft": [
+          "add 'warn' action to 'source' stage ",
+          "Role notifications are not aligned between the policy and the template"
+        ],
+        "License-None": [
+          "change 'proxy' stage action from 'warn' to 'fail'",
+          "add 'warn' action to 'source' stage ",
+          "Role notifications are not aligned between the policy and the template"
+        ],
+        "License-Non Standard": [
+          "add 'warn' action to 'source' stage ",
+          "Role notifications are not aligned between the policy and the template"
+        ],
+        "License-Threat Not Assigned": [
+          "add 'warn' action to 'source' stage ",
+          "Role notifications are not aligned between the policy and the template"
+        ],
+        "Security-Critical": [
+          "change 'stage-release' stage action from 'fail' to 'warn'",
+          "change 'release' stage action from 'fail' to 'warn'",
+          "change 'operate' stage action from 'fail' to 'warn'",
+          "add 'warn' action to 'source' stage ",
+          "Role notifications are not aligned between the policy and the template"
+        ],
+        "Security-High": [
+          "change 'stage-release' stage action from 'fail' to 'warn'",
+          "change 'release' stage action from 'fail' to 'warn'",
+          "change 'operate' stage action from 'fail' to 'warn'",
+          "add 'warn' action to 'source' stage ",
+          "Role notifications are not aligned between the policy and the template"
+        ],
+        "Security-Low": [
+          "remove 'warn' action to 'proxy' stage "
+        ],
+        "Security-Medium": [
+          "change 'stage-release' stage action from 'fail' to 'warn'",
+          "change 'release' stage action from 'fail' to 'warn'",
+          "change 'operate' stage action from 'fail' to 'warn'",
+          "add 'warn' action to 'source' stage ",
+          "Role notifications are not aligned between the policy and the template"
+        ]
+      },
+      "Applications": []
+    },
+    {
+      "Name": "Team Alpha",
+      "Data Purging": [
+        "Data purging for application reports develop stage should be inherited for Team Alpha",
+        "Data purging for application reports build stage should be inherited for Team Alpha",
+        "Data purging for application reports stage-release stage should be inherited for Team Alpha",
+        "Data purging for application reports release stage should be inherited for Team Alpha",
+        "Data purging for application reports operate stage should be inherited for Team Alpha",
+        "Data purging for application reports continuous-monitoring stage should be inherited for Team Alpha",
+        "Data purging for application reports success metrics stage should be inherited for Team Alpha"
+      ],
+      "Proprietary Components": [
+        "Team Alpha is missing proprietary component configuration. The default template specifies proprietary component configuration."
+      ],
+      "Access": [
+        "Application Evaluator role should be added to Team Alpha"
+      ],
+      "Applications": [
+        {
+          "Name": "Reports",
+          "Public Id": "Reports",
+          "Source Control": "SCM configuration URL should be set for Reports",
+          "Access": [
+            "Developer role should be added to Reports"
+          ]
+        },
+        {
+          "Name": "Success Metrics",
+          "Public Id": "Success_Metrics",
+          "Proprietary Components": [
+            "Success Metrics has proprietary component configuration that should be removed. The default template does not specify proprietary component configuration."
+          ],
+          "Source Control": "SCM configuration URL should be set for Success Metrics",
+          "Access": [
+            "Developer role should be added to Success Metrics"
+          ]
+        },
+        {
+          "Name": "SOX compliance",
+          "Public Id": "Successmetrics",
+          "Source Control": "SCM configuration URL should be set for SOX compliance",
+          "Access": [
+            "Developer role should be added to SOX compliance"
+          ]
+        },
+        {
+          "Name": "testApp",
+          "Public Id": "testApp",
+          "Source Control": "SCM configuration URL should be set for testApp",
+          "Access": [
+            "Developer role should be added to testApp"
+          ]
+        }
+      ]
+    },
+    {
+      "Name": "The A Team",
+      "Data Purging": [
+        "Data purging for application reports develop stage should be inherited for The A Team",
+        "Data purging for application reports build stage should be inherited for The A Team",
+        "Data purging for application reports stage-release stage should be inherited for The A Team",
+        "Data purging for application reports release stage should be inherited for The A Team",
+        "Data purging for application reports operate stage should be inherited for The A Team",
+        "Data purging for application reports continuous-monitoring stage should be inherited for The A Team",
+        "Data purging for application reports success metrics stage should be inherited for The A Team"
+      ],
+      "Proprietary Components": [
+        "The A Team is missing proprietary component configuration. The default template specifies proprietary component configuration."
+      ],
+      "Access": [
+        "Application Evaluator role should be added to The A Team"
+      ],
+      "Applications": [
+        {
+          "Name": "Holy Grail",
+          "Public Id": "App1",
+          "Source Control": "SCM configuration URL should be set for Holy Grail",
+          "Access": [
+            "Developer role should be added to Holy Grail"
+          ]
+        },
+        {
+          "Name": "Grandpa",
+          "Public Id": "Grandpa",
+          "Source Control": "SCM configuration URL should be set for Grandpa",
+          "Access": [
+            "Developer role should be added to Grandpa"
+          ]
+        },
+        {
+          "Name": "Secret Sauce",
+          "Public Id": "SecretSauce",
+          "Proprietary Components": [
+            "Secret Sauce has proprietary component configuration that should be removed. The default template does not specify proprietary component configuration."
+          ],
+          "Source Control": "SCM configuration URL should be set for Secret Sauce",
+          "Access": [
+            "Developer role should be added to Secret Sauce"
+          ]
+        }
+      ]
+    },
+    {
+      "Name": "The One Team",
+      "Data Purging": [
+        "Data purging for application reports develop stage should be inherited for The One Team",
+        "Data purging for application reports build stage should be inherited for The One Team",
+        "Data purging for application reports stage-release stage should be inherited for The One Team",
+        "Data purging for application reports release stage should be inherited for The One Team",
+        "Data purging for application reports operate stage should be inherited for The One Team",
+        "Data purging for application reports continuous-monitoring stage should be inherited for The One Team",
+        "Data purging for application reports success metrics stage should be inherited for The One Team"
+      ],
+      "Proprietary Components": [
+        "The One Team is missing proprietary component configuration. The default template specifies proprietary component configuration."
+      ],
+      "Access": [
+        "Application Evaluator role should be added to The One Team"
+      ],
+      "Applications": [
+        {
+          "Name": "Billing App",
+          "Public Id": "TechEnablement",
+          "Source Control": "SCM configuration URL should be set for Billing App",
+          "Access": [
+            "Developer role should be added to Billing App"
+          ]
+        },
+        {
+          "Name": "Trading App",
+          "Public Id": "TradingApp",
+          "Source Control": "SCM configuration URL should be set for Trading App",
+          "Access": [
+            "Developer role should be added to Trading App"
+          ]
+        },
+        {
+          "Name": "Webgoat-legacy",
+          "Public Id": "Webgoat-legacy",
+          "Proprietary Components": [
+            "Webgoat-legacy has proprietary component configuration that should be removed. The default template does not specify proprietary component configuration."
+          ],
+          "Source Control": "SCM configuration URL should be set for Webgoat-legacy",
+          "Access": [
+            "Developer role should be added to Webgoat-legacy"
+          ]
+        }
+      ]
+    }
+  ]
+}

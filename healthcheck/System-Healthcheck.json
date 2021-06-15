@@ -1,0 +1,11 @@
+{
+  "Users": "3 local users.",
+  "Custom Roles": "1 Custom roles.",
+  "LDAP Connections": "0 LDAP server(s).",
+  "Email Server": "1 Email server.",
+  "Webhooks": "1 Webhooks.",
+  "Success Metrics": "Success metrics enabled.",
+  "Automatic Applications": "Automatic application creation disabled.",
+  "Automatic Source Control": "Automatic SCM disabled.",
+  "Success Metrics Reports": "2 Success metrics reports."
+}
