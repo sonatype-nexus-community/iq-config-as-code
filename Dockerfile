@@ -18,7 +18,8 @@ RUN addgroup -S -g ${GROUP_ID} ${GROUP} && \
     ln -sf ${APPDIR}/iq-apply-conf.py /usr/local/bin/iq-apply-conf && \
     ln -sf ${APPDIR}/iq-healthcheck.py /usr/local/bin/iq-healthcheck && \
     ln -sf ${APPDIR}/iq-scrape-conf.py /usr/local/bin/iq-scrape-conf && \
-    chown -R ${USER_ID}:${GROUP_ID} ${APPDIR} ${WORKDIR}
+    chown -R ${USER_ID}:${GROUP_ID} ${APPDIR} ${WORKDIR} && \
+    apk add --no-cache git
 
 USER ${USER}
 RUN pip3 install --no-cache-dir --user requests
