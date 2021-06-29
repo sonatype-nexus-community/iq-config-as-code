@@ -20,6 +20,7 @@ import argparse
 import json
 import requests
 import os
+import time
 
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from copy import deepcopy
@@ -35,7 +36,45 @@ self_signed = False
 ROOT_ORG_NAME = 'Root Organization'
 TEMPLATE_ORG_NAME = 'Template-Org'
 TEMPLATE_APP_NAME = 'Template-App'
-advisories = {}
+Advisories = {
+    'Users':'There are no local users.',
+    'Tags':'Application tags are not being used.',
+    'AccessRemoveRoles':'There are no roles that should be removed.',
+    'AccessAddRoles':'There are no roles that should be added.',
+    'Grandfathering':'Grandfathering is configured correctly.',
+    'SCM':'SCM has not been configured.',
+    'ContinuousMonitoring':'Continuous Monitoring is not enabled.',
+    'UserNotifications':'User notifications are not configured.',
+    'RoleNotifications':'Role notifications are not configured.',
+    'JiraNotifications':'Jira notifications are not configured.',
+    'WebhookNotifications':'Webhook notifications are not configured.'
+    }
+policyAdvisories = []
+proprietaryComps = []
+persistedMessages = []
+
+#---------------------------------
+#
+# Print iterations progress
+def printProgressBar (
+        iteration, 
+        total, 
+        prefix = 'Progress:', 
+        suffix = 'Complete', 
+        decimals = 1, 
+        length = 50, 
+        fill = '█'):
+
+    time.sleep(0.1)
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end = '\r')
+    # Print New Line on Complete
+    if iteration == total: 
+        print()
+
+#---------------------------------
 
 def get_arguments():
     global iq_url, iq_session, iq_auth, output_dir, debug, self_signed, entities, template_file
@@ -101,6 +140,13 @@ def main():
     set_applications()
     set_roles()
 
+    #-----------------------------------------------------------------------------------
+    #t,segments = 0, len(organizations)
+    t,segments = 0, len(applications)
+    #print(len(applications))
+    printProgressBar(t,segments)
+    #-----------------------------------------------------------------------------------
+
     # Admin level configuration and integrations
     nexus_administration()
     data = {}
@@ -122,6 +168,10 @@ def main():
                         app = app_configuration(app, resolve_template_app(template, app['name']))
                         if app is not None:
                             org_apps.append(app)
+                        #-----------------------------------------------------------------------------------   
+                        t +=1
+                        printProgressBar(t,segments)
+                        #-----------------------------------------------------------------------------------
             if len(org_apps) or in_scope(org=org):
                 try:
                     od = {'Organizations': []}
@@ -139,15 +189,11 @@ def main():
         if in_scope(None):
             validate_data(data, f'{output_dir}All-Organizations-Healthcheck.json')
 
-
-
-
-
+    Advisories.update({'PolicyAdvisories':'There are '+str(sum(policyAdvisories))+' advisories relating to policy disparities. Please check All-Organizations-Healthcheck.json for details.'})
+    Advisories.update({'ProprietaryComponents':'There are '+str(sum(proprietaryComps))+' advisories relating to Proprietary Components. Please check All-Organizations-Healthcheck.json for details.'})
     extract_advisories()
-
-
-
-
+    for message in range(0,len(persistedMessages)):
+        print(persistedMessages[message])
 
 
 def item_count(data=None, single=False):
@@ -178,7 +224,7 @@ def nexus_administration():
     validate_data(purge_empty_attributes(systemConf), f'{output_dir}System-Healthcheck.json')
 
 def extract_advisories():
-    validate_data(advisories, f'{output_dir}Advisories.json')
+    validate_data(Advisories, f'{output_dir}Advisories.json')
 
 def resolve_template_org(org_name):
     template = None
@@ -261,7 +307,7 @@ def print_debug(c):
 def handle_resp(resp, root=""):
     # normalize api call responses
     if resp.status_code != 200:
-        print(resp.text)
+        #print(resp.text)           ###
         return None
     node = resp.json()
 
@@ -384,6 +430,7 @@ def validate_application_tags(template, app):
         #         ret.append(f"Application tag {tag} should be added to '{app['name']}'")
 
     if len(ret):
+        Advisories.update({'Tags':'There are '+str(len(ret))+' applications that should have an application tag applied'})
         return ret
     return None
 
@@ -446,14 +493,20 @@ def validate_access(template, org=None, app=None):
 
         # Find the difference between the fulfilled roes and the templated roles
         anomalies = difference(access, taccess)
+        removes = 0
+        adds = 0
         for a in anomalies:
             try:
                 # If the anomaly exists in the fulfilled roles, it is in excess of the template.
                 access.index(a)
                 accessData.append(f'{a} role should be removed from {entity_name}')
+                removes += 1
             except ValueError:
                 accessData.append(f'{a} role should be added to {entity_name}')
-
+                adds += 1
+        Advisories.update({'AccessRemoveRoles':'There are '+str(removes)+' roles that should be removed'})
+        Advisories.update({'AccessAddRoles':'There are '+str(adds)+' roles that should be added'})
+        
     if len(accessData):
         return accessData
     return None
@@ -462,7 +515,9 @@ def validate_access(template, org=None, app=None):
 def validate_auto_applications():
     url = f'{iq_url}/rest/config/automaticApplications'
     if get_url(url)["enabled"]:
+        Advisories.update({'AutoApp':'Automatic application creation is enabled.'})
         return f'Automatic application creation enabled.'
+    Advisories.update({'AutoApp':'Automatic application creation is disabled.'})
     return f'Automatic application creation disabled.'
 
 
@@ -489,8 +544,10 @@ def validate_grandfathering(template, org=None, app=None):
             if data == template:
                 return None
             else:
+                Advisories.update({'Grandfathering':f"Grandfathering should be ["+f"{rendor_json(template, True)}"+f"] enabled for '{entity_name}'."})
                 return f"Grandfathering should be {rendor_json(template, True)} enabled for '{entity_name}'."
-
+                
+    Advisories.update({'Grandfathering':f"Grandfathering should be inherited from '{template['inheritedFromOrganizationName']}' for '{entity_name}'."})
     return f"Grandfathering should be inherited from '{template['inheritedFromOrganizationName']}' for '{entity_name}'."
 
 
@@ -498,7 +555,7 @@ def validate_webhooks():
     url = f'{iq_url}/rest/config/webhook'
     wh = item_count(get_url(url), True)
     if wh:
-        advisories.update({'Webhooks' : 'There are '+str(wh)+' Webhooks configured.'})
+        Advisories.update({'Webhooks' : 'There are '+str(wh)+' Webhooks configured.'})
         return f'{wh} Webhooks.'
     return None
 
@@ -507,9 +564,9 @@ def validate_proxy():
     # This API applies the config regardless of whether the proxy is already configured.
     url = f'{iq_url}/api/v2/config/httpProxyServer'
     ps = item_count(get_url(url), True)
-    advisories.update({'Proxy' : 'There are no proxy servers configured.'})
+    Advisories.update({'Proxy' : 'There are no proxy servers configured.'})
     if ps:
-        advisories.update({'Proxy' : 'There are '+str(ps)+' proxy servers configured.'})
+        Advisories.update({'Proxy' : 'There are '+str(ps)+' proxy servers configured.'})
         return f'Proxy server.'
     return None
 
@@ -521,10 +578,10 @@ def validate_source_control(template, org=None, app=None):
 
     if app is not None:
         entity_name = app["name"]
-        error = f'SCM configuration URL should be set for {entity_name}'
+        error = f'SCM configuration URL should be set for {entity_name}.'
     else:
         entity_name = org["name"]
-        error = f'SCM configuration should be set for {entity_name}, aligned to {template} data'
+        error = f'SCM configuration should be set for {entity_name}, aligned to {template} data.'
 
     # Neither configured - So nothing to do!
     if data == template:
@@ -547,6 +604,7 @@ def validate_source_control(template, org=None, app=None):
         # SCM applied, but no template?
         # If SCM inherits the purge will ensure zero length
         if template is None and len(purge_empty_attributes(data)):
+            Advisories.update({'SCM':f'Source control should be removed for {entity_name}.'})
             return f'Source control should be removed for {entity_name}.'
 
     if template is not None:
@@ -562,6 +620,7 @@ def validate_source_control(template, org=None, app=None):
         # if both exist, the data should now match the template
         if data != tcopy:
             # If not, the template config is applicable
+            Advisories.update({'SCM':error})
             return error
 
     return None
@@ -569,11 +628,28 @@ def validate_source_control(template, org=None, app=None):
 
 def policy_notification_disparities(notifications, tnotifications, ntype):
     if notifications != tnotifications:
-        return f"{ntype} are not aligned between the policy and the template"
+        if ntype == 'User notifications':
+            Advisories.update({'UserNotifications':f"{ntype} are not aligned between the policy and the template."})
+        if ntype == 'Role notifications':
+            Advisories.update({'RoleNotifications':f"{ntype} are not aligned between the policy and the template."})
+        if ntype == 'Jira notifications':
+            Advisories.update({'JiraNotifications':f"{ntype} are not aligned between the policy and the template."})
+        if ntype == 'Webhook notifications':
+            Advisories.update({'WebhookNotifications':f"{ntype} are not aligned between the policy and the template."})    
+        return f"{ntype} are not aligned between the policy and the template."
+    elif len(notifications) != 0:
+        if ntype == 'User notifications':
+            Advisories.update({'UserNotifications':f"{ntype} are configured correctly."})
+        if ntype == 'Role notifications':
+            Advisories.update({'RoleNotifications':f"{ntype} are configured correctly."})
+        if ntype == 'Jira notifications':
+            Advisories.update({'JiraNotifications':f"{ntype} are configured correctly."})
+        if ntype == 'Webhook notifications':
+            Advisories.update({'WebhookNotifications':f"{ntype} are configured correctly."})        
     return None
 
 
-def advise_policy_disparities(policy, tpolicy):
+def advise_policy_disparities(policy, tpolicy,policyAdvisories):
     policy_advisories = []
     name = policy['name']
     if policy['ownerId'] != tpolicy['ownerId']:
@@ -613,7 +689,8 @@ def advise_policy_disparities(policy, tpolicy):
     advisory = policy_notification_disparities(policy['notifications']['webhookNotifications'], tpolicy['notifications']['webhookNotifications'], 'Webhook notifications')
     if advisory is not None:
         policy_advisories.append(advisory)
-
+    policyAdvisories.append(len(policy_advisories))
+    #print(len(policy_advisories))
     return policy_advisories
 
 
@@ -652,12 +729,13 @@ def validate_policy(template, org=None, app=None):
                 # Does the entity data contain the template policy?
                 for policy in data:
                     if policy['name'] == tpolicy['name']:
-                        advisories = advise_policy_disparities(policy, tpolicy)
+                        advisories = advise_policy_disparities(policy, tpolicy,policyAdvisories)
                         if len(advisories):
                             policyData[policy['name']] = advisories
                         break
 
     if len(policyData):
+        #print(policyData)
         return policyData
     return None
 
@@ -666,19 +744,24 @@ def validate_success_metrics():
     url = f'{iq_url}/rest/successMetrics'
     # This API applies the config regardless of whether the proxy is already configured.
     if get_url(url)["enabled"]:
+        Advisories.update({'SuccessMetrics':f'Success metrics enabled.'})
         return f'Success metrics enabled.'
+    Advisories.update({'SuccessMetrics':f'Success metrics disabled.'})
     return f'Success metrics disabled.'
 
 def validate_success_metrics_reports():
     url = f'{iq_url}/rest/successMetrics/report'
+    Advisories.update({'SuccessMetricsReports':f'{item_count(get_url(url))} Success metrics reports.'})
     return f'{item_count(get_url(url))} Success metrics reports.'
 
 
 def validate_automatic_source_control():
     url = f'{iq_url}/rest/config/automaticScmConfiguration'
     if get_url(url)["enabled"]:
-        return f'Automatic SCM enabled.'
-    return f'Automatic SCM disabled.'
+        Advisories.update({'AutoSCM':f'Automatic SCM enabled.'})
+        return f'Automatic SCM is enabled.'
+    Advisories.update({'AutoSCM':f'Automatic SCM disabled.'})
+    return f'Automatic SCM is disabled.'
 
 
 def validate_proprietary_components(template, org=None, app=None):
@@ -757,6 +840,7 @@ def validate_proprietary_components(template, org=None, app=None):
                                    f'added to {entity_name}')
 
     if len(pcsData):
+        proprietaryComps.append(len(pcsData))
         return pcsData
     return None
 
@@ -769,7 +853,7 @@ def validate_roles():
         if element.pop('builtIn') is False:
             count = count + 1
     if count:
-        advisories.update({'Custom Roles' : 'There are '+str(count)+' Custom roles.'})
+        Advisories.update({'Custom Roles' : 'There are '+str(count)+' Custom roles.'})
         return f'{count} Custom roles.'
     return None
 
@@ -791,8 +875,10 @@ def validate_continuous_monitoring(template, org=None, app=None):
         return None
 
     if template is None:
+        Advisories.update({'ContinuousMonitoring':f'Continuous monitoring should be inherited for {entity_name}.'})
         return f'Continuous monitoring should be inherited for {entity_name}.'
-    return f'Continuous monitoring stage should be the {rendor_json(template)} for {entity_name}.'
+    Advisories.update({'ContinuousMonitoring':f'Continuous monitoring stage should be the {rendor_json(template)} for {entity_name}.'})
+    return f'Continuous monitoring stage should be the {rendor_json(template)} stage for {entity_name}.'
 
 
 def validate_data_purging(template, org):
@@ -964,21 +1050,21 @@ def validate_license_threat_groups(template, org):
 def validate_ldap_instances():
     url = f'{iq_url}/rest/config/ldap'
     lc = item_count(get_url(url))
-    advisories.update({'LDAP Connections' : 'There are '+str(lc)+' LDAP servers configured.'})
+    Advisories.update({'LDAP Connections' : 'There are '+str(lc)+' LDAP servers configured.'})
     return f'{lc} LDAP server(s).'
 
 
 def validate_email_server_connection():
     url = f'{iq_url}/api/v2/config/mail'
     es = item_count(get_url(url), True)
-    advisories.update({'Email Server' : 'There are '+str(es)+' Email servers configured.'})
+    Advisories.update({'Email Server' : 'There are '+str(es)+' Email servers configured.'})
     return f'{es} Email server.'
 
 
 def validate_users():
     url = f'{iq_url}/rest/user'
     uc = item_count(get_url(url))
-    advisories.update({'Users' : 'There are '+str(uc)+' local users.'})
+    Advisories.update({'Users' : 'There are '+str(uc)+' local users.'})
     return f'{uc} local users.'
 
 
@@ -994,7 +1080,8 @@ def set_roles():
 def validate_data(data, filename):
     with open(filename, 'w') as outfile:
         json.dump(data, outfile, indent=2)
-    print(f'Persisted data to {filename}')
+    persistedMessages.append(f'Persisted data to {filename}')
+    #print(f'Persisted data to {filename}')                 ###
 
 
 def rendor_json(data, keys=False):

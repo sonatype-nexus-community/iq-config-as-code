@@ -21,7 +21,7 @@
         {
           "Name": "Holy Grail",
           "Public Id": "App1",
-          "Source Control": "SCM configuration URL should be set for Holy Grail",
+          "Source Control": "SCM configuration URL should be set for Holy Grail.",
           "Access": [
             "Developer role should be added to Holy Grail"
           ]
@@ -29,7 +29,7 @@
         {
           "Name": "Grandpa",
           "Public Id": "Grandpa",
-          "Source Control": "SCM configuration URL should be set for Grandpa",
+          "Source Control": "SCM configuration URL should be set for Grandpa.",
           "Access": [
             "Developer role should be added to Grandpa"
           ]
@@ -40,7 +40,7 @@
           "Proprietary Components": [
             "Secret Sauce has proprietary component configuration that should be removed. The default template does not specify proprietary component configuration."
           ],
-          "Source Control": "SCM configuration URL should be set for Secret Sauce",
+          "Source Control": "SCM configuration URL should be set for Secret Sauce.",
           "Access": [
             "Developer role should be added to Secret Sauce"
           ]

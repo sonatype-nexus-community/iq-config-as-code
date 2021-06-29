@@ -6,6 +6,6 @@
   "Webhooks": "1 Webhooks.",
   "Success Metrics": "Success metrics enabled.",
   "Automatic Applications": "Automatic application creation disabled.",
-  "Automatic Source Control": "Automatic SCM disabled.",
+  "Automatic Source Control": "Automatic SCM is disabled.",
   "Success Metrics Reports": "2 Success metrics reports."
 }

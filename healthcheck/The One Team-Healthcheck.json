@@ -21,7 +21,7 @@
         {
           "Name": "Billing App",
           "Public Id": "TechEnablement",
-          "Source Control": "SCM configuration URL should be set for Billing App",
+          "Source Control": "SCM configuration URL should be set for Billing App.",
           "Access": [
             "Developer role should be added to Billing App"
           ]
@@ -29,7 +29,7 @@
         {
           "Name": "Trading App",
           "Public Id": "TradingApp",
-          "Source Control": "SCM configuration URL should be set for Trading App",
+          "Source Control": "SCM configuration URL should be set for Trading App.",
           "Access": [
             "Developer role should be added to Trading App"
           ]
@@ -40,7 +40,7 @@
           "Proprietary Components": [
             "Webgoat-legacy has proprietary component configuration that should be removed. The default template does not specify proprietary component configuration."
           ],
-          "Source Control": "SCM configuration URL should be set for Webgoat-legacy",
+          "Source Control": "SCM configuration URL should be set for Webgoat-legacy.",
           "Access": [
             "Developer role should be added to Webgoat-legacy"
           ]

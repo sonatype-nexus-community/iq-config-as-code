@@ -21,7 +21,7 @@
         {
           "Name": "Reports",
           "Public Id": "Reports",
-          "Source Control": "SCM configuration URL should be set for Reports",
+          "Source Control": "SCM configuration URL should be set for Reports.",
           "Access": [
             "Developer role should be added to Reports"
           ]
@@ -32,7 +32,7 @@
           "Proprietary Components": [
             "Success Metrics has proprietary component configuration that should be removed. The default template does not specify proprietary component configuration."
           ],
-          "Source Control": "SCM configuration URL should be set for Success Metrics",
+          "Source Control": "SCM configuration URL should be set for Success Metrics.",
           "Access": [
             "Developer role should be added to Success Metrics"
           ]
@@ -40,7 +40,7 @@
         {
           "Name": "SOX compliance",
           "Public Id": "Successmetrics",
-          "Source Control": "SCM configuration URL should be set for SOX compliance",
+          "Source Control": "SCM configuration URL should be set for SOX compliance.",
           "Access": [
             "Developer role should be added to SOX compliance"
           ]
@@ -48,7 +48,7 @@
         {
           "Name": "testApp",
           "Public Id": "testApp",
-          "Source Control": "SCM configuration URL should be set for testApp",
+          "Source Control": "SCM configuration URL should be set for testApp.",
           "Access": [
             "Developer role should be added to testApp"
           ]
