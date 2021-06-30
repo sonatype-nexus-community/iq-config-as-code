@@ -36,17 +36,34 @@ self_signed = False
 ROOT_ORG_NAME = 'Root Organization'
 TEMPLATE_ORG_NAME = 'Template-Org'
 TEMPLATE_APP_NAME = 'Template-App'
+totalAdvisories = 0
 Advisories = {
     'Users':'There are no local users.',
-    'Tags':'Application tags are not being used.',
+    'Custom Roles':'There are no custom roles.',
+    'LDAP Connections':'There are no LDAP servers configured.',
+    'Email Server':'There is no Email servers configured.',
+    'Proxy':'There is no Proxy server configured.',
+    'Webhooks':'There are no Webhooks configured.',
+    'Success Metrics':'Success metrics are disabled.',
+    'Success Metrics Reports':'There are no Success Metrics reports available.',
+    'Automatic Applications':'Automatic application creation is disabled.',
+    'Automatic Source Control':'Automatic Source Control Management is disabled.',
+    'TOTAL NUMBER OF ADVISORIES':'There are '+str(totalAdvisories)+' active advisories currently.',
     'Grandfathering':'Grandfathering is configured correctly.',
-    'SCM':'SCM has not been configured.',
     'ContinuousMonitoring':'Continuous Monitoring is not enabled.',
+    'SCM':'Source Control Management has not been configured.',
+    'DataPurging':'',
+    'ProprietaryComponents':'',
+    'AppCategories':'Default application categories are configured. No custom application categories in place.',
+    'ComponentLabels':'',
+    'LTGAdvisories':'',
+    'AccessAdvisories':'',
+    'PolicyAdvisories':'',
     'UserNotifications':'User notifications are not configured.',
     'RoleNotifications':'Role notifications are not configured.',
     'JiraNotifications':'Jira notifications are not configured.',
     'WebhookNotifications':'Webhook notifications are not configured.',
-    'AppCategories':'Default application categories are configured. No custom application categories in place.'
+    'Tags':'Application tags are not being used.'
     }
 policyAdvisories = []
 proprietaryComps = []
@@ -213,7 +230,10 @@ def main():
     Advisories.update({'RoleNotifications':'There are '+str(len(roleNotif))+' advisories relating to Role Notifications. Please check All-Organizations-Healthcheck.json for details.'})
     Advisories.update({'JiraNotifications':'There are '+str(len(jiraNotif))+' advisories relating to Jira Notifications. Please check All-Organizations-Healthcheck.json for details.'})
     Advisories.update({'WebhookNotifications':'There are '+str(len(webhookNotif))+' advisories relating to Webhook Notifications. Please check All-Organizations-Healthcheck.json for details.'})
-        
+
+
+    totalAdvisories = sum(policyAdvisories)+sum(proprietaryComps)+sum(dataPurging)+sum(appCategories)+sum(compLabels)+sum(ltgAdvisories)+sum(accessAdvisories)+len(grandAdvisories)+sum(appTags)+len(contMonitoring)+len(SCMadvisories)
+    Advisories.update({'TOTAL NUMBER OF ADVISORIES':'There are '+str(totalAdvisories)+' active advisories currently. Please check All-Organizations-Healthcheck.json for details.'})        
 
     extract_advisories()
     for message in range(0,len(persistedMessages)):
@@ -240,9 +260,11 @@ def nexus_administration():
     systemConf = {'Users': validate_users(), 'Custom Roles': validate_roles(),
                   'LDAP Connections': validate_ldap_instances(), 'Email Server': validate_email_server_connection(),
                   'Proxy': validate_proxy(), 'Webhooks': validate_webhooks(),
-                  'Success Metrics': validate_success_metrics(), 'Automatic Applications': validate_auto_applications(),
+                  'Success Metrics': validate_success_metrics(),
+                  'Success Metrics Reports': validate_success_metrics_reports(),
+                  'Automatic Applications': validate_auto_applications(),
                   'Automatic Source Control': validate_automatic_source_control(),
-                  'Success Metrics Reports': validate_success_metrics_reports()}
+                  }
     # Parses and applies all the 'administrative' configuration for Nexus IQ
     # systemConf['system_notice'] = validate_system_notice()
     validate_data(purge_empty_attributes(systemConf), f'{output_dir}System-Healthcheck.json')
@@ -537,9 +559,9 @@ def validate_access(template, org=None, app=None):
 def validate_auto_applications():
     url = f'{iq_url}/rest/config/automaticApplications'
     if get_url(url)["enabled"]:
-        Advisories.update({'AutoApp':'Automatic application creation is enabled.'})
+        Advisories.update({'Automatic Applications':'Automatic application creation is enabled.'})
         return f'Automatic application creation enabled.'
-    Advisories.update({'AutoApp':'Automatic application creation is disabled.'})
+    Advisories.update({'Automatic Applications':'Automatic application creation is disabled.'})
     return f'Automatic application creation disabled.'
 
 
@@ -589,8 +611,8 @@ def validate_proxy():
     Advisories.update({'Proxy' : 'There are no proxy servers configured.'})
     if ps:
         Advisories.update({'Proxy' : 'There are '+str(ps)+' proxy servers configured.'})
-        return f'Proxy server.'
-    return None
+        return f'There are '+str(ps)+' proxy servers configured.'
+    return f'There are no proxy servers configured.'
 
 
 def validate_source_control(template, org=None, app=None):
@@ -757,23 +779,23 @@ def validate_success_metrics():
     url = f'{iq_url}/rest/successMetrics'
     # This API applies the config regardless of whether the proxy is already configured.
     if get_url(url)["enabled"]:
-        Advisories.update({'SuccessMetrics':f'Success metrics enabled.'})
+        Advisories.update({'Success Metrics':f'Success metrics are enabled.'})
         return f'Success metrics enabled.'
-    Advisories.update({'SuccessMetrics':f'Success metrics disabled.'})
+    Advisories.update({'Success Metrics':f'Success metrics are disabled.'})
     return f'Success metrics disabled.'
 
 def validate_success_metrics_reports():
     url = f'{iq_url}/rest/successMetrics/report'
-    Advisories.update({'SuccessMetricsReports':f'{item_count(get_url(url))} Success metrics reports.'})
+    Advisories.update({'Success Metrics Reports':f'There are {item_count(get_url(url))} Success metrics reports available.'})
     return f'{item_count(get_url(url))} Success metrics reports.'
 
 
 def validate_automatic_source_control():
     url = f'{iq_url}/rest/config/automaticScmConfiguration'
     if get_url(url)["enabled"]:
-        Advisories.update({'AutoSCM':f'Automatic SCM enabled.'})
+        Advisories.update({'Automatic Source Control':f'Automatic Source Control Management is enabled.'})
         return f'Automatic SCM is enabled.'
-    Advisories.update({'AutoSCM':f'Automatic SCM disabled.'})
+    Advisories.update({'Automatic Source Control':f'Automatic Source Control Management is disabled.'})
     return f'Automatic SCM is disabled.'
 
 
