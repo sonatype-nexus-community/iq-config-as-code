@@ -19,6 +19,23 @@
       ],
       "Applications": [
         {
+          "Name": "BadApplication",
+          "Public Id": "BadApplicationID",
+          "Continuous Monitoring": "Continuous monitoring should be inherited for BadApplication.",
+          "Source Control": "SCM configuration URL should be set for BadApplication.",
+          "Access": [
+            "Developer role should be added to BadApplication"
+          ]
+        },
+        {
+          "Name": "MyFirstApplication",
+          "Public Id": "MyApplicationID",
+          "Source Control": "SCM configuration URL should be set for MyFirstApplication.",
+          "Access": [
+            "Developer role should be added to MyFirstApplication"
+          ]
+        },
+        {
           "Name": "Reports",
           "Public Id": "Reports",
           "Source Control": "SCM configuration URL should be set for Reports.",
@@ -48,6 +65,7 @@
         {
           "Name": "testApp",
           "Public Id": "testApp",
+          "Grandfathering": "Grandfathering should be inherited from 'Root Organization' for 'testApp'.",
           "Source Control": "SCM configuration URL should be set for testApp.",
           "Access": [
             "Developer role should be added to testApp"

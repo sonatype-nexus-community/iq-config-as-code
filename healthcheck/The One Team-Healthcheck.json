@@ -21,6 +21,7 @@
         {
           "Name": "Billing App",
           "Public Id": "TechEnablement",
+          "Grandfathering": "Grandfathering should be inherited from 'Root Organization' for 'Billing App'.",
           "Source Control": "SCM configuration URL should be set for Billing App.",
           "Access": [
             "Developer role should be added to Billing App"

@@ -39,18 +39,27 @@ TEMPLATE_APP_NAME = 'Template-App'
 Advisories = {
     'Users':'There are no local users.',
     'Tags':'Application tags are not being used.',
-    'AccessRemoveRoles':'There are no roles that should be removed.',
-    'AccessAddRoles':'There are no roles that should be added.',
     'Grandfathering':'Grandfathering is configured correctly.',
     'SCM':'SCM has not been configured.',
     'ContinuousMonitoring':'Continuous Monitoring is not enabled.',
     'UserNotifications':'User notifications are not configured.',
     'RoleNotifications':'Role notifications are not configured.',
     'JiraNotifications':'Jira notifications are not configured.',
-    'WebhookNotifications':'Webhook notifications are not configured.'
+    'WebhookNotifications':'Webhook notifications are not configured.',
+    'AppCategories':'Default application categories are configured. No custom application categories in place.'
     }
 policyAdvisories = []
 proprietaryComps = []
+dataPurging = []
+appCategories = []
+compLabels = []
+ltgAdvisories = []
+accessAdvisories = []
+grandAdvisories = []
+appTags = []
+contMonitoring = []
+SCMadvisories = []
+userNotif,roleNotif,jiraNotif,webhookNotif = [],[],[],[]
 persistedMessages = []
 
 #---------------------------------
@@ -191,6 +200,21 @@ def main():
 
     Advisories.update({'PolicyAdvisories':'There are '+str(sum(policyAdvisories))+' advisories relating to policy disparities. Please check All-Organizations-Healthcheck.json for details.'})
     Advisories.update({'ProprietaryComponents':'There are '+str(sum(proprietaryComps))+' advisories relating to Proprietary Components. Please check All-Organizations-Healthcheck.json for details.'})
+    Advisories.update({'DataPurging':'There are '+str(sum(dataPurging))+' advisories relating to Data Purging. Please check All-Organizations-Healthcheck.json for details.'})
+    Advisories.update({'AppCategories':'There are '+str(sum(appCategories))+' advisories relating to Application Categories. Please check All-Organizations-Healthcheck.json for details.'})
+    Advisories.update({'ComponentLabels':'There are '+str(sum(compLabels))+' advisories relating to Component Labels. Please check All-Organizations-Healthcheck.json for details.'})
+    Advisories.update({'LTGAdvisories':'There are '+str(sum(ltgAdvisories))+' advisories relating to Licence Threat Groups. Please check All-Organizations-Healthcheck.json for details.'})
+    Advisories.update({'AccessAdvisories':'There are '+str(sum(accessAdvisories))+' advisories relating to Access roles. Please check All-Organizations-Healthcheck.json for details.'})
+    Advisories.update({'Grandfathering':'There are '+str(len(grandAdvisories))+' advisories relating to Grandfathering. Please check All-Organizations-Healthcheck.json for details.'})
+    Advisories.update({'Tags':'There are '+str(sum(appTags))+' advisories relating to application tags. Please check All-Organizations-Healthcheck.json for details.'})
+    Advisories.update({'ContinuousMonitoring':'There are '+str(len(contMonitoring))+' advisories relating to Continuous Monitoring. Please check All-Organizations-Healthcheck.json for details.'})
+    Advisories.update({'SCM':'There are '+str(len(SCMadvisories))+' advisories relating to Source Control Management. Please check All-Organizations-Healthcheck.json for details.'})
+    Advisories.update({'UserNotifications':'There are '+str(len(userNotif))+' advisories relating to User Notifications. Please check All-Organizations-Healthcheck.json for details.'})
+    Advisories.update({'RoleNotifications':'There are '+str(len(roleNotif))+' advisories relating to Role Notifications. Please check All-Organizations-Healthcheck.json for details.'})
+    Advisories.update({'JiraNotifications':'There are '+str(len(jiraNotif))+' advisories relating to Jira Notifications. Please check All-Organizations-Healthcheck.json for details.'})
+    Advisories.update({'WebhookNotifications':'There are '+str(len(webhookNotif))+' advisories relating to Webhook Notifications. Please check All-Organizations-Healthcheck.json for details.'})
+        
+
     extract_advisories()
     for message in range(0,len(persistedMessages)):
         print(persistedMessages[message])
@@ -430,7 +454,7 @@ def validate_application_tags(template, app):
         #         ret.append(f"Application tag {tag} should be added to '{app['name']}'")
 
     if len(ret):
-        Advisories.update({'Tags':'There are '+str(len(ret))+' applications that should have an application tag applied'})
+        appTags.append(len(ret))
         return ret
     return None
 
@@ -504,10 +528,8 @@ def validate_access(template, org=None, app=None):
             except ValueError:
                 accessData.append(f'{a} role should be added to {entity_name}')
                 adds += 1
-        Advisories.update({'AccessRemoveRoles':'There are '+str(removes)+' roles that should be removed'})
-        Advisories.update({'AccessAddRoles':'There are '+str(adds)+' roles that should be added'})
-        
     if len(accessData):
+        accessAdvisories.append(len(accessData))
         return accessData
     return None
 
@@ -544,10 +566,10 @@ def validate_grandfathering(template, org=None, app=None):
             if data == template:
                 return None
             else:
-                Advisories.update({'Grandfathering':f"Grandfathering should be ["+f"{rendor_json(template, True)}"+f"] enabled for '{entity_name}'."})
+                grandAdvisories.append(f"Grandfathering should be ["+f"{rendor_json(template, True)}"+f"] enabled for '{entity_name}'.")
                 return f"Grandfathering should be {rendor_json(template, True)} enabled for '{entity_name}'."
                 
-    Advisories.update({'Grandfathering':f"Grandfathering should be inherited from '{template['inheritedFromOrganizationName']}' for '{entity_name}'."})
+    grandAdvisories.append(f"Grandfathering should be inherited from '{template['inheritedFromOrganizationName']}' for '{entity_name}'.")
     return f"Grandfathering should be inherited from '{template['inheritedFromOrganizationName']}' for '{entity_name}'."
 
 
@@ -604,7 +626,7 @@ def validate_source_control(template, org=None, app=None):
         # SCM applied, but no template?
         # If SCM inherits the purge will ensure zero length
         if template is None and len(purge_empty_attributes(data)):
-            Advisories.update({'SCM':f'Source control should be removed for {entity_name}.'})
+            SCMadvisories.append(f'Source control should be removed for {entity_name}.')
             return f'Source control should be removed for {entity_name}.'
 
     if template is not None:
@@ -620,7 +642,7 @@ def validate_source_control(template, org=None, app=None):
         # if both exist, the data should now match the template
         if data != tcopy:
             # If not, the template config is applicable
-            Advisories.update({'SCM':error})
+            SCMadvisories.append(error)
             return error
 
     return None
@@ -629,23 +651,14 @@ def validate_source_control(template, org=None, app=None):
 def policy_notification_disparities(notifications, tnotifications, ntype):
     if notifications != tnotifications:
         if ntype == 'User notifications':
-            Advisories.update({'UserNotifications':f"{ntype} are not aligned between the policy and the template."})
+            userNotif.append(f"{ntype} are not aligned between the policy and the template.")
         if ntype == 'Role notifications':
-            Advisories.update({'RoleNotifications':f"{ntype} are not aligned between the policy and the template."})
+            roleNotif.append(f"{ntype} are not aligned between the policy and the template.")
         if ntype == 'Jira notifications':
-            Advisories.update({'JiraNotifications':f"{ntype} are not aligned between the policy and the template."})
+            jiraNotif.append(f"{ntype} are not aligned between the policy and the template.")
         if ntype == 'Webhook notifications':
-            Advisories.update({'WebhookNotifications':f"{ntype} are not aligned between the policy and the template."})    
-        return f"{ntype} are not aligned between the policy and the template."
-    elif len(notifications) != 0:
-        if ntype == 'User notifications':
-            Advisories.update({'UserNotifications':f"{ntype} are configured correctly."})
-        if ntype == 'Role notifications':
-            Advisories.update({'RoleNotifications':f"{ntype} are configured correctly."})
-        if ntype == 'Jira notifications':
-            Advisories.update({'JiraNotifications':f"{ntype} are configured correctly."})
-        if ntype == 'Webhook notifications':
-            Advisories.update({'WebhookNotifications':f"{ntype} are configured correctly."})        
+            webhookNotif.append(f"{ntype} are not aligned between the policy and the template.")    
+        return f"{ntype} are not aligned between the policy and the template."       
     return None
 
 
@@ -875,9 +888,9 @@ def validate_continuous_monitoring(template, org=None, app=None):
         return None
 
     if template is None:
-        Advisories.update({'ContinuousMonitoring':f'Continuous monitoring should be inherited for {entity_name}.'})
+        contMonitoring.append(f'Continuous monitoring should be inherited for {entity_name}.')
         return f'Continuous monitoring should be inherited for {entity_name}.'
-    Advisories.update({'ContinuousMonitoring':f'Continuous monitoring stage should be the {rendor_json(template)} for {entity_name}.'})
+    contMonitoring.append(f'Continuous monitoring stage should be the {rendor_json(template)} for {entity_name}.')
     return f'Continuous monitoring stage should be the {rendor_json(template)} stage for {entity_name}.'
 
 
@@ -920,6 +933,7 @@ def validate_data_purging(template, org):
         # if sm != template_sm:
         #     dpData.append(f'Data purging for success metrics should be: {template_sm} for {org_name}')
         if len(dpData):
+            dataPurging.append(len(dpData))
             return dpData
     return None
 
@@ -954,6 +968,7 @@ def validate_application_categories(template, org):
                 # No! Add it.
                 acData.append(f"Application Category '{ac}' should be added to '{org_name}'.")
     if len(acData):
+        appCategories.append(len(acData))
         return acData
     return None
 
@@ -993,6 +1008,7 @@ def validate_component_labels(template, org=None, app=None):
                 cl_data.append(f"Component label '{cl['label']}' should be added to '{entity_name}'.")
 
     if len(cl_data):
+        compLabels.append(len(cl_data))
         return cl_data
     return None
 
@@ -1043,6 +1059,7 @@ def validate_license_threat_groups(template, org):
                 ltg_data.append(f'License threat group {ltg} should be added to {org_name}.')
 
     if len(ltg_data):
+        ltgAdvisories.append(len(ltg_data))
         return ltg_data
     return None
 

@@ -17,6 +17,15 @@
       "Proprietary Components": [
         "Proprietary component 'packages:['com.sonatype']','regexes:['com.sonatype.*']' should be added to Root Organization"
       ],
+      "Application Categories": [
+        "Application Category '{'name': 'Carlos category', 'description': 'My dummy category', 'color': 'light-green'}' should be removed from 'Root Organization'."
+      ],
+      "Component Labels": [
+        "Component label 'Carlos super duper label' should be removed from 'Root Organization'."
+      ],
+      "License Threat Groups": [
+        "License threat group {'name': 'Carlos dummy LTG', 'threatLevel': 5} should be removed from Root Organization."
+      ],
       "Access": [
         "Developer role should be removed from Root Organization",
         "SCNR default role should be removed from Root Organization",
@@ -115,6 +124,23 @@
       ],
       "Applications": [
         {
+          "Name": "BadApplication",
+          "Public Id": "BadApplicationID",
+          "Continuous Monitoring": "Continuous monitoring should be inherited for BadApplication.",
+          "Source Control": "SCM configuration URL should be set for BadApplication.",
+          "Access": [
+            "Developer role should be added to BadApplication"
+          ]
+        },
+        {
+          "Name": "MyFirstApplication",
+          "Public Id": "MyApplicationID",
+          "Source Control": "SCM configuration URL should be set for MyFirstApplication.",
+          "Access": [
+            "Developer role should be added to MyFirstApplication"
+          ]
+        },
+        {
           "Name": "Reports",
           "Public Id": "Reports",
           "Source Control": "SCM configuration URL should be set for Reports.",
@@ -144,6 +170,7 @@
         {
           "Name": "testApp",
           "Public Id": "testApp",
+          "Grandfathering": "Grandfathering should be inherited from 'Root Organization' for 'testApp'.",
           "Source Control": "SCM configuration URL should be set for testApp.",
           "Access": [
             "Developer role should be added to testApp"
@@ -219,6 +246,7 @@
         {
           "Name": "Billing App",
           "Public Id": "TechEnablement",
+          "Grandfathering": "Grandfathering should be inherited from 'Root Organization' for 'Billing App'.",
           "Source Control": "SCM configuration URL should be set for Billing App.",
           "Access": [
             "Developer role should be added to Billing App"
