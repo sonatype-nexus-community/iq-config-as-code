@@ -459,7 +459,8 @@ def validate_grandfathering(template, org=None, app=None):
 
     if data == template:
         return None
-
+    if template == None:
+        return None
     if app is not None:
         entity_name = app["name"]
     else:
@@ -783,6 +784,8 @@ def validate_data_purging(template, org):
     data = get_url(url)
 
     if data == template:
+        return None
+    if template == None:
         return None
     if data is not None:
         arStages = deepcopy(data['applicationReports']['stages'])

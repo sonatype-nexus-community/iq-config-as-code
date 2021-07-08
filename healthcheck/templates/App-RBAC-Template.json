@@ -1653,6 +1653,11 @@
           "role": "Legal Reviewer",
           "user_or_group_name": "Kevin",
           "role_type": "USER"
+        },
+        {
+          "role": "Application Evaluator",
+          "user_or_group_name": "BuildAgent",
+          "role_type": "USER"
         }
       ],
       "policy": {
@@ -11777,13 +11782,7 @@
       "application_categories": null,
       "component_labels": null,
       "license_threat_groups": null,
-      "access": [
-        {
-          "role": "Application Evaluator",
-          "user_or_group_name": "BuildAgent",
-          "role_type": "USER"
-        }
-      ],
+      "access": null,
       "policy": {
         "policies": [],
         "labels": [],
