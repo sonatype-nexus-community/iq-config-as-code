@@ -1,0 +1,52 @@
+{
+  "Organizations": [
+    {
+      "Name": "The One Team",
+      "Data Purging": [
+        "Data purging for application reports develop stage should be inherited for The One Team",
+        "Data purging for application reports build stage should be inherited for The One Team",
+        "Data purging for application reports stage-release stage should be inherited for The One Team",
+        "Data purging for application reports release stage should be inherited for The One Team",
+        "Data purging for application reports operate stage should be inherited for The One Team",
+        "Data purging for application reports continuous-monitoring stage should be inherited for The One Team",
+        "Data purging for application reports success metrics stage should be inherited for The One Team"
+      ],
+      "Proprietary Components": [
+        "The One Team is missing proprietary component configuration. The default template specifies proprietary component configuration."
+      ],
+      "Access": [
+        "Application Evaluator role should be added to The One Team"
+      ],
+      "Applications": [
+        {
+          "Name": "Billing App",
+          "Public Id": "TechEnablement",
+          "Grandfathering": "Grandfathering should be inherited from 'Root Organization' for 'Billing App'.",
+          "Source Control": "SCM configuration URL should be set for Billing App.",
+          "Access": [
+            "Developer role should be added to Billing App"
+          ]
+        },
+        {
+          "Name": "Trading App",
+          "Public Id": "TradingApp",
+          "Source Control": "SCM configuration URL should be set for Trading App.",
+          "Access": [
+            "Developer role should be added to Trading App"
+          ]
+        },
+        {
+          "Name": "Webgoat-legacy",
+          "Public Id": "Webgoat-legacy",
+          "Proprietary Components": [
+            "Webgoat-legacy has proprietary component configuration that should be removed. The default template does not specify proprietary component configuration."
+          ],
+          "Source Control": "SCM configuration URL should be set for Webgoat-legacy.",
+          "Access": [
+            "Developer role should be added to Webgoat-legacy"
+          ]
+        }
+      ]
+    }
+  ]
+}
