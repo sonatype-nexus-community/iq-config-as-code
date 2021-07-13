@@ -23,9 +23,7 @@ import os
 import time
 
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
-from deepdiff import DeepDiff
 from copy import deepcopy
-from dictdiffer import diff
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 iq_session = requests.Session
