@@ -23,6 +23,7 @@ import os
 import time
 
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
+from deepdiff import DeepDiff
 from copy import deepcopy
 from dictdiffer import diff
 
@@ -76,7 +77,8 @@ grandAdvisories = []
 appTags = []
 contMonitoring = []
 SCMadvisories = []
-userNotif,roleNotif,jiraNotif,webhookNotif = [],[],[],[]
+notifs = {"User notifications": [], "Role notifications": [], "Jira notifications": [], "Webhook notifications": []}
+notifsCounts = {"User notifications": 0, "Role notifications": 0, "Jira notifications": 0, "Webhook notifications": 0}
 persistedMessages = []
 
 #---------------------------------
@@ -226,10 +228,10 @@ def main():
     Advisories.update({'Tags':'There are '+str(sum(appTags))+' advisories relating to application tags. Please check All-Organizations-Healthcheck.json for details.'})
     Advisories.update({'ContinuousMonitoring':'There are '+str(len(contMonitoring))+' advisories relating to Continuous Monitoring. Please check All-Organizations-Healthcheck.json for details.'})
     Advisories.update({'SCM':'There are '+str(len(SCMadvisories))+' advisories relating to Source Control Management. Please check All-Organizations-Healthcheck.json for details.'})
-    Advisories.update({'UserNotifications':'There are '+str(len(userNotif))+' advisories relating to User Notifications. Please check All-Organizations-Healthcheck.json for details.'})
-    Advisories.update({'RoleNotifications':'There are '+str(len(roleNotif))+' advisories relating to Role Notifications. Please check All-Organizations-Healthcheck.json for details.'})
-    Advisories.update({'JiraNotifications':'There are '+str(len(jiraNotif))+' advisories relating to Jira Notifications. Please check All-Organizations-Healthcheck.json for details.'})
-    Advisories.update({'WebhookNotifications':'There are '+str(len(webhookNotif))+' advisories relating to Webhook Notifications. Please check All-Organizations-Healthcheck.json for details.'})
+    Advisories.update({'UserNotifications':'There are '+str(notifsCounts['User notifications'])+' advisories relating to User Notifications. Please check All-Organizations-Healthcheck.json for details.'})
+    Advisories.update({'RoleNotifications':'There are '+str(notifsCounts['Role notifications'])+' advisories relating to Role Notifications. Please check All-Organizations-Healthcheck.json for details.'})
+    Advisories.update({'JiraNotifications':'There are '+str(notifsCounts['Jira notifications'])+' advisories relating to Jira Notifications. Please check All-Organizations-Healthcheck.json for details.'})
+    Advisories.update({'WebhookNotifications':'There are '+str(notifsCounts['Webhook notifications'])+' advisories relating to Webhook Notifications. Please check All-Organizations-Healthcheck.json for details.'})
 
 
     totalAdvisories = sum(policyAdvisories)+sum(proprietaryComps)+sum(dataPurging)+sum(appCategories)+sum(compLabels)+sum(ltgAdvisories)+sum(accessAdvisories)+len(grandAdvisories)+sum(appTags)+len(contMonitoring)+len(SCMadvisories)
@@ -673,15 +675,47 @@ def validate_source_control(template, org=None, app=None):
 
 def policy_notification_disparities(notifications, tnotifications, ntype):
     if notifications != tnotifications:
-        if ntype == 'User notifications':
-            userNotif.append(f"{ntype} are not aligned between the policy and the template.")
-        if ntype == 'Role notifications':
-            roleNotif.append(f"{ntype} are not aligned between the policy and the template.")
-        if ntype == 'Jira notifications':
-            jiraNotif.append(f"{ntype} are not aligned between the policy and the template.")
-        if ntype == 'Webhook notifications':
-            webhookNotif.append(f"{ntype} are not aligned between the policy and the template.")    
-        return f"{ntype} are not aligned between the policy and the template."       
+        try:
+            # Iterate over the notifications in the IQ policy checking for disparity between notifications
+            # that exist in both template and IQ and notifications missing from the template.
+            for notification in notifications:
+                found = False
+                # Iterate over the notifications required within the template
+                for tnotification in tnotifications:
+                    # Notifications for the same role?
+                    if roles[notification['roleId']] == tnotification['role']:
+                        # If the notification stages match, we have a match. Happy days!
+                        if set(notification['stageIds']) != set(tnotification['stageIds']):
+                            notifs[ntype].append(f"{ntype} are mis-aligned for {difference(notification['stageIds'], tnotification['stageIds'])} between the policy and the template for the '{tnotification['role']}' role.")
+                        # Alignment has been identified, so move on.
+                        found = True
+                        break
+                if not found:
+                    notifs[ntype].append(f"Remove notifications set within Nexus for '{roles[notification['roleId']]}' that are not set within the template.")
+
+            # Iterate over the template notifications looking for template notifications not present in IQ
+            for tnotification in tnotifications:
+                found = False
+                # Iterate over the IQ notifications
+                for notification in notifications:
+                    # Notifications for the same role?
+                    if tnotification['role'] == roles[notification['roleId']]:
+                        found = True
+                        # Any disparity is identified above, so the requirement here is to check only for missing notifications
+                        break
+                if not found:
+                    notifs[ntype].append(f"Add notifications specified for '{tnotification['role']}' in the template")
+
+        except TypeError:
+            notifs[ntype].append(f"{ntype} are not aligned between the policy and the template.")
+
+        advisories = None
+        if len(notifs[ntype]):
+            advisories = deepcopy(notifs[ntype])
+            notifsCounts[ntype] += len(advisories)
+        notifs[ntype].clear()
+        return advisories
+
     return None
 
 
@@ -703,15 +737,24 @@ def advise_policy_disparities(policy, tpolicy,policyAdvisories):
         for condition in constraint['conditions']:
             condition.pop('value')
     if policy['constraints'] != tpolicy['constraints']:
-        policy_advisories.append(f'{name} constraints require the following correction {list(diff(policy["constraints"],tpolicy["constraints"]))}')
+        policy_advisories.append(f'{name} policy constraints differ between the configuration in Nexus and that in the template.')
 
     if policy['actions'] != tpolicy['actions']:
-        al = list(diff(policy["actions"], tpolicy["actions"]))
-        for tuple in al:
-            if len(tuple[1]):
-                policy_advisories.append(f"{tuple[0]} '{tuple[1]}' stage action from '{tuple[2][0]}' to '{tuple[2][1]}'")
-            else:
-                policy_advisories.append(f"{tuple[0]} '{tuple[2][0][1]}' action to '{tuple[2][0][0]}' stage ")
+        # Find actions in Nexus but not the template
+        actions = {k: policy['actions'][k] for k in set(policy['actions']) - set(tpolicy['actions'])}
+        for item in actions.items():
+            policy_advisories.append(f'Remove \'{item[1]}\' action from the \'{item[0]}\' scan stage')
+        # Find actions in the template but not Nexus
+        actions = {k: tpolicy['actions'][k] for k in set(tpolicy['actions']) - set(policy['actions'])}
+        for item in actions.items():
+            policy_advisories.append(f'Add \'{item[1]}\' action to the \'{item[0]}\' scan stage')
+        # Find actions that differ in Nexus and the template for the policy
+        for item in policy['actions'].items():
+            try:
+                if policy['actions'][item[0]] != tpolicy['actions'][item[0]]:
+                    policy_advisories.append(f'Amend \'{item[0]}\' action from {policy["actions"][item[0]]} to {tpolicy["actions"][item[0]]}')
+            except KeyError:
+                pass
 
     advisory = policy_notification_disparities(policy['notifications']['userNotifications'], tpolicy['notifications']['userNotifications'], 'User notifications')
     if advisory is not None:
@@ -867,8 +910,7 @@ def validate_proprietary_components(template, org=None, app=None):
                 if default_template_org_or_app:
                     # Therefore, if the template has PC and the org/app doesn't, inform that it should be added.
                     if pcsx is not None and not len(pcsx):
-                        pcsData.append(f'{entity_name} is missing proprietary component configuration. The default '
-                                       f'template specifies proprietary component configuration.')
+                        pcsData.append(f'{entity_name} is missing proprietary component configuration specified in the template.')
                 # No. It's a named entity, so the PC config can be explicitly specified.
                 else:
                     # No! Add it.

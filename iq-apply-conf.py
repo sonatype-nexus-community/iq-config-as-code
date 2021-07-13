@@ -68,9 +68,6 @@ def main():
     # Admin level configuration and integrations
     nexus_administration(config)
 
-    # ROOT level configuration
-    root_configuration(config)
-
     # Iterate over the Organisations
     organisations = config.get('organizations')
     if organisations is not None:

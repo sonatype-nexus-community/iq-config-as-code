@@ -1786,18 +1786,12 @@
                 {
                   "stageIds": [
                     "build",
-                    "source",
-                    "stage-release"
-                  ],
-                  "roleId": "1da70fae1fd54d6cb7999871ebdb9a36"
-                },
-                {
-                  "stageIds": [
-                    "continuous-monitoring",
+                    "stage-release",
+                    "release",
                     "operate",
-                    "release"
+                    "continuous-monitoring"
                   ],
-                  "roleId": "1cddabf7fdaa47d6833454af10e0a3ef"
+                  "role": "Owner"
                 }
               ],
               "jiraNotifications": [],
@@ -1877,18 +1871,12 @@
                 {
                   "stageIds": [
                     "build",
-                    "source",
-                    "stage-release"
-                  ],
-                  "roleId": "1da70fae1fd54d6cb7999871ebdb9a36"
-                },
-                {
-                  "stageIds": [
-                    "continuous-monitoring",
+                    "stage-release",
+                    "release",
                     "operate",
-                    "release"
+                    "continuous-monitoring"
                   ],
-                  "roleId": "1cddabf7fdaa47d6833454af10e0a3ef"
+                  "role": "Owner"
                 }
               ],
               "jiraNotifications": [],
@@ -1929,18 +1917,12 @@
                 {
                   "stageIds": [
                     "build",
-                    "source",
-                    "stage-release"
-                  ],
-                  "roleId": "1da70fae1fd54d6cb7999871ebdb9a36"
-                },
-                {
-                  "stageIds": [
-                    "continuous-monitoring",
+                    "stage-release",
+                    "release",
                     "operate",
-                    "release"
+                    "continuous-monitoring"
                   ],
-                  "roleId": "1cddabf7fdaa47d6833454af10e0a3ef"
+                  "role": "Owner"
                 }
               ],
               "jiraNotifications": [],
@@ -1981,18 +1963,12 @@
                 {
                   "stageIds": [
                     "build",
-                    "source",
-                    "stage-release"
-                  ],
-                  "roleId": "1da70fae1fd54d6cb7999871ebdb9a36"
-                },
-                {
-                  "stageIds": [
-                    "continuous-monitoring",
+                    "stage-release",
+                    "release",
                     "operate",
-                    "release"
+                    "continuous-monitoring"
                   ],
-                  "roleId": "1cddabf7fdaa47d6833454af10e0a3ef"
+                  "role": "Owner"
                 }
               ],
               "jiraNotifications": [],
@@ -2045,18 +2021,12 @@
                 {
                   "stageIds": [
                     "build",
-                    "source",
-                    "stage-release"
-                  ],
-                  "roleId": "1da70fae1fd54d6cb7999871ebdb9a36"
-                },
-                {
-                  "stageIds": [
-                    "continuous-monitoring",
+                    "stage-release",
+                    "release",
                     "operate",
-                    "release"
+                    "continuous-monitoring"
                   ],
-                  "roleId": "1cddabf7fdaa47d6833454af10e0a3ef"
+                  "role": "Owner"
                 }
               ],
               "jiraNotifications": [],
@@ -2211,18 +2181,12 @@
                 {
                   "stageIds": [
                     "build",
-                    "source",
-                    "stage-release"
-                  ],
-                  "roleId": "1da70fae1fd54d6cb7999871ebdb9a36"
-                },
-                {
-                  "stageIds": [
-                    "continuous-monitoring",
+                    "stage-release",
+                    "release",
                     "operate",
-                    "release"
+                    "continuous-monitoring"
                   ],
-                  "roleId": "1cddabf7fdaa47d6833454af10e0a3ef"
+                  "role": "Owner"
                 }
               ],
               "jiraNotifications": [],
@@ -2263,18 +2227,12 @@
                 {
                   "stageIds": [
                     "build",
-                    "source",
-                    "stage-release"
-                  ],
-                  "roleId": "1da70fae1fd54d6cb7999871ebdb9a36"
-                },
-                {
-                  "stageIds": [
-                    "continuous-monitoring",
+                    "stage-release",
+                    "release",
                     "operate",
-                    "release"
+                    "continuous-monitoring"
                   ],
-                  "roleId": "1cddabf7fdaa47d6833454af10e0a3ef"
+                  "role": "Owner"
                 }
               ],
               "jiraNotifications": [],
@@ -2315,18 +2273,12 @@
                 {
                   "stageIds": [
                     "build",
-                    "source",
-                    "stage-release"
-                  ],
-                  "roleId": "1da70fae1fd54d6cb7999871ebdb9a36"
-                },
-                {
-                  "stageIds": [
-                    "continuous-monitoring",
+                    "stage-release",
+                    "release",
                     "operate",
-                    "release"
+                    "continuous-monitoring"
                   ],
-                  "roleId": "1cddabf7fdaa47d6833454af10e0a3ef"
+                  "role": "Owner"
                 }
               ],
               "jiraNotifications": [],
@@ -2367,18 +2319,12 @@
                 {
                   "stageIds": [
                     "build",
-                    "source",
-                    "stage-release"
-                  ],
-                  "roleId": "1da70fae1fd54d6cb7999871ebdb9a36"
-                },
-                {
-                  "stageIds": [
-                    "continuous-monitoring",
+                    "stage-release",
+                    "release",
                     "operate",
-                    "release"
+                    "continuous-monitoring"
                   ],
-                  "roleId": "1cddabf7fdaa47d6833454af10e0a3ef"
+                  "role": "Owner"
                 }
               ],
               "jiraNotifications": [],
@@ -2425,18 +2371,12 @@
                 {
                   "stageIds": [
                     "build",
-                    "source",
-                    "stage-release"
-                  ],
-                  "roleId": "1da70fae1fd54d6cb7999871ebdb9a36"
-                },
-                {
-                  "stageIds": [
-                    "continuous-monitoring",
+                    "stage-release",
+                    "release",
                     "operate",
-                    "release"
+                    "continuous-monitoring"
                   ],
-                  "roleId": "1cddabf7fdaa47d6833454af10e0a3ef"
+                  "role": "Owner"
                 }
               ],
               "jiraNotifications": [],
@@ -2510,18 +2450,12 @@
                 {
                   "stageIds": [
                     "build",
-                    "source",
-                    "stage-release"
-                  ],
-                  "roleId": "1da70fae1fd54d6cb7999871ebdb9a36"
-                },
-                {
-                  "stageIds": [
-                    "continuous-monitoring",
+                    "stage-release",
+                    "release",
                     "operate",
-                    "release"
+                    "continuous-monitoring"
                   ],
-                  "roleId": "1cddabf7fdaa47d6833454af10e0a3ef"
+                  "role": "Owner"
                 }
               ],
               "jiraNotifications": [],
@@ -2568,18 +2502,12 @@
                 {
                   "stageIds": [
                     "build",
-                    "source",
-                    "stage-release"
-                  ],
-                  "roleId": "1da70fae1fd54d6cb7999871ebdb9a36"
-                },
-                {
-                  "stageIds": [
-                    "continuous-monitoring",
+                    "stage-release",
+                    "release",
                     "operate",
-                    "release"
+                    "continuous-monitoring"
                   ],
-                  "roleId": "1cddabf7fdaa47d6833454af10e0a3ef"
+                  "role": "Owner"
                 }
               ],
               "jiraNotifications": [],
@@ -2620,18 +2548,12 @@
                 {
                   "stageIds": [
                     "build",
-                    "source",
-                    "stage-release"
-                  ],
-                  "roleId": "1da70fae1fd54d6cb7999871ebdb9a36"
-                },
-                {
-                  "stageIds": [
-                    "continuous-monitoring",
+                    "stage-release",
+                    "release",
                     "operate",
-                    "release"
+                    "continuous-monitoring"
                   ],
-                  "roleId": "1cddabf7fdaa47d6833454af10e0a3ef"
+                  "role": "Owner"
                 }
               ],
               "jiraNotifications": [],
@@ -11814,7 +11736,7 @@
             "enableStatusChecks": true
           },
           "publicId": null,
-          "applicationTags": null,
+          "applicationTags": "Apply an Application Category to each application",
           "access": [
             {
               "role": "Developer",
