@@ -68,6 +68,9 @@ def main():
     # Admin level configuration and integrations
     nexus_administration(config)
 
+    # ROOT level configuration
+    root_configuration(config)
+
     # Iterate over the Organisations
     organisations = config.get('organizations')
     if organisations is not None:
@@ -101,6 +104,7 @@ def nexus_administration(config):
     # Parses and applies all the 'administrative' configuration for Nexus IQ
     create_users(config.get('users'))
     custom_roles(config.get('custom_roles'))
+    create_administrators(config.get('administrators'))
     create_ldap_instances(config.get('ldap_connections'))
     create_email_server_connection(config.get('email_server'))
     add_proxy(config.get('proxy'))
@@ -191,6 +195,11 @@ def get_url(url, root=""):
 def post_url(url, params, root=""):
     # common post call
     resp = iq_session.post(url, json=params, auth=iq_auth, verify=not self_signed)
+    return handle_resp(resp, root)
+
+def put_url(url, params, root=""):
+    # common post call
+    resp = iq_session.put(url, json=params, auth=iq_auth, verify=not self_signed)
     return handle_resp(resp, root)
 
 def multipart_post_url(url, data, root=""):
@@ -661,6 +670,18 @@ def create_users(data):
         print("Added User:")
         print_debug(data)
 
+def create_administrators(data):
+    if data is None or len(data) == 0:
+        return
+    url = f'{iq_url}/rest/membershipMapping/global/global'
+    membershipData, idMap = get_url(url), {}
+    for role in membershipData['membersByRole']:
+        idMap[role['roleName']] = role['roleId']
+
+    for adminRoles in data['membersByRole']:
+        put_url(f'{url}/role/{idMap[adminRoles["roleName"]]}', adminRoles['membersByOwner'][0]['members'])
+        print("Added Administrator:")
+        print_debug(data)
 
 def add_system_notice(data):
     if data is None or len(data) == 0:
