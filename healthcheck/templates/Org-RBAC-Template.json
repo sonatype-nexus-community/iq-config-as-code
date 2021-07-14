@@ -12,7 +12,7 @@
       },
       "source_control": {
         "repositoryUrl": null,
-        "username": "YOUR-USERNAME",
+        "username": "CSMonkee",
         "token": "#~FAKE~SECRET~KEY~#",
         "provider": "bitbucket",
         "baseBranch": "master",
@@ -1650,13 +1650,13 @@
       ],
       "access": [
         {
-          "role": "Application Evaluator",
-          "user_or_group_name": "BuildAgent",
+          "role": "Legal Reviewer",
+          "user_or_group_name": "Kevin",
           "role_type": "USER"
         },
         {
-          "role": "Legal Reviewer",
-          "user_or_group_name": "Kevin",
+          "role": "Application Evaluator",
+          "user_or_group_name": "BuildAgent",
           "role_type": "USER"
         }
       ],
@@ -2449,7 +2449,6 @@
               "roleNotifications": [
                 {
                   "stageIds": [
-                    "source",
                     "build",
                     "stage-release",
                     "release",
@@ -2548,11 +2547,11 @@
               "roleNotifications": [
                 {
                   "stageIds": [
-                    "source",
                     "build",
                     "stage-release",
                     "release",
-                    "operate"
+                    "operate",
+                    "continuous-monitoring"
                   ],
                   "role": "Owner"
                 }
@@ -11716,7 +11715,7 @@
           "user_or_group_name": "leads1",
           "role_type": "GROUP"
         }
-     ],
+      ],
       "policy": {
         "policies": [],
         "labels": [],
