@@ -31,6 +31,7 @@ iq_url, iq_auth, output_dir, debug = "", "", "", False
 app_categories, organizations, template_organizations, applications, ldap_connections, entities = [], [], [], [], [], []
 roleType = ['USER', 'GROUP']
 roles = {}
+webhooks = {}
 self_signed = False
 ROOT_ORG_NAME = 'Root Organization'
 TEMPLATE_ORG_NAME = 'Template-Org'
@@ -165,6 +166,7 @@ def main():
     set_template_organizations(template_file)
     set_applications()
     set_roles()
+    set_webhooks()
 
     #-----------------------------------------------------------------------------------
     #t,segments = 0, len(organizations)
@@ -671,40 +673,53 @@ def validate_source_control(template, org=None, app=None):
     return None
 
 
-def policy_notification_disparities(notifications, tnotifications, ntype):
+def policy_notification_disparities(notifications, tnotifications, ntype, nkey, tnkey, names=None):
     if notifications != tnotifications:
         try:
             # Iterate over the notifications in the IQ policy checking for disparity between notifications
             # that exist in both template and IQ and notifications missing from the template.
             for notification in notifications:
                 found = False
+                if names:
+                    lookup = names[notification[nkey]]
+                else:
+                    lookup = notification[nkey]
+
                 # Iterate over the notifications required within the template
                 for tnotification in tnotifications:
                     # Notifications for the same role?
-                    if roles[notification['roleId']] == tnotification['role']:
+                    if lookup == tnotification[tnkey]:
                         # If the notification stages match, we have a match. Happy days!
                         if set(notification['stageIds']) != set(tnotification['stageIds']):
-                            notifs[ntype].append(f"{ntype} are mis-aligned for {difference(notification['stageIds'], tnotification['stageIds'])} between the policy and the template for the '{tnotification['role']}' role.")
+                            notifs[ntype].append(f"{ntype} are mis-aligned for {difference(notification['stageIds'], tnotification['stageIds'])} between the policy and the template for the '{tnotification[tnkey]}'.")
                         # Alignment has been identified, so move on.
                         found = True
                         break
                 if not found:
-                    notifs[ntype].append(f"Remove notifications set within Nexus for '{roles[notification['roleId']]}' that are not set within the template.")
+                    if not names:
+                        notifs[ntype].append(f"Remove {ntype} set within Nexus for {notification[nkey]} that are not set within the template.")
+                    else:
+                        notifs[ntype].append(f"Remove {ntype} set within Nexus for {names[notification[nkey]]} that are not set within the template.")
 
             # Iterate over the template notifications looking for template notifications not present in IQ
             for tnotification in tnotifications:
                 found = False
                 # Iterate over the IQ notifications
                 for notification in notifications:
+                    if names:
+                        lookup = names[notification[nkey]]
+                    else:
+                        lookup = notification[nkey]
+
                     # Notifications for the same role?
-                    if tnotification['role'] == roles[notification['roleId']]:
+                    if tnotification[tnkey] == lookup:
                         found = True
                         # Any disparity is identified above, so the requirement here is to check only for missing notifications
                         break
                 if not found:
-                    notifs[ntype].append(f"Add notifications specified for '{tnotification['role']}' in the template")
+                    notifs[ntype].append(f"Add {ntype} specified for {tnotification[tnkey]} in the template")
 
-        except TypeError:
+        except (TypeError, KeyError):
             notifs[ntype].append(f"{ntype} are not aligned between the policy and the template.")
 
         advisories = None
@@ -754,16 +769,16 @@ def advise_policy_disparities(policy, tpolicy,policyAdvisories):
             except KeyError:
                 pass
 
-    advisory = policy_notification_disparities(policy['notifications']['userNotifications'], tpolicy['notifications']['userNotifications'], 'User notifications')
+    advisory = policy_notification_disparities(policy['notifications']['userNotifications'], tpolicy['notifications']['userNotifications'], 'User notifications', 'emailAddress', 'emailAddress')
     if advisory is not None:
         policy_advisories.append(advisory)
-    advisory = policy_notification_disparities(policy['notifications']['roleNotifications'], tpolicy['notifications']['roleNotifications'], 'Role notifications')
+    advisory = policy_notification_disparities(policy['notifications']['roleNotifications'], tpolicy['notifications']['roleNotifications'], 'Role notifications', 'roleId', 'role', roles)
     if advisory is not None:
         policy_advisories.append(advisory)
-    advisory = policy_notification_disparities(policy['notifications']['jiraNotifications'], tpolicy['notifications']['jiraNotifications'], 'Jira notifications')
+    advisory = policy_notification_disparities(policy['notifications']['jiraNotifications'], tpolicy['notifications']['jiraNotifications'], 'Jira notifications', 'roleId', 'role')
     if advisory is not None:
         policy_advisories.append(advisory)
-    advisory = policy_notification_disparities(policy['notifications']['webhookNotifications'], tpolicy['notifications']['webhookNotifications'], 'Webhook notifications')
+    advisory = policy_notification_disparities(policy['notifications']['webhookNotifications'], tpolicy['notifications']['webhookNotifications'], 'Webhook notifications', 'webhookId', 'webhook', webhooks)
     if advisory is not None:
         policy_advisories.append(advisory)
     policyAdvisories.append(len(policy_advisories))
@@ -1156,6 +1171,14 @@ def set_roles():
     data = get_url(url)
     for role in data['roles']:
         roles[role['id']] = role['name']
+
+
+def set_webhooks():
+    global webhooks
+    url = f'{iq_url}/rest/config/webhook'
+    data = get_url(url)
+    for webhook in data:
+        webhooks[webhook['id']] = webhook['description']
 
 
 # Write the data to a file...
