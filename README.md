@@ -65,6 +65,17 @@ Usage: iq-apply-config [ARGS]...
     python3 iq-apply-conf.py -f scrape/System-Config.json  -a <user>:<password> -u <protocol>://<hostname>:<port> -s True
     
     python3 iq-apply-conf.py -f scrape/All-Organizations-Config.json  -a <user>:<password> -u <protocol>://<hostname>:<port>
+    
+    The iq-apply-config script will not override configuration pertaining to child organizations and applications. It will override 'Root' organization
+    configuration! It imports the policies and in so doing invalidates all waivers that are currently applied. This behaviour is the same as that exhibited
+    when uploading a new policy.json file. ** YOU HAVE BEEN WARNED! **
+    
+    When on-boarding development teams, you may find the dev-team-onboarding-template.json file helpful. This provides the data-set that pertains to organisation
+    and application configuration, aligned to recommended best practice.
+    
+    If you are configuring Nexus Lifecycle for the first time, you may wish to 'apply' the sonatype-recommended-system-config.json and 
+    sonatype-recommended-root-configuration.json before on-boarding development teams. You will need to adjust the system config settings for LDAP and Email, but
+    these defaults are a good prompt to tend to these important configuration items.
 
 Usage: iq-healthcheck [ARGS]...
 
@@ -94,13 +105,13 @@ Usage: iq-healthcheck [ARGS]...
     you must 'scrape' it's data and copy/paste it into the template json file. Thereafter, the 'Template-Org' containing a 'Template-App' configuration exists. 
     The configuration of organisations/applications that are not specifically identified by name within the template is benchmarked against the template org/app.
     Output is written to the 'healthcheck' directory by default. The '<Org-Name>-Healthcheck.json' file informs the compliance of your organisation and application
-    against the template.
+    against the template. The 'Advisories.json' file provides a summary of the healthcheck advisories generated.
     
     You may be required to adjust the template to align with your SDLC. For example 'Root Organisation' proprietary component matching uses data that must be
     modified in order to align with your company namespaces. The 'policy' configuration utilises role based notifications which ensure stakeholders receive
     notification of new policy violations. Does your business benefit from this capability?
     
-    Please feel free to discuss this with the Sonatype Customer Success team: success@sonatype.com
+    Please feel free to discuss this with your dedicated CSE or the wider Sonatype Customer Success team: success@sonatype.com
 
 Usage: iq-scrape-config [ARGS]...
 
@@ -177,6 +188,8 @@ Changelog
 06th May 2021 - Add healthcheck capability
 
 25th May 2021 - Enhanced healthcheck benchmarks environment configuration against a 'template' configuration aligned with recommended best practice.
+
+13th July 2021 - Improved healthcheck reporting. Templates for on-boarding and healthcheck config aligned to Sonatype recommended best practice.
 
 
 LICENSE
