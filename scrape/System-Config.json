@@ -66,6 +66,53 @@
       "permissionCategories": null
     }
   ],
+  "administrators": {
+    "membersByRole": [
+      {
+        "roleId": "xx123randomroleidxx123",
+        "roleName": "Policy Administrator",
+        "roleDescription": "Manages all organizations, applications, policies, and policy violations.",
+        "membersByOwner": [
+          {
+            "ownerId": "global",
+            "ownerName": "Global",
+            "ownerType": "global",
+            "members": [
+              {
+                "type": "USER",
+                "internalName": "testUser",
+                "displayName": "Test User",
+                "email": "test@localhost",
+                "realm": "IQ Server"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "roleId": "xx123randomroleid2xx123",
+        "roleName": "System Administrator",
+        "roleDescription": "Manages system configuration and users.",
+        "membersByOwner": [
+          {
+            "ownerId": "global",
+            "ownerName": "Global",
+            "ownerType": "global",
+            "members": [
+              {
+                "type": "USER",
+                "internalName": "testUser",
+                "displayName": "Test User",
+                "email": "test@localhost",
+                "realm": "IQ Server"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "groupSearchEnabled": true
+  },
   "ldap_connections": [],
   "email_server": {
     "hostname": "127.0.0.1",

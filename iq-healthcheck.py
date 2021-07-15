@@ -259,7 +259,7 @@ def purge_empty_attributes(data):
 
 
 def nexus_administration():
-    systemConf = {'Users': validate_users(), 'Custom Roles': validate_roles(),
+    systemConf = {'Users': validate_users(), 'Custom Roles': validate_roles(), 'Administrators': validate_administrators(),
                   'LDAP Connections': validate_ldap_instances(), 'Email Server': validate_email_server_connection(),
                   'Proxy': validate_proxy(), 'Webhooks': validate_webhooks(),
                   'Success Metrics': validate_success_metrics(),
@@ -948,6 +948,21 @@ def validate_roles():
         return f'{count} Custom roles.'
     return None
 
+def validate_administrators():
+    url = f'{iq_url}/rest/membershipMapping/global/global'
+    data = get_url(url)
+    policyAdminCount = 0
+    systemAdminCount = 0
+    for element in data['membersByRole']:
+        role = element.pop('roleName')
+        if role == 'Policy Administrator':
+            policyAdminCount = len(element['membersByOwner'][0]['members'])
+            Advisories.update({'Policy Administrators' : 'There are ' + str(policyAdminCount) + ' Custom roles.'})
+        elif role == 'System Administrator':
+            systemAdminCount = len(element['membersByOwner'][0]['members'])
+            Advisories.update({'System Administrators' : 'There are ' + str(systemAdminCount) + ' Custom roles.'})
+    return f'There are {policyAdminCount} Policy Administrators and {systemAdminCount} System Administrators.'
+
 
 def validate_continuous_monitoring(template, org=None, app=None):
     url = f'{iq_url}/rest/policyMonitoring/{org_or_app(org, app)}'
@@ -1177,11 +1192,12 @@ def set_webhooks():
     global webhooks
     url = f'{iq_url}/rest/config/webhook'
     data = get_url(url)
-    for webhook in data:
-        webhooks[webhook['id']] = webhook['description']
+    if data is not None:
+        for webhook in data:
+            webhooks[webhook['id']] = webhook['description']
 
 
-# Write the data to a file...
+# Write the data to a file...ß
 def validate_data(data, filename):
     with open(filename, 'w') as outfile:
         json.dump(data, outfile, indent=2)

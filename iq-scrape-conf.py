@@ -130,6 +130,7 @@ def nexus_administration():
     # Parses and applies all the 'administrative' configuration for Nexus IQ
     systemConf['users'] = persist_users()
     systemConf['custom_roles'] = persist_roles()
+    systemConf['administrators'] = persist_administrators()
     systemConf['ldap_connections'] = persist_ldap_instances()
     systemConf['email_server'] = persist_email_server_connection()
     systemConf['proxy'] = persist_proxy()
@@ -571,6 +572,11 @@ def persist_roles():
     print_debug(data)
     return data
 
+def persist_administrators():
+    url = f'{iq_url}/rest/membershipMapping/global/global'
+    data = get_url(url)
+    print_debug(data)
+    return data
 
 def persist_continuous_monitoring(org='ROOT_ORGANIZATION_ID', app=None):
     url = f'{iq_url}/rest/policyMonitoring/{org_or_app(org, app)}'
