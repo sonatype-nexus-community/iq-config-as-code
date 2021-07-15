@@ -1,0 +1,41 @@
+{
+  "notifications": {
+    "userNotifications": [
+      {
+        "stageIds": [
+          "build",
+          "stage-release",
+          "release",
+          "operate",
+          "continuous-monitoring"
+        ],
+        "emailAddress": "user@company.com"
+      }
+    ],
+    "roleNotifications": [
+      {
+        "stageIds": [
+          "build",
+          "stage-release",
+          "release",
+          "operate",
+          "continuous-monitoring"
+        ],
+        "role": "Owner"
+      }
+    ],
+    "jiraNotifications": [],
+    "webhookNotifications": [
+      {
+        "stageIds": [
+          "build",
+          "stage-release",
+          "release",
+          "operate",
+          "continuous-monitoring"
+        ],
+        "webhook": "Sonatype webhook description"
+      }
+    ]
+  }
+}

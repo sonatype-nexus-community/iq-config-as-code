@@ -775,7 +775,7 @@ def advise_policy_disparities(policy, tpolicy,policyAdvisories):
     advisory = policy_notification_disparities(policy['notifications']['roleNotifications'], tpolicy['notifications']['roleNotifications'], 'Role notifications', 'roleId', 'role', roles)
     if advisory is not None:
         policy_advisories.append(advisory)
-    advisory = policy_notification_disparities(policy['notifications']['jiraNotifications'], tpolicy['notifications']['jiraNotifications'], 'Jira notifications', 'roleId', 'role')
+    advisory = policy_notification_disparities(policy['notifications']['jiraNotifications'], tpolicy['notifications']['jiraNotifications'], 'Jira notifications', 'webhookId', 'webhook')
     if advisory is not None:
         policy_advisories.append(advisory)
     advisory = policy_notification_disparities(policy['notifications']['webhookNotifications'], tpolicy['notifications']['webhookNotifications'], 'Webhook notifications', 'webhookId', 'webhook', webhooks)
