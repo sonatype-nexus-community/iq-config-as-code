@@ -51,13 +51,35 @@ Usage
 
     $ python3 iq-apply-conf.py --help
 
+Docker Usage
+
+    Build the image by your own:
+
+        $ docker build -t iq-server-casc:latest .
+
+    Build the image by your own with a custom base image:
+
+        $ docker build -t iq-server-casc:latest --build-arg BASEIMAGE=python:3.9.6-alpine3.14 .
+
+    In case you need some custom user ids or group ids, you could just build the image with those args:
+
+        $ docker build -t iq-server-casc:latest --build-arg USER_ID=1001 --build-arg GROUP_ID=1001 .
+
+    Run with local image:
+
+        docker run --rm -i -v $PWD:/data iq-server-casc:latest <iq-script>
+
+    Run with the latest upstream image:
+
+        docker run --rm -i -v $PWD:/data kehrhardt/iq-server-casc:latest <iq-script>
+
 
 Usage: iq-apply-config [ARGS]...
 
   Example usage:
 
     # Run python script though docker container with all packages installed on it!
-    docker run -w /tmp --rm -i -v $PWD:/tmp broadinstitute/python-requests /tmp/iq-apply-conf.py -f /tmp/conf/<conf-file>.json -u http://<iq-hostname>:<iq-port> -a <user>:<password>
+    docker run --rm -i -v $PWD:/data kehrhardt/iq-server-casc:latest iq-apply-conf -f /data/conf/<conf-file>.json -u http://<iq-hostname>:<iq-port> -a <user>:<password>
 
     # Run the script natively on your host
     python3 iq-apply-conf.py -f conf/<conf-file>.json -a <user>:<password> -u <protocol>://<hostname>:<port>
@@ -82,7 +104,7 @@ Usage: iq-healthcheck [ARGS]...
   Example usage:
     
     # Run python script though docker container with all packages installed on it!
-    docker run -w /tmp --rm -i -v $PWD:/tmp broadinstitute/python-requests iq-scrape-conf.py -u "http://<iq-hostname>:<iq-port>"
+    docker run --rm -i -v $PWD:/data kehrhardt/iq-server-casc:latest iq-healthcheck -u "http://<iq-hostname>:<iq-port>"
 
     # Run the script natively on your host
     python3 iq-healthcheck.py  -a <user>:<password> -u <protocol>://<hostname>:<port> -o /tmp -t healthcheck/templates/App-RBAC-Template.json
@@ -118,7 +140,7 @@ Usage: iq-scrape-config [ARGS]...
   Example usage:
     
     # Run python script though docker container with all packages installed on it!
-    docker run -w /tmp --rm -i -v $PWD:/tmp broadinstitute/python-requests iq-scrape-conf.py -u "http://<iq-hostname>:<iq-port>"
+    docker run --rm -i -v $PWD:/data kehrhardt/iq-server-casc:latest iq-scrape-conf -u "http://<iq-hostname>:<iq-port>" -a <user>:<password>
 
     # Run the script natively on your host
     python3 iq-scrape-conf.py  -a <user>:<password> -u <protocol>://<hostname>:<port> -o /tmp
