@@ -152,6 +152,10 @@ Options:
       
       -t, --template      The template configuration against which the environment configuration is benchmarked.
                                                                                             # iq-healthcheck.py only
+                                                                                            
+      -m, --success_metrics_months 
+                          The number of previous months (from current date) for which success metric will be collected.
+                                                                                            # iq-scrape-conf.py only - defaults to 6
 
 Limitations/Scope:
 
