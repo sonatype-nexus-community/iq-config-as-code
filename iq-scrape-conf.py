@@ -710,8 +710,9 @@ def set_roles():
     global roles
     url = f'{iq_url}/api/v2/applications/roles'
     data = get_url(url)
-    for role in data['roles']:
-        roles[role['id']] = role['name']
+    if data is not None:
+        for role in data['roles']:
+            roles[role['id']] = role['name']
 
 
 def name_available(name):

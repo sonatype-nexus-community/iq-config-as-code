@@ -1177,8 +1177,9 @@ def set_webhooks():
     global webhooks
     url = f'{iq_url}/rest/config/webhook'
     data = get_url(url)
-    for webhook in data:
-        webhooks[webhook['id']] = webhook['description']
+    if data is not None:
+        for webhook in data:
+            webhooks[webhook['id']] = webhook['description']
 
 
 # Write the data to a file...
