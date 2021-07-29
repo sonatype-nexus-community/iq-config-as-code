@@ -45,7 +45,7 @@ def get_arguments():
     parser.add_argument('-d', '--debug', default=False, required=False)
     parser.add_argument('-s', '--self_signed', default=False, required=False)
     parser.add_argument('-y', '--scope', default="all", required=False)
-    parser.add_argument('-m', '--success_metrics_months', default=0, type=int, required=False)
+    parser.add_argument('-m', '--success_metrics_months', default=6, type=int, required=False)
 
     args = vars(parser.parse_args())
     iq_url = args["url"]
