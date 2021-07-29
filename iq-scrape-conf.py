@@ -18,6 +18,8 @@
 
 import argparse
 import json
+from datetime import datetime
+
 import requests
 import os
 
@@ -30,10 +32,11 @@ app_categories, organizations, applications, ldap_connections, entities = [], []
 roleType = ['USER', 'GROUP']
 roles = {}
 self_signed = False
+success_metrics_months = 0
 
 
 def get_arguments():
-    global iq_url, iq_session, iq_auth, output_dir, debug, self_signed, entities
+    global iq_url, iq_session, iq_auth, output_dir, debug, self_signed, entities, success_metrics_months
     parser = argparse.ArgumentParser(description='This script enables you to persist the configuration of IQ Server to JSON\
      data, thus supporting the config-as-code requirement of Sonatype customers')
     parser.add_argument('-u', '--url', help='', default="http://localhost:8070", required=False)
@@ -42,6 +45,7 @@ def get_arguments():
     parser.add_argument('-d', '--debug', default=False, required=False)
     parser.add_argument('-s', '--self_signed', default=False, required=False)
     parser.add_argument('-y', '--scope', default="all", required=False)
+    parser.add_argument('-m', '--success_metrics_months', default=0, type=int, required=False)
 
     args = vars(parser.parse_args())
     iq_url = args["url"]
@@ -52,6 +56,7 @@ def get_arguments():
 
     debug = args["debug"]
     self_signed = args["self_signed"]
+    success_metrics_months = args["success_metrics_months"]
     entities = args["scope"].split(",")
     # Remove outer whitespace from entity (org, app)
     entities2 = []
@@ -89,6 +94,8 @@ def main():
     set_organizations()
     set_applications()
     set_roles()
+
+    persist_success_metrics_data()
 
     # Admin level configuration and integrations
     nexus_administration()
@@ -135,10 +142,10 @@ def nexus_administration():
     systemConf['proxy'] = persist_proxy()
     systemConf['webhooks'] = persist_webhooks()
     # systemConf['system_notice'] = persist_system_notice()
-    systemConf['success_metrics'] = persist_success_metrics()
+    systemConf['success_metrics'] = persist_success_metrics_enabled()
     systemConf['automatic_applications'] = persist_auto_applications()
     systemConf['automatic_source_control'] = persist_automatic_source_control()
-    systemConf['success_metrics_reports'] = persist_success_metrics_reports()
+    systemConf['success_metrics_reports'] = persist_success_metrics_report_names()
     persist_data(systemConf, f'{output_dir}System-Config.json')
 
 
@@ -503,7 +510,7 @@ def persist_policy(org='ROOT_ORGANIZATION_ID', app=None):
     return data
 
 
-def persist_success_metrics():
+def persist_success_metrics_enabled():
     url = f'{iq_url}/rest/successMetrics'
     # This API applies the config regardless of whether the proxy is already configured.
     data = get_url(url)
@@ -512,7 +519,37 @@ def persist_success_metrics():
     return data
 
 
-def persist_success_metrics_reports():
+def persist_success_metrics_data():
+    data = None
+    if success_metrics_months:
+        url = f'{iq_url}/api/v2/reports/metrics'
+        period = datetime.now()
+        month = success_metrics_months % 12
+        year = int((success_metrics_months - month)/12)
+        myobj = {'timePeriod': 'MONTH', 'firstTimePeriod': str(period.year-year)+'-'+str(period.month-month)}
+        # This API applies the config regardless of whether the proxy is already configured.
+        data = post_url(url, myobj)
+        # persist_data(data, '{output_dir}system-success_metrics.json')
+        persist_data(data, f'{output_dir}Success-Metrics.json')
+    return data
+
+
+# def persist_success_metrics_data():
+#     data = None
+#     if success_metrics:
+#         url = f'{iq_url}/api/v2/reports/metrics'
+#         period = datetime.now()
+#         period = period - datetime.month - success_metrics
+#
+#
+#         myobj = {'timePeriod': 'MONTH', 'firstTimePeriod': '2021-03'}
+#         # This API applies the config regardless of whether the proxy is already configured.
+#         data = post_url(url, myobj)
+#         # persist_data(data, '{output_dir}system-success_metrics.json')
+#         persist_data(data, f'{output_dir}Success-Metrics.json')
+#     return data
+
+def persist_success_metrics_report_names():
     url = f'{iq_url}/rest/successMetrics/report'
     # This API applies the config regardless of whether the proxy is already configured.
     data = get_url(url)
