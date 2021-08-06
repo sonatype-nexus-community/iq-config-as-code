@@ -252,7 +252,7 @@ def set_categories():
     global app_categories
     # using categories from root organization.
     url = f'{iq_url}/api/v2/applicationCategories/organization/ROOT_ORGANIZATION_ID'
-    categories = get_url(url)
+    app_categories = get_url(url)
 
 
 def check_application(new_app):
@@ -607,7 +607,7 @@ def application_categories(data, org='ROOT_ORGANIZATION_ID'):
         resp = post_url(url, app_cat)
         if resp is not None:
             app_categories.append(resp)
-        print('Applied Application Category configuration:')
+            print(f'Applied Application Category configuration {app_cat["name"]}')
         print_debug(app_cat)
 
 
