@@ -68,9 +68,6 @@ def main():
     # Admin level configuration and integrations
     nexus_administration(config)
 
-    # ROOT level configuration
-    root_configuration(config)
-
     # Iterate over the Organisations
     organisations = config.get('organizations')
     if organisations is not None:
@@ -195,11 +192,6 @@ def get_url(url, root=""):
 def post_url(url, params, root=""):
     # common post call
     resp = iq_session.post(url, json=params, auth=iq_auth, verify=not self_signed)
-    return handle_resp(resp, root)
-
-def put_url(url, params, root=""):
-    # common post call
-    resp = iq_session.put(url, json=params, auth=iq_auth, verify=not self_signed)
     return handle_resp(resp, root)
 
 def multipart_post_url(url, data, root=""):

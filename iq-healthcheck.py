@@ -84,12 +84,12 @@ persistedMessages = []
 #
 # Print iterations progress
 def printProgressBar (
-        iteration, 
-        total, 
-        prefix = 'Progress:', 
-        suffix = 'Complete', 
-        decimals = 1, 
-        length = 50, 
+        iteration,
+        total,
+        prefix = 'Progress:',
+        suffix = 'Complete',
+        decimals = 1,
+        length = 50,
         fill = '█'):
 
     time.sleep(0.1)
@@ -98,7 +98,7 @@ def printProgressBar (
     bar = fill * filledLength + '-' * (length - filledLength)
     print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end = '\r')
     # Print New Line on Complete
-    if iteration == total: 
+    if iteration == total:
         print()
 
 #---------------------------------
@@ -196,7 +196,7 @@ def main():
                         app = app_configuration(app, resolve_template_app(template, app['name']))
                         if app is not None:
                             org_apps.append(app)
-                        #-----------------------------------------------------------------------------------   
+                        #-----------------------------------------------------------------------------------
                         t +=1
                         printProgressBar(t,segments)
                         #-----------------------------------------------------------------------------------
@@ -235,7 +235,7 @@ def main():
 
 
     totalAdvisories = sum(policyAdvisories)+sum(proprietaryComps)+sum(dataPurging)+sum(appCategories)+sum(compLabels)+sum(ltgAdvisories)+sum(accessAdvisories)+len(grandAdvisories)+sum(appTags)+len(contMonitoring)+len(SCMadvisories)
-    Advisories.update({'TOTAL NUMBER OF ADVISORIES':'There are '+str(totalAdvisories)+' active advisories currently. Please check All-Organizations-Healthcheck.json for details.'})        
+    Advisories.update({'TOTAL NUMBER OF ADVISORIES':'There are '+str(totalAdvisories)+' active advisories currently. Please check All-Organizations-Healthcheck.json for details.'})
 
     extract_advisories()
     for message in range(0,len(persistedMessages)):
@@ -593,7 +593,7 @@ def validate_grandfathering(template, org=None, app=None):
             else:
                 grandAdvisories.append(f"Grandfathering should be ["+f"{rendor_json(template, True)}"+f"] enabled for '{entity_name}'.")
                 return f"Grandfathering should be {rendor_json(template, True)} enabled for '{entity_name}'."
-                
+
     grandAdvisories.append(f"Grandfathering should be inherited from '{template['inheritedFromOrganizationName']}' for '{entity_name}'.")
     return f"Grandfathering should be inherited from '{template['inheritedFromOrganizationName']}' for '{entity_name}'."
 
@@ -948,6 +948,7 @@ def validate_roles():
         return f'{count} Custom roles.'
     return None
 
+
 def validate_administrators():
     url = f'{iq_url}/rest/membershipMapping/global/global'
     data = get_url(url)
@@ -1197,7 +1198,7 @@ def set_webhooks():
             webhooks[webhook['id']] = webhook['description']
 
 
-# Write the data to a file...ß
+# Write the data to a file...
 def validate_data(data, filename):
     with open(filename, 'w') as outfile:
         json.dump(data, outfile, indent=2)
