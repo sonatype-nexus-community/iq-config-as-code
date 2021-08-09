@@ -393,7 +393,7 @@ def add_category(name):
             }
     resp = post_url(url, data)
     if resp is not None:
-        categories.append(resp)
+        app_categories.append(resp)
         return resp['id']
     return ''
 
