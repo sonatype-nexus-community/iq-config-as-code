@@ -84,12 +84,12 @@ persistedMessages = []
 #
 # Print iterations progress
 def printProgressBar (
-        iteration, 
-        total, 
-        prefix = 'Progress:', 
-        suffix = 'Complete', 
-        decimals = 1, 
-        length = 50, 
+        iteration,
+        total,
+        prefix = 'Progress:',
+        suffix = 'Complete',
+        decimals = 1,
+        length = 50,
         fill = '█'):
 
     time.sleep(0.1)
@@ -98,7 +98,7 @@ def printProgressBar (
     bar = fill * filledLength + '-' * (length - filledLength)
     print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end = '\r')
     # Print New Line on Complete
-    if iteration == total: 
+    if iteration == total:
         print()
 
 #---------------------------------
@@ -196,7 +196,7 @@ def main():
                         app = app_configuration(app, resolve_template_app(template, app['name']))
                         if app is not None:
                             org_apps.append(app)
-                        #-----------------------------------------------------------------------------------   
+                        #-----------------------------------------------------------------------------------
                         t +=1
                         printProgressBar(t,segments)
                         #-----------------------------------------------------------------------------------
@@ -235,7 +235,7 @@ def main():
 
 
     totalAdvisories = sum(policyAdvisories)+sum(proprietaryComps)+sum(dataPurging)+sum(appCategories)+sum(compLabels)+sum(ltgAdvisories)+sum(accessAdvisories)+len(grandAdvisories)+sum(appTags)+len(contMonitoring)+len(SCMadvisories)
-    Advisories.update({'TOTAL NUMBER OF ADVISORIES':'There are '+str(totalAdvisories)+' active advisories currently. Please check All-Organizations-Healthcheck.json for details.'})        
+    Advisories.update({'TOTAL NUMBER OF ADVISORIES':'There are '+str(totalAdvisories)+' active advisories currently. Please check All-Organizations-Healthcheck.json for details.'})
 
     extract_advisories()
     for message in range(0,len(persistedMessages)):
@@ -259,7 +259,7 @@ def purge_empty_attributes(data):
 
 
 def nexus_administration():
-    systemConf = {'Users': validate_users(), 'Custom Roles': validate_roles(),
+    systemConf = {'Users': validate_users(), 'Custom Roles': validate_roles(), 'Administrators': validate_administrators(),
                   'LDAP Connections': validate_ldap_instances(), 'Email Server': validate_email_server_connection(),
                   'Proxy': validate_proxy(), 'Webhooks': validate_webhooks(),
                   'Success Metrics': validate_success_metrics(),
@@ -593,7 +593,7 @@ def validate_grandfathering(template, org=None, app=None):
             else:
                 grandAdvisories.append(f"Grandfathering should be ["+f"{rendor_json(template, True)}"+f"] enabled for '{entity_name}'.")
                 return f"Grandfathering should be {rendor_json(template, True)} enabled for '{entity_name}'."
-                
+
     grandAdvisories.append(f"Grandfathering should be inherited from '{template['inheritedFromOrganizationName']}' for '{entity_name}'.")
     return f"Grandfathering should be inherited from '{template['inheritedFromOrganizationName']}' for '{entity_name}'."
 
@@ -947,6 +947,22 @@ def validate_roles():
         Advisories.update({'Custom Roles' : 'There are '+str(count)+' Custom roles.'})
         return f'{count} Custom roles.'
     return None
+
+
+def validate_administrators():
+    url = f'{iq_url}/rest/membershipMapping/global/global'
+    data = get_url(url)
+    policyAdminCount = 0
+    systemAdminCount = 0
+    for element in data['membersByRole']:
+        role = element.pop('roleName')
+        if role == 'Policy Administrator':
+            policyAdminCount = len(element['membersByOwner'][0]['members'])
+            Advisories.update({'Policy Administrators' : 'There are ' + str(policyAdminCount) + ' Custom roles.'})
+        elif role == 'System Administrator':
+            systemAdminCount = len(element['membersByOwner'][0]['members'])
+            Advisories.update({'System Administrators' : 'There are ' + str(systemAdminCount) + ' Custom roles.'})
+    return f'There are {policyAdminCount} Policy Administrators and {systemAdminCount} System Administrators.'
 
 
 def validate_continuous_monitoring(template, org=None, app=None):
