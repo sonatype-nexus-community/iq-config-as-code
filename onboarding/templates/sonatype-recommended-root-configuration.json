@@ -1853,6 +1853,58 @@
               "jiraNotifications": [],
               "webhookNotifications": []
             }
+          },
+          {
+            "name": "Suspicious Component",
+            "ownerId": "ROOT_ORGANIZATION_ID",
+            "threatLevel": 9,
+            "policyViolationGrandfatheringAllowed": false,
+            "constraints": [
+              {
+                "name": "integrity-rating",
+                "operator": "OR",
+                "conditions": [
+                  {
+                    "conditionTypeId": "IntegrityRating",
+                    "operator": "is",
+                    "value": "1",
+                    "conditionIndex": 0
+                  },
+                  {
+                    "conditionTypeId": "IntegrityRating",
+                    "operator": "is",
+                    "value": "2",
+                    "conditionIndex": 1
+                  }
+                ]
+              }
+            ],
+            "actions": {
+              "proxy": "fail",
+              "develop": "warn",
+              "source": "warn",
+              "build": "warn",
+              "stage-release": "warn",
+              "release": "warn",
+              "operate": "warn"
+            },
+            "notifications": {
+              "userNotifications": [],
+              "roleNotifications": [
+                {
+                  "stageIds": [
+                    "continuous-monitoring",
+                    "operate",
+                    "build",
+                    "release",
+                    "stage-release"
+                  ],
+                  "roleId": "1cddabf7fdaa47d6833454af10e0a3ef"
+                }
+              ],
+              "jiraNotifications": [],
+              "webhookNotifications": []
+            }
           }
         ],
         "labels": [
