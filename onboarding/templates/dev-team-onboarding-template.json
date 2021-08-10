@@ -12,13 +12,6 @@
           ]
         }
       ],
-      "access": [
-        {
-          "role": "Application Evaluator",
-          "user_or_group_name": "BuildAgent",
-          "role_type": "USER"
-        }
-      ],
       "name": "Best-Practice-Template",
       "applications": [
         {
