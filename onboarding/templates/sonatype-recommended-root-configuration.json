@@ -1711,6 +1711,52 @@
             }
           },
           {
+            "name": "Security-Malicious",
+            "ownerId": "ROOT_ORGANIZATION_ID",
+            "threatLevel": 10,
+            "policyViolationGrandfatheringAllowed": false,
+            "constraints": [
+              {
+                "name": "Malicious vulnerability category",
+                "operator": "AND",
+                "conditions": [
+                  {
+                    "conditionTypeId": "SecurityVulnerabilityCategory",
+                    "operator": "is",
+                    "value": "malicious_code",
+                    "conditionIndex": 0
+                  }
+                ]
+              }
+            ],
+            "actions": {
+              "proxy": "fail",
+              "develop": "warn",
+              "source": "warn",
+              "build": "warn",
+              "stage-release": "warn",
+              "release": "warn",
+              "operate": "warn"
+            },
+            "notifications": {
+              "userNotifications": [],
+              "roleNotifications": [
+                {
+                  "stageIds": [
+                    "continuous-monitoring",
+                    "operate",
+                    "build",
+                    "release",
+                    "stage-release"
+                  ],
+                  "roleId": "1cddabf7fdaa47d6833454af10e0a3ef"
+                }
+              ],
+              "jiraNotifications": [],
+              "webhookNotifications": []
+            }
+          },
+          {
             "name": "Security-Medium",
             "ownerId": "ROOT_ORGANIZATION_ID",
             "threatLevel": 7,
