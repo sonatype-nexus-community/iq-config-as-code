@@ -194,10 +194,14 @@ def handle_resp(resp, root=""):
     if resp.status_code != 200:
         print(resp.text)
         return None
-    node = resp.json()
+    try:
+        node = resp.json()
+        if root in node:
+            node = node[root]
+    except:
+        node = resp.text
+        pass
 
-    if root in node:
-        node = node[root]
     if node is None or len(node) == 0:
         return None
     return node
@@ -209,9 +213,9 @@ def get_url(url, root=""):
     return handle_resp(resp, root)
 
 
-def post_url(url, params, root=""):
+def post_url(url, params, custom_header=None, root=""):
     # common post call
-    resp = iq_session.post(url, json=params, auth=iq_auth, verify=not self_signed)
+    resp = iq_session.post(url, json=params, auth=iq_auth, verify=not self_signed, headers=custom_header)
     return handle_resp(resp, root)
 
 
@@ -304,19 +308,6 @@ def get_organization_name(id):
     return ret
 
 
-def check_ldap_connection(name):
-    ret = ''
-    for connection in ldap_connections:
-        if name in connection['name']:
-            ret = connection['id']
-    if len(ret) == 0:
-        ret = add_ldap_connection(name)
-    if len(ret) > 0:
-        return ret
-    else:
-        return None
-
-
 def persist_application_tags(app_tags):
     # If the application category does not exist, it will be added to the root organisation by default, by design.
     ret = []
@@ -373,18 +364,6 @@ def check_user_or_group(user_or_group):
 
     print(f"User type '{user_or_group}' does not exist! 'USER' or 'GROUP' are the valid types.")
     return None
-
-
-
-def add_ldap_connection(ldap_conn_name):
-    data = {"name": ldap_conn_name}
-    url = f'{iq_url}/rest/config/ldap'
-    resp = post_url(url, data)
-    if resp is not None:
-        ldap_connections.append(resp)
-        print(f"Created LDAP connection: {ldap_conn_name}")
-        return resp['id']
-    return ''
 
 
 # Apply roles to the endpoint identified within the URL
@@ -528,26 +507,10 @@ def persist_success_metrics_data():
         year = int((success_metrics_months - month)/12)
         myobj = {'timePeriod': 'MONTH', 'firstTimePeriod': str(period.year-year)+'-'+str(period.month-month)}
         # This API applies the config regardless of whether the proxy is already configured.
-        data = post_url(url, myobj)
-        # persist_data(data, '{output_dir}system-success_metrics.json')
-        persist_data(data, f'{output_dir}Success-Metrics.json')
+        data = post_url(url, myobj, {"accept": "text/csv"})
+        persist_data(data, f'{output_dir}Success-Metrics.csv')
     return data
 
-
-# def persist_success_metrics_data():
-#     data = None
-#     if success_metrics:
-#         url = f'{iq_url}/api/v2/reports/metrics'
-#         period = datetime.now()
-#         period = period - datetime.month - success_metrics
-#
-#
-#         myobj = {'timePeriod': 'MONTH', 'firstTimePeriod': '2021-03'}
-#         # This API applies the config regardless of whether the proxy is already configured.
-#         data = post_url(url, myobj)
-#         # persist_data(data, '{output_dir}system-success_metrics.json')
-#         persist_data(data, f'{output_dir}Success-Metrics.json')
-#     return data
 
 def persist_success_metrics_report_names():
     url = f'{iq_url}/rest/successMetrics/report'
@@ -761,9 +724,15 @@ def name_available(name):
 
 # Write the data to a file...
 def persist_data(data, filename):
-    with open(filename, 'w') as outfile:
-        json.dump(data, outfile, indent=2)
-    print(f'Persisted data to {filename}')
+    if 'csv' in filename:
+        f = open(filename, 'w')
+        f.write(data)
+        f.close()
+        print(f'Persisted data to {filename}')
+    elif 'json' in filename:
+        with open(filename, 'w') as outfile:
+            json.dump(data, outfile, indent=2)
+        print(f'Persisted data to {filename}')
 
 
 # --------------------------------------------------------------------
