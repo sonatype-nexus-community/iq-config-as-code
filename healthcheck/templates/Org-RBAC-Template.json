@@ -69,10 +69,10 @@
         {
           "id": null,
           "packages": [
-            "com.sonatype"
+            "com.yourorg"
           ],
           "regexes": [
-            "com.sonatype.*"
+            "com.yourorg.*"
           ]
         }
       ],
@@ -11746,10 +11746,10 @@
         {
           "id": null,
           "packages": [
-            "com.sonatype.example"
+            "com.yourorg.example"
           ],
           "regexes": [
-            "com.sonatype.example.*"
+            "com.yourorg.example.*"
           ]
         }
       ],
