@@ -469,7 +469,7 @@ def validate_application_tags(template, app):
 
     if template is not None:
         # If tags exist in the template, advise that one should be applied.
-        if not len(ret):
+        if len(template):
             ret.append(f"Application '{app['name']}' should have an application tag applied.")
         # for tag in template:
         #     try:
@@ -1052,7 +1052,7 @@ def validate_application_categories(template, org):
                 template.index(ac)
             except (ValueError, AttributeError):
                 # No! Remove it.
-                acData.append(f"Application Category '{ac}' should be removed from '{org_name}'.")
+                acData.append(f"Application Category '{ac['name']}' should be removed from '{org_name}'.")
 
     if template is not None:
         # Iterate over the ACs in the template
@@ -1062,7 +1062,7 @@ def validate_application_categories(template, org):
                 data.index(ac)
             except (ValueError, AttributeError):
                 # No! Add it.
-                acData.append(f"Application Category '{ac}' should be added to '{org_name}'.")
+                acData.append(f"Application Category '{ac['name']}' should be added to '{org_name}'.")
     if len(acData):
         appCategories.append(len(acData))
         return acData
