@@ -459,23 +459,26 @@ def validate_application_tags(template, app):
         if tag_ is not None:
             # The regard here is that a tag has been applied. Tags speak to HOW the application is delivered
             # and can influence policies in scope.
-            # ret.append(f"Application tag '{tag_['name']}' has been applied to '{app['name']}'")
-            return None
-            # try:
-            #     applied_tags.append(tag_)
-            #     template.index(tag_)
-            # except (AttributeError, ValueError):
-            #     ret.append(f"Application tag {tag_} should be removed from {app['name']}'")
+            try:
+                applied_tags.append(tag_)
+                template.index(tag_)
+            except (AttributeError, ValueError):
+                ret.append(f"Application tag '{tag_['name']}' should be removed from {app['name']}'")
 
     if template is not None:
         # If tags exist in the template, advise that one should be applied.
-        if len(template):
-            ret.append(f"Application '{app['name']}' should have an application tag applied.")
-        # for tag in template:
-        #     try:
-        #         applied_tags.index(tag)
-        #     except ValueError:
-        #         ret.append(f"Application tag {tag} should be added to '{app['name']}'")
+        index = -1
+        for tag in template:
+            try:
+                index = applied_tags.index(tag)
+                # One of the applied tags appears in the template. That is enough because the application has been
+                # annotated to reflect how it is delivered
+                break
+            except ValueError:
+                pass
+        if index == -1:
+            if len(template):
+                ret.append(f"One of the following template application tags '{template}' should be applied to '{app['name']}'")
 
     if len(ret):
         appTags.append(len(ret))

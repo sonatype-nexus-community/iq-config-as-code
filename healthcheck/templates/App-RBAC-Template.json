@@ -11788,7 +11788,17 @@
             "enableStatusChecks": true
           },
           "publicId": null,
-          "applicationTags": "Apply an Application Category to each application",
+          "applicationTags": [
+            {
+              "name": "Distributed"
+            },
+            {
+              "name": "Hosted"
+            },
+            {
+              "name": "Internal"
+            }
+          ],
           "access": [
             {
               "role": "Developer",
