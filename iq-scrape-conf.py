@@ -45,7 +45,7 @@ def get_arguments():
 
     args = vars(parser.parse_args())
     iq_url = args["url"]
-    credentials = args["auth"].split(":")
+    credentials = args["auth"].split(":", 1)
     output_dir = args["output"]
     if output_dir[-1] != '/':
         output_dir += '/'
