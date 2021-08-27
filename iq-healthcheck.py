@@ -120,7 +120,7 @@ def get_arguments():
     # An errant '/' on the URL does not prevent a connection, but does scupper the REST calls working!
     if iq_url[len(iq_url)-1] == "/":
         iq_url = iq_url[:-1]
-    credentials = args["auth"].split(":")
+    credentials = args["auth"].split(":", 1)
     output_dir = args["output"]
     if output_dir[-1] != '/':
         output_dir += '/'

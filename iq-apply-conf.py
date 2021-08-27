@@ -40,7 +40,7 @@ def get_arguments():
 
     args = vars(parser.parse_args())
     iq_url = args["url"]
-    credentials = args["auth"].split(":")
+    credentials = args["auth"].split(":", 1)
     debug = args["debug"]
     self_signed = args["self_signed"]
     iq_session = requests.Session()
