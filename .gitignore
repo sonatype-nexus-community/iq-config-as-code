@@ -2,3 +2,4 @@
 .idea
 /scrape/
 /healthcheck/
+**/.DS_Store
