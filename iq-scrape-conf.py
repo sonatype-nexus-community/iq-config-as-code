@@ -500,7 +500,42 @@ def persist_policy(org='ROOT_ORGANIZATION_ID', app=None):
             policy.pop('id')
             for constraint in policy['constraints']:
                 constraint.pop('id')
+
+    if org == 'ROOT_ORGANIZATION_ID':
+        # So the 'export' API does not persist the policyTags, so I have to work around that by hard coding tag scopes that align to best practice.
+        ptags = [
+        {
+            "policyName": "License-None",
+            "tagName": "Hosted"
+        },
+        {
+            "policyName": "License-None",
+            "tagName": "Distributed"
+        },
+        {
+            "policyName": "License-Commercial",
+            "tagName": "Hosted"
+        },
+        {
+            "policyName": "License-Commercial",
+            "tagName": "Distributed"
+        },
+        {
+            "policyName": "License-Copyleft",
+            "tagName": "Distributed"
+        },
+        {
+            "policyName": "License-Modified Weak Copyleft",
+            "tagName": "Distributed"
+        },
+        {
+            "policyName": "License-Non Standard",
+            "tagName": "Distributed"
+        }
+    ]
+        data['policyTags'] = ptags
     print_debug(data)
+
     return data
 
 

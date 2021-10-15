@@ -139,12 +139,24 @@ def org_configuration(org):
     data_purging(org.get('data_purging'), org['eid'])
     apply_access(org, org.get('access'), org=org['eid'])
     add_policy(data=org.get('policy'), org=org['eid'])
+    apply_policy_tags(data=org.get('policy'), org=org['eid'])
     data = org.get('proprietary_components')
     if data is not None and len(data) > 0:
         for ppc in data:
             ppc['ownerId'] = org['eid']
             add_proprietary_components(ppc, org=org['eid'])
     add_source_control(org.get('source_control'), org=org['eid'])
+
+
+def parse_policies(org='ROOT_ORGANIZATION_ID', app=None):
+    if app is not None:
+        # app level policy import/export is not supported
+        return
+    url = f'{iq_url}/rest/policy/{org_or_app(org, app)}/export'
+    data = get_url(url)
+    if data is not None:
+        return data['policies']
+    return None
 
 
 def app_configuration(app):
@@ -155,6 +167,7 @@ def app_configuration(app):
     eid = new_app['id']
     apply_access(new_app, app.get('access'), app=eid)
     add_policy(data=app.get('policy'), app=eid)
+    apply_policy_tags(data=app.get('policy'), app=eid)
     data = app.get('proprietary_components')
     if data is not None and len(data) > 0:
         for ppc in data:
@@ -519,6 +532,40 @@ def add_policy(data, org='ROOT_ORGANIZATION_ID', app=None):
         return
     url = f'{iq_url}/rest/policy/{org_or_app(org, app)}/import'
     multipart_post_url(url, data)
+
+
+def apply_policy_tags(data, org='ROOT_ORGANIZATION_ID', app=None):
+    if data is None or len(data) == 0:
+        return
+
+    # Need to get the AC tags from the current environment
+    tag_lookup = {}
+    for tag in app_categories:
+        tag_lookup[tag['name']]=tag
+
+    # Need to get the policy IDs from the current env
+    policy_lookup = {}
+    policies = parse_policies(org, app)
+    for policy in policies:
+        policy_lookup[policy['name']]=policy['id']
+
+    # Iterate over the policies
+    for policy in policies:
+        tags = []
+        # So the 'export' API does not persist the policyTags, so I have to work around that by hard coding tag scopes that align to best practice.
+        ptags = data['policyTags']
+
+        for ptag in ptags:
+            # Find the policy ID for this env that corresponds to the named policy
+            policyId = policy_lookup[ptag['policyName']]
+            # If the policy is mentioned by name in the hard-coded tags above, append it to the payload
+            if policyId == policy['id']:
+                tags.append(tag_lookup[ptag['tagName']])
+
+        if len(tags):
+            # The current policy has tags scope to be applied
+            url = f'{iq_url}/rest/appliedTag/policy/{policy["id"]}/{org_or_app(org, app)}'
+            put_url(url, tags)
 
 
 def add_success_metrics(data):

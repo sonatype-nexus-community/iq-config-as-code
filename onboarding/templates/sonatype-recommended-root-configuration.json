@@ -6765,7 +6765,36 @@
             "color": "dark-green"
           }
         ],
-        "policyTags": []
+        "policyTags": [
+          {
+            "policyName": "License-None",
+            "tagName": "Hosted"
+          },
+          {
+            "policyName": "License-None",
+            "tagName": "Distributed"
+          },
+          {
+            "policyName": "License-Commercial",
+            "tagName": "Hosted"
+          },
+          {
+            "policyName": "License-Commercial",
+            "tagName": "Distributed"
+          },
+          {
+            "policyName": "License-Copyleft",
+            "tagName": "Distributed"
+          },
+          {
+            "policyName": "License-Modified Weak Copyleft",
+            "tagName": "Distributed"
+          },
+          {
+            "policyName": "License-Non Standard",
+            "tagName": "Distributed"
+          }
+        ]
       },
       "name": "Root Organization",
       "applications": []
