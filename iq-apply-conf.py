@@ -555,17 +555,20 @@ def apply_policy_tags(data, org='ROOT_ORGANIZATION_ID', app=None):
         # So the 'export' API does not persist the policyTags, so I have to work around that by hard coding tag scopes that align to best practice.
         ptags = data['policyTags']
 
-        for ptag in ptags:
-            # Find the policy ID for this env that corresponds to the named policy
-            policyId = policy_lookup[ptag['policyName']]
-            # If the policy is mentioned by name in the hard-coded tags above, append it to the payload
-            if policyId == policy['id']:
-                tags.append(tag_lookup[ptag['tagName']])
+        try:
+            for ptag in ptags:
+                # Find the policy ID for this env that corresponds to the named policy
+                policyId = policy_lookup[ptag['policyName']]
+                # If the policy is mentioned by name in the hard-coded tags above, append it to the payload
+                if policyId == policy['id']:
+                    tags.append(tag_lookup[ptag['tagName']])
 
-        if len(tags):
-            # The current policy has tags scope to be applied
-            url = f'{iq_url}/rest/appliedTag/policy/{policy["id"]}/{org_or_app(org, app)}'
-            put_url(url, tags)
+            if len(tags):
+                # The current policy has tags scope to be applied
+                url = f'{iq_url}/rest/appliedTag/policy/{policy["id"]}/{org_or_app(org, app)}'
+                put_url(url, tags)
+        except Exception:
+            pass
 
 
 def add_success_metrics(data):
