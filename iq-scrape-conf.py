@@ -71,6 +71,7 @@ def get_arguments():
     iq_session.auth = iq_auth
     return args
 
+
 def main():
     # grab defaults or args passed into script.
     args = get_arguments()
@@ -82,7 +83,6 @@ def main():
         if os.access(output_dir, os.W_OK) is False:
             print(f"Directory {output_dir} is not writeable!")
             return
-
 
     # store current applications, categories, and organizations
     set_categories()
@@ -125,7 +125,6 @@ def main():
 
 
 def nexus_administration():
-
     systemConf = {}
     # Parses and applies all the 'administrative' configuration for Nexus IQ
     systemConf['users'] = persist_users()
@@ -161,7 +160,6 @@ def org_configuration(org):
 
 
 def app_configuration(app):
-
     app_conf = {}
     # Parses and applies all of the application configuration
     app_conf['name'] = app['name']
@@ -176,6 +174,7 @@ def app_configuration(app):
     app_conf['policy'] = persist_policy(app=app['id'])
     # persist_data(app_conf, f'{output_dir}{app["name"]}-config.json')
     return app_conf
+
 
 def print_debug(c):
     # testing json output to console
@@ -289,6 +288,7 @@ def get_organization_id(name):
             break
     return ret
 
+
 def get_organization_name(id):
     ret = None
     for org in organizations:
@@ -333,6 +333,7 @@ def check_category(ac):
         return {'name': ret}
     return None
 
+
 def category_exists(ac):
     ret = ''
     if len(ac) == 0:
@@ -344,6 +345,7 @@ def category_exists(ac):
     if len(ret) > 0:
         return {'name': ret}
     return None
+
 
 def check_roles(name, roles):
     ret = ''
@@ -367,7 +369,6 @@ def check_user_or_group(user_or_group):
 
     print(f"User type '{user_or_group}' does not exist! 'USER' or 'GROUP' are the valid types.")
     return None
-
 
 
 def add_ldap_connection(ldap_conn_name):
@@ -425,7 +426,6 @@ def persist_access(org='ROOT_ORGANIZATION_ID', app=None):
     return accessors
 
 
-
 def persist_auto_applications():
     url = f'{iq_url}/rest/config/automaticApplications'
     data = get_url(url)
@@ -439,7 +439,6 @@ def persist_auto_applications():
 
 
 def persist_grandfathering(org='ROOT_ORGANIZATION_ID', app=None):
-
     url = f'{iq_url}/rest/policyViolationGrandfathering/{org_or_app(org, app)}'
 
     data = get_url(url)
@@ -495,44 +494,20 @@ def persist_policy(org='ROOT_ORGANIZATION_ID', app=None):
         return
     url = f'{iq_url}/rest/policy/{org_or_app(org, app)}/export'
     data = get_url(url)
+    policy_lookup = {}
     if data is not None:
         for policy in data['policies']:
-            policy.pop('id')
+            policy_lookup[policy.pop('id')] = policy['name']
             for constraint in policy['constraints']:
                 constraint.pop('id')
 
-    if org == 'ROOT_ORGANIZATION_ID':
-        # So the 'export' API does not persist the policyTags, so I have to work around that by hard coding tag scopes that align to best practice.
-        ptags = [
-        {
-            "policyName": "License-None",
-            "tagName": "Hosted"
-        },
-        {
-            "policyName": "License-None",
-            "tagName": "Distributed"
-        },
-        {
-            "policyName": "License-Commercial",
-            "tagName": "Hosted"
-        },
-        {
-            "policyName": "License-Commercial",
-            "tagName": "Distributed"
-        },
-        {
-            "policyName": "License-Copyleft",
-            "tagName": "Distributed"
-        },
-        {
-            "policyName": "License-Modified Weak Copyleft",
-            "tagName": "Distributed"
-        },
-        {
-            "policyName": "License-Non Standard",
-            "tagName": "Distributed"
-        }
-    ]
+        ptags = []
+        for tag in data['policyTags']:
+            ptag = {}
+            ptag["policyName"] = policy_lookup[tag['policyId']]
+            ptag["tagName"] = check_category(tag)['name']
+            ptags.append(ptag)
+
         data['policyTags'] = ptags
     print_debug(data)
 
@@ -598,6 +573,7 @@ def persist_proprietary_components(org='ROOT_ORGANIZATION_ID', app=None):
         print_debug(data)
     return pcs2
 
+
 def persist_roles():
     url = f'{iq_url}/rest/security/roles'
     data = get_url(url)
@@ -607,11 +583,13 @@ def persist_roles():
     print_debug(data)
     return data
 
+
 def persist_administrators():
     url = f'{iq_url}/rest/membershipMapping/global/global'
     data = get_url(url)
     print_debug(data)
     return data
+
 
 def persist_continuous_monitoring(org='ROOT_ORGANIZATION_ID', app=None):
     url = f'{iq_url}/rest/policyMonitoring/{org_or_app(org, app)}'
@@ -648,7 +626,6 @@ def persist_application_categories(org='ROOT_ORGANIZATION_ID'):
     print_debug(data)
     # persist_data(data, f'{output_dir}{get_organization_name(org)}-application_categories.json')
     return data
-
 
 
 def persist_component_labels(org='ROOT_ORGANIZATION_ID', app=None):

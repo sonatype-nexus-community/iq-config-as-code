@@ -193,11 +193,6 @@ Limitations/Scope:
 
       When performing a 'healthcheck', System-Healthcheck.json is always persisted!
 
-      The 'export' api for policy does not return the 'policyTags' field. To ensure alignment with best practice, I had to hard-code this in the scrape script.
-      If you wish to modify this 'hard-coded' best practice config, please modify it in the persisted 'All-Organizations-Conf.json' and 
-      'Root Organisation-config.json' files. If the API is fixed, the code will likely have to change! Note that the code uses the IDs on your current env, 
-      not those persisted from the env upon which you performed a 'scrape' operation.
-
 
 Changelog
 =========
@@ -219,6 +214,7 @@ Changelog
 
 15th Oct 2021 - API limitation identified. Code to apply policy App Cat scrope 'hard-coded' in scrape script. Persisted data applied to best practice.
 
+5th Nov 2021 - Aforementioned API limitation remediated within product. policyTag data parsed dynamically from json payload.
 
 LICENSE
 =========
