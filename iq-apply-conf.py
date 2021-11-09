@@ -113,22 +113,6 @@ def nexus_administration(config):
     add_success_metrics_reports(config.get('success_metrics_reports'))
 
 
-def root_configuration(config):
-    # Parses and applies all of the ROOT Org configuration
-    application_categories(config.get('application_categories'))
-    application_grandfathering(config.get('grandfathering'))
-    continuous_monitoring(config.get('continuous_monitoring_stage'))
-    add_proprietary_components(config.get('proprietary_components'))
-    component_labels(config.get('component_labels'))
-    license_threat_groups(config.get('license_threat_groups'))
-    data_purging(config.get('data_purging'))
-    add_source_control(config.get('source_control'))
-    add_policy(data=config.get('policy'))
-    entity = dict()
-    entity['name'] = "Root Organisation"
-    apply_access(entity, config.get('access'))
-
-
 def org_configuration(org):
     # Parses and applies all of the child Org configuration
     application_categories(org.get('application_categories'), org['eid'])
@@ -530,8 +514,14 @@ def add_policy(data, org='ROOT_ORGANIZATION_ID', app=None):
     # importing policy at the application level is not currently supported; only org
     if data is None or len(data) == 0 or app is not None:
         return
+
+    # The policyTags mappings are a format that is proprietary to this script. They are therefore removed from here.
+    # This data is parsed and applied by the apply_policy_tags function.
+    policyTags = data['policyTags']
+    data['policyTags'] = []
     url = f'{iq_url}/rest/policy/{org_or_app(org, app)}/import'
     multipart_post_url(url, data)
+    data['policyTags'] = policyTags
 
 
 def apply_policy_tags(data, org='ROOT_ORGANIZATION_ID', app=None):
