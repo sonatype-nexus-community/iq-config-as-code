@@ -216,6 +216,8 @@ Changelog
 
 5th Nov 2021 - Aforementioned API limitation remediated within product. policyTag data parsed dynamically from json payload.
 
+15th Nov 2021 - Add policyTags to healthcheck analysis.
+
 LICENSE
 =========
 
