@@ -314,7 +314,7 @@ def org_configuration(org, template):
                'Component Labels': validate_component_labels(template["component_labels"], org=org),
                'License Threat Groups': validate_license_threat_groups(template["license_threat_groups"], org),
                'Access': validate_access(template["access"], org=org),
-               'Policy': validate_policy(template["policy"]["policies"], org=org)}
+               'Policy': validate_policy(template["policy"], org=org)}
 
     def org_or_app_id(org, app):
         if app is not None and app["publicId"]:
@@ -735,7 +735,7 @@ def policy_notification_disparities(notifications, tnotifications, ntype, nkey, 
     return None
 
 
-def advise_policy_disparities(policy, tpolicy,policyAdvisories):
+def advise_policy_disparities(policy, tpolicy, policyAdvisories):
     policy_advisories = []
     name = policy['name']
     if policy['ownerId'] != tpolicy['ownerId']:
@@ -789,6 +789,12 @@ def advise_policy_disparities(policy, tpolicy,policyAdvisories):
     return policy_advisories
 
 
+def advise_policytag_disparities(policytag, tpolicytag):
+    policy_advisories = []
+    policy_advisories.append(f'Policy {policytag["policyName"]} uses incorrect `{policytag["tagName"]}` application category. Apply `{tpolicytag["tagName"]}` application category to align with templated best practice.')
+    return policy_advisories
+
+
 def validate_policy(template, org=None, app=None):
     if app is not None:
         # app level policy import/export is not supported
@@ -800,34 +806,67 @@ def validate_policy(template, org=None, app=None):
         entity_name = org["name"]
 
     url = f'{iq_url}/rest/policy/{org_or_app(org, app)}/export'
-    data = get_url(url)['policies']
+    data = get_url(url)
     policyData = {}
+    policy_lookup = {}
 
-    if data is not None:
+    if data['policies'] is not None:
         # Iterate over the entity policies
-        for policy in data:
+        for policy in data['policies']:
             try:
                 # Remove the IDs so the policy can be compared for parity with the template policies
-                policy.pop('id')
+                policy_lookup[policy.pop('id')] = policy['name']
                 for constraint in policy['constraints']:
                     constraint.pop('id')
                 # Does the template contain the entity policy?
                 # If the policy matches the template, so remove it from the template for disparity comparison
-                del(template[template.index(policy)])
+                del(template['policies'][template['policies'].index(policy)])
             except ValueError:
                 # The template policy will be retained for disparity comparison and reporting
                 pass
 
-        if template is not None:
+        if template['policies'] is not None:
             # Iterate over the template policies
-            for tpolicy in template:
+            for tpolicy in template['policies']:
                 # Does the entity data contain the template policy?
-                for policy in data:
+                for policy in data['policies']:
                     if policy['name'] == tpolicy['name']:
                         advisories = advise_policy_disparities(policy, tpolicy,policyAdvisories)
                         if len(advisories):
                             policyData[policy['name']] = advisories
                         break
+
+    # Iterate over the policy tags in IQ and identify them in the template
+    if data['policyTags'] is not None:
+        ptags_anomolies = []
+        for ptag_anomoly in data['policyTags']:
+            try:
+                tag = {}
+                tag['policyName'] = policy_lookup[ptag_anomoly['policyId']]
+                tag['tagName'] = check_app_category(ptag_anomoly)['name']
+
+                # Does the template contain the entity policy?
+                # If the policy matches the template, so remove it from the template for disparity comparison
+                del(template['policyTags'][template['policyTags'].index(tag)])
+            except ValueError:
+                # The template policy will be retained for disparity comparison and reporting
+                ptags_anomolies.append(tag)
+                pass
+
+        if template['policyTags'] is not None:
+            # Iterate over the template policies
+            for tptag in template['policyTags']:
+                # Does the entity data contain the template policy?
+                for ptag_anomoly in ptags_anomolies:
+                    try:
+                        if ptag_anomoly['policyName'] == tptag['policyName']:
+                            advisories = advise_policytag_disparities(ptag_anomoly, tptag)
+                            policyAdvisories.append(len(advisories))
+                            if len(advisories):
+                                policyData[f'{ptag_anomoly["policyName"]}-Application-Categories'] = advisories
+                            break
+                    except KeyError:
+                        pass
 
     if len(policyData):
         #print(policyData)

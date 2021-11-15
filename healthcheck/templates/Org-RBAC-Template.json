@@ -11682,7 +11682,36 @@
             "color": "dark-red"
           }
         ],
-        "policyTags": []
+        "policyTags": [
+          {
+            "policyName": "License-Commercial",
+            "tagName": "Distributed"
+          },
+          {
+            "policyName": "License-Copyleft",
+            "tagName": "Distributed"
+          },
+          {
+            "policyName": "License-Modified Weak Copyleft",
+            "tagName": "Distributed"
+          },
+          {
+            "policyName": "License-None",
+            "tagName": "Distributed"
+          },
+          {
+            "policyName": "License-Non Standard",
+            "tagName": "Distributed"
+          },
+          {
+            "policyName": "License-Commercial",
+            "tagName": "Hosted"
+          },
+          {
+            "policyName": "License-None",
+            "tagName": "Hosted"
+          }
+        ]
       },
       "name": "Root Organization",
       "applications": []
