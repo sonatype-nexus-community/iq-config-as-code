@@ -19,7 +19,9 @@ commands:
     description: "Installs Poetry ready for use"
     steps:
       - run: |
-          sudo update-alternatives --config python3
+          sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.7
+          sudo update-alternatives --config python
+          sudo update-alternatives  --set python /usr/bin/python3.7
           python -m ensurepip --default-pip
           pip install --upgrade pip
           pip install poetry
