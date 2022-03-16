@@ -19,6 +19,7 @@ commands:
     description: "Installs Poetry ready for use"
     steps:
       - run: |
+          ls -al /usr/bin
           sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1
           sudo update-alternatives --config python
           sudo update-alternatives  --set python /usr/bin/python3.10
