@@ -2,6 +2,18 @@
 
 <!--next-version-placeholder-->
 
+## v0.2.0 (2022-03-16)
+### Feature
+* Work to add standardised Circle CI for Python project ([`ea8d65d`](https://github.com/sonatype-nexus-community/iq-config-as-code/commit/ea8d65dcb9c1f9ec97bd8c8b87a22a16262af99b))
+* Export policy for orgs and apps ([`423c41f`](https://github.com/sonatype-nexus-community/iq-config-as-code/commit/423c41fb5dd0d20a79c4132878e8f006fb9bb93c))
+
+### Fix
+* Remove duplicate call to persist_policy ([`3cf7ea5`](https://github.com/sonatype-nexus-community/iq-config-as-code/commit/3cf7ea547b40ac407432a98b2f1c03f8bb36eb72))
+* Correct organization policy import, disable for apps ([`768431e`](https://github.com/sonatype-nexus-community/iq-config-as-code/commit/768431e6d10579ec6cbd4ff3fe485ab484616ece))
+
+### Documentation
+* Add some docker documentation ([`e7bbd55`](https://github.com/sonatype-nexus-community/iq-config-as-code/commit/e7bbd55d51abc07a4b1113c123a81fce45749171))
+
 ## Historical Changelog
 29th January 2021 - First release
 
