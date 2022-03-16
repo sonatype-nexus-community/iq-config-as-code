@@ -8,6 +8,9 @@ license = "Apache-2.0"
 readme = "README.md"
 homepage = "https://github.com/sonatype-nexus-community/iq-config-as-code"
 repository = "https://github.com/sonatype-nexus-community/iq-config-as-code"
+packages = [
+    { include = "iq-config-as-code" }
+]
 include = [
     "LICENSE"
 ]
