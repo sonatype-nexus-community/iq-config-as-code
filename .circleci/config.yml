@@ -60,7 +60,7 @@ jobs:
           name: "Install python-semantic-release"
           command: |
             export
-            pip install python-semantic-release
+            pip3 install python-semantic-release
       - checkout
       - run:
           name: "Semantic Release"
