@@ -1,0 +1,52 @@
+[tool.poetry]
+name = "iq-config-as-code"
+version = "0.1.0"
+description = "Provides the capability to automate the configuration of the Sonatype Nexus IQ Server"
+authors = ["Sonatype Community <community-group@sonatype.com>"]
+maintainers = ["Sonatype Community <community-group@sonatype.com>"]
+license = "Apache-2.0"
+readme = "README.md"
+homepage = "https://github.com/sonatype-nexus-community/iq-config-as-code"
+repository = "https://github.com/sonatype-nexus-community/iq-config-as-code"
+include = [
+    "LICENSE"
+]
+classifiers = [
+    'Development Status :: 4 - Beta',
+    'Intended Audience :: Developers',
+    'Intended Audience :: Information Technology',
+    'Intended Audience :: Legal Industry',
+    'Intended Audience :: System Administrators',
+    'Topic :: Security',
+    'License :: OSI Approved :: Apache Software License',
+    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+]
+keywords = [
+    "Sonatype", "Nexus", "IQ", "Lifecycle", "CasC", "Configuration"
+]
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/sonatype-nexus-community/iq-config-as-code/issues"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+requests = { version = ">= 2.20.0" }
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.semantic_release]
+version_variable = [
+    "pyproject.toml:version"
+]
+branch = "master"
+upload_to_pypi = true
+upload_to_release = true
+build_command = "pip install poetry && poetry build"
