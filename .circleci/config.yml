@@ -19,7 +19,6 @@ commands:
     description: "Installs Poetry ready for use"
     steps:
       - run: |
-          ls -al /usr/bin
           sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.8 1
           sudo update-alternatives --config python
           sudo update-alternatives  --set python /usr/bin/python3.8
@@ -81,6 +80,7 @@ jobs:
             docker build -t sonatypecommunity/iq-config-as-code:$VERSION -t sonatypecommunity/iq-config-as-code:latest .
       # Publish Docker Image
       - run: |
+            VERSION="$(poetry version --short --no-interaction --no-ansi)"
             docker push sonatypecommunity/iq-config-as-code:$VERSION
             docker push sonatypecommunity/iq-config-as-code:latest
 
