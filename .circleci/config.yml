@@ -45,7 +45,7 @@ jobs:
     machine: true
     steps:
       - checkout
-      - run: docker build -t sonatype-nexus-community/iq-config-as-code:$CIRCLE_BRANCH .
+      - run: docker build -t sonatype-nexus-community/iq-config-as-code:ci-build-test .
 
   release_and_docker_publish:
     machine: true
