@@ -19,6 +19,7 @@ commands:
     description: "Installs Poetry ready for use"
     steps:
       - run: |
+          sudo update-alternatives --config python3
           python -m ensurepip --default-pip
           pip install --upgrade pip
           pip install poetry
