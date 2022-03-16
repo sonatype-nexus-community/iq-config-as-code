@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.0 (2022-03-16)
+### Feature
+* Refactor to use Poetry for build and semantic versioning ([`6afc751`](https://github.com/sonatype-nexus-community/iq-config-as-code/commit/6afc75167dcff5ac9134d051df321002a01e58ba))
+
 ## v0.2.0 (2022-03-16)
 ### Feature
 * Work to add standardised Circle CI for Python project ([`ea8d65d`](https://github.com/sonatype-nexus-community/iq-config-as-code/commit/ea8d65dcb9c1f9ec97bd8c8b87a22a16262af99b))

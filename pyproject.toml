@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "iq-config-as-code"
-version = "0.2.0"
+version = "0.3.0"
 description = "Provides the capability to automate the configuration of the Sonatype Nexus IQ Server"
 authors = ["Sonatype Community <community-group@sonatype.com>"]
 maintainers = ["Sonatype Community <community-group@sonatype.com>"]
