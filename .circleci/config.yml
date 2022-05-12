@@ -49,7 +49,7 @@ jobs:
       image: ubuntu-2004:202201-02
     steps:
       - checkout
-      - run: docker build -t sonatype-nexus-community/iq-config-as-code:ci-build-test .
+      - run: docker build -t sonatype-nexus-community/nexus_iq_casc:ci-build-test .
 
   release_and_docker_publish:
     machine:
