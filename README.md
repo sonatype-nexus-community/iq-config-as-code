@@ -20,7 +20,7 @@
 This project provides the capability to automate the configuration of the IQ Server, by applying configuration data
 from JSON config file(s). It further supports the capability to 'scrape' existing config and persist to JSON config files
 from where it can be re-applied. Additional evaluation of the configuration on IQ server is provided by a healthcheck
-capability, which informs your configuration in a more human readable format. Discuss the findings with your Sonatype CSE.
+capability, which informs your configuration in a more human-readable format. Discuss the findings with your Sonatype CSE.
 The 'apply', 'healthcheck' and 'scrape' may be scoped to specific data.
 
 This capability supports Sonatype customers aspiration to stand-up/tear-down an IQ environment in support of business
