@@ -15,17 +15,40 @@
 # limitations under the License.
 #
 import argparse
+from nexus_iq import ApiException
+from nexus_iq.api.configuration_api import ConfigurationApi
+from typing import Any, Dict
 
-from . import BaseCommand
+from . import BaseCommand, DebugMessageCallable
 
 
 class Scrape(BaseCommand):
 
-    def __init__(self, *, arguments: argparse.Namespace) -> None:
+    def __init__(self, *, arguments: argparse.Namespace, debug_func: DebugMessageCallable) -> None:
         super().__init__(arguments=arguments)
+        self._debug_message = debug_func
 
     def handle_args(self) -> int:
-        pass
+        print(f'Scraping using args: {self.arguments}')
+        config = self._scrape_system_configuration()
+
+        print(config)
+
+        return 0
+
+    def _scrape_system_configuration(self) -> Dict[str, Any]:
+        config: Dict[str, Any] = {}
+        with self.api_client() as api_client:
+            # REST config['users'] =
+
+            # SMTP
+            api_instance = ConfigurationApi(api_client=api_client)
+            try:
+                config['email_server'] = api_instance.get_mail_configuration()
+            except ApiException as e:
+                self._debug_message(message=f'Exception calling ConfigurationApi->get_mail_configuration(): {e}')
+
+        return config
 
     @staticmethod
     def get_argument_parser_help() -> str:
@@ -34,10 +57,10 @@ class Scrape(BaseCommand):
     @staticmethod
     def setup_argument_parser(arg_parser: argparse.ArgumentParser) -> None:
         arg_parser.add_argument('-u', '--server-url', help='Full http(s):// URL to your Nexus Lifecycle server',
-                                metavar='https://localhost:8070', required=True, dest='iq_server_url')
+                                metavar='https://localhost:8070', required=False, dest='iq_server_url')
 
         arg_parser.add_argument('-a', '--auth', help='Basic Auth used to authenticate with IQ',
-                                metavar='USERNAME:PASSWORD', required=False, dest='iq_auth')
+                                metavar='USERNAME:PASSWORD', default='admin:admin123', required=False, dest='iq_auth')
 
         arg_parser.add_argument('-o', '--output-dir', help='Directory to write output to',
                                 metavar='/tmp', default='/tmp', required=False, dest='output_directory')

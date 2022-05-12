@@ -44,21 +44,23 @@ _SUBCOMMANDS: Dict[_CLI_MODE, Type[BC]] = {
 
 
 class IqConfigAsCodeCmd:
+    _DEBUG_ENABLED: bool = False
 
     def __init__(self, args: argparse.Namespace) -> None:
         self._arguments: argparse.Namespace = args
-        self._DEBUG_ENABLED: bool = False
 
         if self._arguments.debug_enabled:
-            self._DEBUG_ENABLED = True
-            self._debug_message('!!! DEBUG MODE ENABLED !!!')
-            self._debug_message('Parsed Arguments: {}'.format(self._arguments))
+            IqConfigAsCodeCmd._DEBUG_ENABLED = True
+            IqConfigAsCodeCmd._debug_message('!!! DEBUG MODE ENABLED !!!')
+            IqConfigAsCodeCmd._debug_message('Parsed Arguments: {}'.format(self._arguments))
 
     def execute(self) -> None:
         # Determine primary command and then hand off to that Command handler
-        if self._arguments.cmd and self._arguments.cmd in _SUBCOMMANDS.keys():
-            command = _SUBCOMMANDS[self._arguments.cmd]
-            exit_code: int = command(arguments=self._arguments).execute()
+        print(f'Executing with args: {self._arguments}')
+        print(f'Keys: {_SUBCOMMANDS.keys()}')
+        if self._arguments.cmd:
+            command = _SUBCOMMANDS[_CLI_MODE(self._arguments.cmd)]
+            exit_code: int = command(arguments=self._arguments, debug_func=IqConfigAsCodeCmd._debug_message).execute()
             exit(exit_code)
         else:
             IqConfigAsCodeCmd.get_arg_parser().print_help()
@@ -75,6 +77,9 @@ class IqConfigAsCodeCmd:
                                 help='prevents exit with non-zero code when issues have been detected')
         arg_parser.add_argument('-X', action='store_true', help='enable debug output', dest='debug_enabled')
 
+        arg_parser.add_argument('--no-verify-ssl', help='Disable SSL validation when connecting to Nexus IQ Server',
+                                action='store_true', dest='disable_ssl_verification')
+
         subparsers = arg_parser.add_subparsers(title='nexus-iq-casc sub-commands', dest='cmd', metavar='')
         for cli_mode, cmd in _SUBCOMMANDS.items():
             cmd.setup_argument_parser(
@@ -86,9 +91,10 @@ class IqConfigAsCodeCmd:
 
         return arg_parser
 
-    def _debug_message(self, message: str) -> None:
-        if self._DEBUG_ENABLED:
-            print('[DEBUG] - {} - {}'.format(datetime.now(), message))
+    @staticmethod
+    def _debug_message(message: str) -> None:
+        if IqConfigAsCodeCmd._DEBUG_ENABLED:
+            print(f'[DEBUG] - {datetime.now()} - {message}')
 
     @staticmethod
     def _error_and_exit(message: str, exit_code: int = 1) -> None:
