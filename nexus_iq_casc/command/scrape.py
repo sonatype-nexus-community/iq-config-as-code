@@ -15,11 +15,47 @@
 # limitations under the License.
 #
 import argparse
+import importlib
+import re
 from nexus_iq import ApiException
-from nexus_iq.api.configuration_api import ConfigurationApi
+from nexus_iq.exceptions import NotFoundException
+from nexus_iq_internal import ApiException as RestApiException
+from nexus_iq_internal.exceptions import NotFoundException as RestNotFoundException
 from typing import Any, Dict
 
 from . import BaseCommand, DebugMessageCallable
+
+_OUTPUT_MAPPING = {
+    'System-Config.json': {
+        "api": {
+            "email_server": {"api": "ConfigurationApi", "method": "get_mail_configuration"},
+            "proxy": {"api": "ConfigurationApi", "method": "get_http_proxy_configuration"}
+        },
+        "rest": {
+            "administrators": {"api": "SecurityApi", "method": "membership_mapping_owner_type_owner_id_get", "params": {
+                "owner_type": "global", "owner_id": "global"
+            }},
+            "custom_roles": {"api": "SecurityApi", "method": "security_roles_get"},
+            "ldap_connections": {"api": "ConfigurationApi", "method": "get_ldap_servers"},
+            "system_notice": {"api": "ConfigurationApi", "method": "get_system_notice"},
+            "users": {"api": "UserApi", "method": "get_users"},
+            "webhooks": {"api": "ConfigurationApi", "method": "get_all_webhooks"}
+        }
+    }
+}
+
+# # Parses and applies all the 'administrative' configuration for Nexus IQ
+# systemConf['success_metrics'] = persist_success_metrics()
+# systemConf['automatic_applications'] = persist_auto_applications()
+# systemConf['automatic_source_control'] = persist_automatic_source_control()
+# systemConf['success_metrics_reports'] = persist_success_metrics_reports()
+# persist_data(systemConf, f'{output_dir}System-Config.json')
+
+_API_TO_MODULE_PATTERN = re.compile(r'(?<!^)(?=[A-Z])')
+
+
+def _api_to_module_name(api_name: str) -> str:
+    return _API_TO_MODULE_PATTERN.sub('_', api_name).lower()
 
 
 class Scrape(BaseCommand):
@@ -29,7 +65,6 @@ class Scrape(BaseCommand):
         self._debug_message = debug_func
 
     def handle_args(self) -> int:
-        print(f'Scraping using args: {self.arguments}')
         config = self._scrape_system_configuration()
 
         print(config)
@@ -37,16 +72,44 @@ class Scrape(BaseCommand):
         return 0
 
     def _scrape_system_configuration(self) -> Dict[str, Any]:
+        filename_key = 'System-Config.json'
         config: Dict[str, Any] = {}
-        with self.api_client() as api_client:
-            # REST config['users'] =
 
-            # SMTP
-            api_instance = ConfigurationApi(api_client=api_client)
-            try:
-                config['email_server'] = api_instance.get_mail_configuration()
-            except ApiException as e:
-                self._debug_message(message=f'Exception calling ConfigurationApi->get_mail_configuration(): {e}')
+        with self.api_client() as api_client:
+            for k, v in _OUTPUT_MAPPING[filename_key]['api'].items():
+                api_class = v['api']
+                api_method = v['method']
+                try:
+                    api = getattr(
+                        importlib.import_module(f'nexus_iq.api.{_api_to_module_name(api_name=api_class)}'), api_class)(
+                        api_client=api_client
+                    )
+                    method = getattr(api, api_method)
+                    params = v['params'] if 'params' in v.items() else {}
+                    config[k] = method(**params)
+                except NotFoundException:
+                    pass
+                except ApiException as e:
+                    self._debug_message(message=f'Exception calling ConfigurationApi->get_mail_configuration(): {e}')
+
+        with self.rest_api_client() as rest_api_client:
+            for k, v in _OUTPUT_MAPPING[filename_key]['rest'].items():
+                api_class = v['api']
+                api_method = v['method']
+                try:
+                    api = getattr(
+                        importlib.import_module(
+                            f'nexus_iq_internal.api.{_api_to_module_name(api_name=api_class)}'), api_class
+                    )(
+                        api_client=rest_api_client
+                    )
+                    method = getattr(api, api_method)
+                    params = v['params'] if 'params' in v.keys() else {}
+                    config[k] = method(**params)
+                except RestNotFoundException:
+                    pass
+                except RestApiException as e:
+                    self._debug_message(message=f'Exception calling ConfigurationApi->get_mail_configuration(): {e}')
 
         return config
 

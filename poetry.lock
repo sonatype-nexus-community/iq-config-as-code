@@ -59,6 +59,22 @@ type = "file"
 url = "../../madpah/nexus-iq-lib/dist/nexus_iq-0.0.1-py3-none-any.whl"
 
 [[package]]
+name = "nexus-iq-internal"
+version = "0.0.1"
+description = "Nexus IQ (Internal REST) API Client"
+category = "main"
+optional = false
+python-versions = ">=3.6,<4.0"
+
+[package.dependencies]
+python_dateutil = ">=2.5.3"
+urllib3 = ">=1.25.3"
+
+[package.source]
+type = "file"
+url = "../../madpah/nexus-iq-internal-lib/dist/nexus_iq_internal-0.0.1-py3-none-any.whl"
+
+[[package]]
 name = "python-dateutil"
 version = "2.8.2"
 description = "Extensions to the standard Python datetime module"
@@ -131,7 +147,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "cef4072ee62830a594f59e7197682c566c129e8e40975cb3f4648bbfbcd923d0"
+content-hash = "119165b35c1bd7b530a1aa7cbe7f795ef40394dc12146c544b3a5967b84fa7c0"
 
 [metadata.files]
 certifi = [
@@ -152,6 +168,9 @@ importlib-metadata = [
 ]
 nexus-iq = [
     {file = "nexus_iq-0.0.1-py3-none-any.whl", hash = "sha256:e3cafd3db935826a0975b4eb6d5e94383471834a7b75c85be6f28614d2471346"},
+]
+nexus-iq-internal = [
+    {file = "nexus_iq_internal-0.0.1-py3-none-any.whl", hash = "sha256:916f1d36ee0c9fd813a4ef7756fb1b8f37b71e27a86f5b5c2ddecb6c739f22d1"},
 ]
 python-dateutil = [
     {file = "python-dateutil-2.8.2.tar.gz", hash = "sha256:0123cacc1627ae19ddf3c27a5de5bd67ee4586fbdd6440d9748f8abb483d3e86"},

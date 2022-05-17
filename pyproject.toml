@@ -40,8 +40,7 @@ python = "^3.6"
 importlib-metadata = { version = ">= 3.4", python = "< 3.8" }
 requests = { version = ">= 2.20.0" }
 nexus-iq = {path = "../../madpah/nexus-iq-lib/dist/nexus_iq-0.0.1-py3-none-any.whl"}
-
-[tool.poetry.dev-dependencies]
+nexus-iq-internal = {path = "../../madpah/nexus-iq-internal-lib/dist/nexus_iq_internal-0.0.1-py3-none-any.whl"}
 
 [tool.poetry.scripts]
 nexus-iq-casc = 'nexus_iq_casc.client:main'

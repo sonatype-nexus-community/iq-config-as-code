@@ -21,6 +21,8 @@ import urllib3
 from abc import ABC, abstractmethod
 from nexus_iq import ApiClient
 from nexus_iq.configuration import Configuration
+from nexus_iq_internal import ApiClient as RestApiClient
+from nexus_iq_internal.configuration import Configuration as RestConfiguration
 from typing import Optional
 
 if sys.version_info >= (3, 8):
@@ -58,7 +60,23 @@ class BaseCommand(ABC):
 
     def api_client_config(self) -> Configuration:
         auth = self.arguments.iq_auth.split(':')
-        config = Configuration(host=self.arguments.iq_server_url, username=auth[0], password=auth[1])
+        config = Configuration(
+            host=f'{self.arguments.iq_server_url}/api/v2', username=auth[0], password=auth[1]
+        )
+        if self.arguments.disable_ssl_verification:
+            urllib3.disable_warnings()
+            config.verify_ssl = False
+        return config
+
+    @final
+    def rest_api_client(self) -> RestApiClient:
+        return RestApiClient(configuration=self.rest_api_client_config())
+
+    def rest_api_client_config(self) -> RestConfiguration:
+        auth = self.arguments.iq_auth.split(':')
+        config = RestConfiguration(
+            host=f'{self.arguments.iq_server_url}/rest', api_key='api', username=auth[0], password=auth[1]
+        )
         if self.arguments.disable_ssl_verification:
             urllib3.disable_warnings()
             config.verify_ssl = False
