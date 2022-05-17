@@ -15,6 +15,13 @@
     limitations under the License.
 
 -->
+# WIP Notes for 1.0.0
+
+- Command line invocation changed to wrap `apply`, `scrape` and `healthcheck` as subcommands of a single 
+  executable `nexus-iq-casc`
+- Debug flag changed from `-d` to `-X`
+- New flag to disable all SSL Validation (replaces previous `-s` and `--self_signed`)
+
 # Nexus Lifecycle config-as-code
 
 This project provides the capability to automate the configuration of the IQ Server, by applying configuration data
@@ -44,6 +51,9 @@ Proxy Server Note:
     utilizing a .pac file
 
 Usage
+
+nexus-iq-casc 
+
 
     $ python3 iq-healthcheck.py --help
 
@@ -220,7 +230,6 @@ Changelog
 
 LICENSE
 =========
-
 
     Copyright 2019-Present Sonatype Inc.
 
