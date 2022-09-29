@@ -105,7 +105,6 @@ def main():
             org_conf = org_configuration(org)
             org_apps = []
             if applications is not None:
-                app =[]
                 for app in applications:
                     if app['organizationId'] == org['id']:
                         if in_scope(app=app):
