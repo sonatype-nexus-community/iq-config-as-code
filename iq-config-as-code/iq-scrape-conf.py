@@ -109,16 +109,16 @@ def main():
                     if app['organizationId'] == org['id']:
                         if in_scope(app=app):
                             org_apps.append(app_configuration(app))
-                if len(org_apps) or in_scope(org=org):
-                    org_conf['applications'] = org_apps
-                    od = {}
-                    od['organizations'] = []
-                    od['organizations'].append(org_conf)
-                    if (org_conf['name'] == 'Root Organization'):
-                        orgs.insert(0, org_conf)
-                    else:
-                        orgs.append(org_conf)
-                    persist_data(od, f'{output_dir}{get_organization_name(org["id"])}-config.json')
+            if len(org_apps) or in_scope(org=org):
+                org_conf['applications'] = org_apps
+                od = {}
+                od['organizations'] = []
+                od['organizations'].append(org_conf)
+                if (org_conf['name'] == 'Root Organization'):
+                    orgs.insert(0, org_conf)
+                else:
+                    orgs.append(org_conf)
+                persist_data(od, f'{output_dir}{get_organization_name(org["id"])}-config.json')
 
         data['organizations'] = orgs
         if in_scope(None):
