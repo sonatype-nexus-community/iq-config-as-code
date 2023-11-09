@@ -1,4 +1,4 @@
-ARG BASEIMAGE=python:3-alpine3.14
+ARG BASEIMAGE=python:3.13-rc-slim
 FROM ${BASEIMAGE}
 
 ARG WORKDIR=/data
