@@ -15,7 +15,7 @@
     limitations under the License.
 
 -->
-# Nexus Lifecycle config-as-code
+# Sonatype Lifecycle config-as-code
 
 This project provides the capability to automate the configuration of the IQ Server, by applying configuration data
 from JSON config file(s). It further supports the capability to 'scrape' existing config and persist to JSON config files
@@ -115,7 +115,7 @@ Usage: iq-apply-config [ARGS]...
     When on-boarding development teams, you may find the dev-team-onboarding-template.json file helpful. This provides the data-set that pertains to organisation
     and application configuration, aligned to recommended best practice.
 
-    If you are configuring Nexus Lifecycle for the first time, you may wish to 'apply' the sonatype-recommended-system-config.json and
+    If you are configuring Sonatype Lifecycle for the first time, you may wish to 'apply' the sonatype-recommended-system-config.json and
     sonatype-recommended-root-configuration.json before on-boarding development teams. You will need to adjust the system config settings for LDAP and Email, but
     these defaults are a good prompt to tend to these important configuration items.
 
@@ -157,7 +157,7 @@ Usage: iq-healthcheck [ARGS]...
 
 Options:
 
-      -u, --url           Nexus IQ Server URL                                               # defaults to http://localhost:8070
+      -u, --url           Sonatype IQ Server URL                                            # defaults to http://localhost:8070
 
       -a, --auth          Authentication. <user-id>:<password>                              # defaults to admin:admin123
 
@@ -248,4 +248,4 @@ The Fine Print
     DO file issues here on GitHub, so that the community can pitch in
     Phew, that was easier than I thought. Last but not least of all:
 
-    Have fun creating and using this utility to on-board, persist and health-check your applications into Nexus Lifecycle. We are glad to have you here!
+    Have fun creating and using this utility to on-board, persist and health-check your applications into Sonatype Lifecycle. We are glad to have you here!
