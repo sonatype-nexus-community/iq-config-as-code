@@ -595,7 +595,7 @@ def persist_administrators():
 def persist_continuous_monitoring(org='ROOT_ORGANIZATION_ID', app=None):
     url = f'{iq_url}/rest/policyMonitoring/{org_or_app(org, app)}'
     data = get_url(url)
-    if data is not None:
+    if data is not None and isinstance(data, dict):
         data.pop('id')
         data.pop('ownerId')
     # if app is not None:
