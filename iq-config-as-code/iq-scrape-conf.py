@@ -727,7 +727,7 @@ def parse_ldap_connection(conn):
 
 def set_roles():
     global roles
-    url = f'{iq_url}/api/v2/applications/roles'
+    url = f'{iq_url}/api/v2/roles'
     data = get_url(url)
     if data is not None:
         for role in data['roles']:
